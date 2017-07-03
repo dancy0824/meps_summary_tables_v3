@@ -133,10 +133,8 @@ codeModule <- function(input, output, session, inputs){
   #   
   # })
   # outputOptions(output,"code",suspendWhenHidden = FALSE) 
-}
 
 
->>>>>>> f8ce2d38264da441d0a9e5e692e2656299c6c959
 # 
 #   r_code <- reactive({
 #     yr = max(inputs()$years) %>% substring(3,4)
