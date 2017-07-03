@@ -17,8 +17,8 @@ meps_names = read.csv("https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Qu
                       stringsAsFactors = F)
 
 source("notes.R",local=TRUE)
-source("dictionaries.R",local=TRUE)
 source("functions.R",local=TRUE)
+source("functions508.R",local=TRUE)
 # 
 # source("code/r_code/snippets_load.R",local=TRUE)
 # source("code/r_code/snippets_subgrps.R",local=TRUE)
@@ -31,6 +31,29 @@ source("../../modules/module3_notes.R",local=TRUE)
 source("../../modules/tab1_table.R",local=TRUE)
 source("../../modules/tab2_plot.R",local=TRUE)
 source("../../modules/tab3_code.R",local=TRUE)
+
+########################################################
+
+subgrps <- list(
+  "(none)"             = "ind",
+  "Demographics" = c(
+    "Age Groups"         = "agegrps",
+    "Census Region"      = "region",
+    "Marital Status"     = "married",
+    "Race/Ethnicity"     = "race",
+    "Sex"                = "sex"
+  ),
+  "Health Variables" = c(
+    "Insurance Coverage" = "insurance",
+    "Perceived Health Status" = "health",
+    "Perceived Mental Health" = "mental_health"
+  ), 
+  "Socio-Economic Status" = c(
+    "Education"         = "education",
+    "Employment Status" = "employed",
+    "Poverty Status"    = "poverty"
+  )
+)  
 
 ########################################################
 ## UI builder

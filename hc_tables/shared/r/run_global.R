@@ -28,7 +28,6 @@ get_file_names <- function(year){
    select(-Year,-ends_with('Panel'))
 }
 
-
 readSource <- function(file,...,dir=".",verbose=T){
   fileName <- sprintf("%s/%s",dir,file) %>% gsub("//","/",.)
   codeString <- readChar(fileName,file.info(fileName)$size)

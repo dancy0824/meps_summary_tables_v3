@@ -1,4 +1,6 @@
 
+## This can eventually be combined into merge.R
+
 ##################################################
 ## Compare SAS and R estimates
 

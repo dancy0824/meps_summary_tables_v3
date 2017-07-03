@@ -4,17 +4,37 @@
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 # options(shiny.reactlog=T)
 
-source("../shared/global.R", chdir=T, local=T)
-source("dictionaries.R",local=T)
+source("../shared/app_global.R", chdir=T, local=T)
 
-info <- source("info.R")$value
+info <- source("app_info.R")$value
 load("USE_TABLES.Rdata")
 
 ###########################################################
-## this bad here -- change it
-stat_labels <- use_stats %>% invertList
-stat_labels <- stat_labels %>% append(list("pctPOP"="Percent of population"))
 
+use_stats = list(
+  "Population" = c(
+    "Number of people" = "totPOP",
+    "Percent of population with an expense (%)" = "pctEXP"
+  ),
+  "Expenditures" = c(
+    "Total expenditures ($)"                        = "totEXP",
+    "Mean expenditure per person ($)"               = "meanEXP0",
+    "Mean expenditure per person with expense ($)"  = "meanEXP",
+    "Median expenditure per person with expense ($)"= "medEXP"
+  ),
+  "Utilization" = c(
+    "Number of events" = "totEVT",
+    "Mean expenditure per event ($)" = "meanEVT"
+  )
+)
+
+use_add <- list(
+  "Event Type"  = "event",
+  "Source of Payment"  = "sop")
+
+use_subgrps <- append(subgrps,use_add,after=1)
+
+stat_labels <- use_stats %>% invertList
 grp_labels <- use_subgrps %>% invertList 
 grp_labels$Year = "Year"
 
@@ -52,6 +72,8 @@ ui <- htmlTemplate("../../template.html", body = body_ui)
 # Exclude levels from initial select
   all_levels <- c(use_tables$levels1, use_tables$levels2) %>% unique
   
+  
+  ## this should be a function in shared/function.R instead
   exclude_initial <- c(
     grep("physician",all_levels,value=T,ignore.case=T),
     grep("agency|independent",all_levels,value=T,ignore.case=T),
@@ -62,7 +84,6 @@ ui <- htmlTemplate("../../template.html", body = body_ui)
 
   
 # Exclude 'Missing' entirely (can comment out for debugging)
-  
   exclude_choices <- c(
     grep("missing",all_levels,value=T,ignore.case=T),
     grep("All",all_levels,value=T)
