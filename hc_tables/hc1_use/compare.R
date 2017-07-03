@@ -40,7 +40,7 @@ compareR <- function(year,stat){
   
   stat_se = paste0(stat,"_se")
   
-  setwd("C:/Users/emily.mitchell/Desktop/Programming/GitHub/meps_summary_tables/hc_tables")
+  setwd("C:/Users/emily.mitchell/Desktop/Programming/GitHub/meps_summary_tables_v3/hc_tables")
   
   old_r = read.csv(sprintf("hc1_use/r/tables_old/%s%s.csv",ftype,year),stringsAsFactors = F)
   new_r = read.csv(sprintf("hc1_use/r/tables/%s/%s.csv",year,stat),stringsAsFactors = F)
@@ -75,18 +75,41 @@ compareR <- function(year,stat){
   
   both <- full_join(old_r,new_r,by=c("grp1","grp2","levels1","levels2"))
   
-  diff = both %>% filter(round(old_stat,3) != round(new_stat,3)) 
-  diff_se = both %>% filter(round(old_se,3) != round(new_se,3)) 
+  diff = both %>% filter(round(old_stat,2) != round(new_stat,2)) 
+  diff_se = both %>% filter(round(old_se,2) != round(new_se,2)) 
   
   miss_old = both %>% filter(is.na(old_stat)&!is.na(new_stat)) 
   miss_new = both %>% filter(is.na(new_stat)&!is.na(old_stat))
 
-  print(list(diff=diff,diff_se=diff_se,miss_old=miss_old,miss_new=miss_new))
+  #print(list(diff=diff,diff_se=diff_se,miss_old=miss_old,miss_new=miss_new))
   
-  return(list(both=both,diff=diff,diff_se=diff_se,miss_old=miss_old,miss_new=miss_new))
+  return(list(diff=diff,diff_se=diff_se,miss_old=miss_old,miss_new=miss_new))
+}
+  
+  
+R1 = lapply(1996:2014,compareR,stat="totPOP") 
+
+
+for(i in 1:length(R1)){
+  print(i)
+  test = R1[[i]]
+  
+  test$diff <- test$diff %>% 
+    filter(!levels2 %in% c("OBV","OBD")) %>%
+    filter(!levels2 %in% c("EXP","TOT")) %>%
+    filter(!levels1 %in% c("EXP","TOT")); 
+  
+  test$diff_se <- test$diff_se %>% 
+    filter(!levels2 %in% c("OBV","OBD")) %>%
+    filter(!levels2 %in% c("EXP","TOT")) %>%
+    filter(!levels1 %in% c("EXP","TOT")); 
+  
+  for(d in test){
+    if(nrow(d) > 0) print(d)
+  }
 }
 
-year=2014
+year=2011
 
 r1 = compareR(year,"totPOP");  
 
@@ -112,6 +135,8 @@ r9 = compareR(year,"totEVT");
 r10 = compareR(year,"meanEVT"); 
 
 r9$diff %>% filter(grp1=="sop")
+
+
 
 ##################################################
 ## Compare SAS and R estimates

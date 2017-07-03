@@ -29,7 +29,6 @@ run;
 
 /* Reminder: only inline comments are allowed in macros */
 
-
 %macro survey(grp1,grp2,stat,char1,char2);
 	%put &grp1, &grp2, &event, &sop, &stat;
 
@@ -142,17 +141,17 @@ run;
 	%run_stat(medEXP,year=&year);
 %mend;
 
-%macro run_sas(year_list);
-	%do i = 1 %to %sysfunc(countw(&year_list));
-		%run_year(year=%scan(&year_list, &i));
+%macro run_sas(year_start,year_end);
+	%do year = &year_start %to &year_end;
+		%run_year(year=&year);
 	%end;
 %mend;
 
 /*********************************************************/
 
-*%run_sas(1996,2014);
+%run_sas(1996,2014);
 
-%run_year(1996 1997 1998 1999);
+%run_year( (1996, 1997, 1998, 1999 ) );
 
 %let year = 1996;
 %run_year(&year);

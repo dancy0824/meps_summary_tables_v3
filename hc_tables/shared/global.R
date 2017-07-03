@@ -9,7 +9,7 @@ library(dplyr)
 library(tidyr)
 library(scales)
 
-addResourcePath('www','../www')
+addResourcePath('www','../../www')
 
 #meps_names = read.csv("meps_names.csv",stringsAsFactors = F)
 

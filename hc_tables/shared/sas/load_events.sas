@@ -1,9 +1,3 @@
-
-%let file = h160;
-%let year = 2013;
-%let yy = 13;
-
-
 %macro load_events(evnt,file) / minoperator;
 
 	FILENAME &file. "&PUFdir.\&file..ssp";

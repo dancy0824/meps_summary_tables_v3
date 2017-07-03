@@ -7,6 +7,10 @@
 %let subgrp_list = &subgrps insurance_v2X agegrps_v2X; /* add alternative levels */
 %let ngrps  = %sysfunc(countw(&subgrp_list));
 
+/* Initialize macro variables so PROC SQL will work */
+%let FYC = ; %let RX = ; %let DV = ;
+%let OM = ;  %let IP = ; %let ER = ;
+%let OB = ;  %let OP = ; %let HH = ;
 
 /******************************************/
 
@@ -31,7 +35,6 @@ run;
 	quit;
 
 %mend;
-
 
 %macro create_subgrps;
 	%local i grp;
