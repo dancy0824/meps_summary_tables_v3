@@ -1,0 +1,35 @@
+################################################################
+## Update list of MEPS files and create expanded version
+
+puf_names_current = read.csv(
+  "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_file_names.csv",
+  stringsAsFactors = F)
+
+puf_names <- puf_names_current %>% 
+  mutate(Year = as.numeric(Year)) %>% 
+  filter(!is.na(Year))
+
+
+setwd("C:/Users/emily.mitchell/Desktop/Programming/GitHub/meps_summary_tables/hc_tables/shared")
+
+write.csv(puf_names,file="puf_names.csv",row.names=F) # for file_transfer.R
+
+################################################################
+## Expand puf_names.csv for easy access in run files
+
+event_letters <- list(DV="b",OM="c",IP="d",ER="e",OP="f",OB="g",HH="h")
+hc_list <- c("h26bf1",
+             sprintf("h16%sf1",letters[2:8]),
+             sprintf("h10%sf1",letters[2:8]))
+
+puf_expanded <- puf_names %>% rename(RX=RX.Events)
+
+for(evnt in names(event_letters)){
+  letter = event_letters[[evnt]]
+  value = puf_expanded$Events %>% gsub("\\*",letter,.)
+  special = value %in% hc_list
+  value[special] = value[special] %>% sub("h","hc",.)
+  puf_expanded[,evnt] = value
+}
+
+write.csv(puf_expanded,file="puf_expanded.csv",row.names=F)

@@ -1,0 +1,1 @@
+FYC <- FYC %>% mutate(ind = 'Total')

@@ -1,0 +1,199 @@
+#######################################################
+###                   FUNCTIONS                     ###
+#######################################################
+
+decorate_tbl <- function(tbl,var_name, se_name=paste0(var_name,"_se"),n_name=NULL){
+  
+  if(is.null(n_name)) n_name <- ifelse(var_name %in% c("meanEXP","medEXP"),"n_exp","n")
+  is.pct = (var_name %>% startsWith("pct")) 
+  
+  out <- tbl %>%
+    mutate_(coef=var_name,se=se_name,sample_size=n_name) %>%
+    mutate(RSE = se/coef,
+           special_pct = (is.pct & (coef < 0.1) & (RSE < (0.1/coef-1)/1.96)),
+           suppress = (sample_size < 60 | RSE > 0.5),
+           suppress = replace(suppress, special_pct,FALSE),
+           star = (RSE > 0.3 & !suppress)) %>%
+    mutate(coef = replace(coef,suppress,NA),
+           se   = replace(se,suppress,NA)) 
+  
+  out <- out %>% select(Year, cols, rows, coef, se, suppress, star)
+  
+  return(out)
+}
+
+
+#######################################################
+###                       UI                        ###
+#######################################################
+
+dataViewInput <- function(id){
+  ns <- NS(id)
+  radioButtons508(ns("tabs"), "Select data view:", inline=T, 
+                  class="em-fieldset controls-trend skinny-display",
+                  choices = c("Trends over time"="trend",
+                              "Cross-sectional"="cross"))
+}
+
+standardErrorInput <- function(id){
+  ns <- NS(id)
+  div(
+    checkboxInput508(ns("showSEs"),label="Show Standard Errors",inline=T),
+    uiOutput(ns("CInote"),class="control-message")
+  )
+}
+
+yearInput <- function(id,min,max){
+  ns <- NS(id)
+  tags$fieldset(
+    div(class="half", selectInput508(ns("year"),label="Year:",choices=max:min,selected=max)),
+    div(class="half show-if-trend", selectInput508(ns("year_end"), label= "to:",choices=max:min,selected=min)) 
+  )
+}
+
+rcInput <- function(id, type="cols", choices=NULL, selected=choices[1], label="Group by:", hide_label=FALSE, class=""){
+  ns <- NS(id)
+  
+  if(hide_label) labelClass = "usa-sr-only" else labelClass = ""
+  
+  tags$fieldset(class = class,
+                tags$label(label, `for` = ns(type), class=labelClass),
+                div(class="btn-group rc-group", role="group",
+                    div(class="btn-group rc-select", role="group", selectInput508(ns(type),choices=choices,selected)),
+                    div(class="btn-group rc-drop", grpInput( ns(type), choices=choices))
+                )
+  )
+}
+
+switchUI <- function(id,class=""){
+  ns <- NS(id)
+  actionButton508(ns("rc_switch"),label = "",class = sprintf("rc-switch %s", class))
+}
+
+
+#######################################################
+###                     SERVER                      ###
+#######################################################
+
+dataModule <- function(input, output, session, df, stat, exclude_initial,...){
+ 
+  is_trend <- reactive(input$tabs == "trend")
+  
+  years <- reactive({
+    if(!is_trend()) return(input$year)
+    return(input$year:input$year_end)
+  })
+  
+  cols = reactive({
+    if(input$cols==input$rows & !is_trend()) return("ind")
+    return(input$cols)
+  })
+  
+  rows = reactive({
+    if(is_trend()) return("ind")
+    return(input$rows)
+  })
+  
+  rowsX = reactive({
+    if(is_trend()) return("Year")
+    if(!is_trend() & input$rows == "ind") return("Year")
+    return(input$rows)
+  })
+  
+# Standard Errors and Control Totals
+  controlTotals <- reactive({
+    tot_vars = c("Year","ind","agegrps","race","sex","poverty","region")
+    (stat()=="totPOP") &
+      (rows() %in% tot_vars) &
+      (input$cols %in% tot_vars)
+  })
+  
+  showSEs <- reactive({
+    input$showSEs & !controlTotals()
+  })
+  
+  output$CInote <- renderUI({
+    if(controlTotals() & input$showSEs) return(controlTotals_message) else return(HTML("<br>"))
+  })
+  
+# Initialize reactiveValues
+  all1 <- df %>% select(levels1,grp1) %>% rename(levels=levels1,grp=grp1)
+  all2 <- df %>% select(levels2,grp2) %>% rename(levels=levels2,grp=grp2)
+  
+  initial_values <- bind_rows(all1,all2) %>% 
+    filter(!levels %in% exclude_initial) %>% 
+    distinct %>% unstack 
+
+  values = reactiveValues()
+  
+  observe({
+    isolate({
+      for(i in names(initial_values)) values[[i]] = initial_values[[i]] %>% gsub(" ","_",.)
+    })
+  })
+
+  col_levels <- callModule(groupBy,"cols",var = reactive(input$cols),df = subgrp_tbl,values = values,initial=initial_values,...)
+  row_levels <- callModule(groupBy,"rows",var = reactive(rows()), df = subgrp_tbl,values = values,initial=initial_values,...)
+  
+  observeEvent(input$rc_switch,{
+    in1 <- input$cols; in2 <- input$rows;
+    updateSelectInput(session,inputId="cols",selected=in2)
+    updateSelectInput(session,inputId="rows",selected=in1)
+  })
+
+  
+  select_years <- reactive({                              
+    df %>% filter(Year %in% years())
+  })
+  
+  subgrp_tbl <- reactive({                                 print("subgrp_tbl()")
+    
+    rows <- rows()
+    cols <- cols()
+    
+    tbl <- select_years()
+
+    tab <- tbl %>% filter(grp1 == rows, grp2 == cols)
+    tab[,rows] = tab$levels1
+    tab[,cols] = tab$levels2
+    
+    tab <- tab %>% select(-grp1,-grp2,-levels1,-levels2)
+
+    rev <- tbl %>% filter(grp1 == cols, grp2 == rows)
+    rev[,rows] = rev$levels2
+    rev[,cols] = rev$levels1
+
+    rev <- rev %>% select(-grp1,-grp2,-levels1,-levels2)
+      
+    bind_rows(tab,rev) %>% distinct
+    
+  })
+  
+  select_levels <- reactive({                               print("select_levels()")
+    subgrp_tbl() %>%
+      mutate_(cols = input$cols, rows=rows()) %>% # for trend, rows() = 'ind'
+      filter(cols %in% col_levels(), rows %in% row_levels()) %>%
+      mutate_(rows = rowsX())  ## maybe change this so row_levels = years if row is year?
+
+  })
+  
+  ### Return ###
+  
+  inputs <- reactive({
+    list(years=years(),cols=cols(),rows=rows(),rowsX=rowsX(),showSEs=showSEs(),stat=stat())
+  })
+  
+  decorated_tbl <- reactive({
+    select_levels() %>% decorate_tbl(var_name=stat())
+  }) 
+
+  return(reactive(list(inputs=inputs(), tbl=decorated_tbl())))
+}
+
+
+
+
+
+
+
+

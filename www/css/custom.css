@@ -1,0 +1,87 @@
+/* Colors
+#015289 : meps blue regular
+#0a3b61 : meps dark blue (guesstimate)
+*/
+
+body{font-family: Source Sans Pro,Helvetica Neue,Helvetica,Roboto,Arial,sans-serif;}
+
+h1{font-size: 3rem;}
+h2{font-size: 2rem;}
+
+label {
+  font-weight: 400;
+  margin-top:0;
+}
+
+caption, .caption{
+  color: #5b616b; /* gray */
+  font-size: 2.2rem;
+}
+
+.em-legend{
+  font-weight: 400;
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+  font-size: 1.7rem;
+  color:white;
+}
+
+.em-logo{
+  line-height: 1.5rem;
+  margin-top: 1rem;
+}
+
+.em-logo a{
+  color: #015289;
+}
+
+.em-logo img{
+  vertical-align: bottom;
+  width: 4em;
+}
+
+
+/* Nav-tabs */
+
+.nav-pills> li> a {
+  text-decoration: none;
+  margin: 0.2em;
+  font-weight:600;
+  color: #015289;
+  border: 2px solid #015289;
+}
+
+.nav-pills>li.active>a, 
+.nav-pills>li.active>a:focus, 
+.nav-pills>li.active>a:hover {
+    color: #fff;
+    background-color: #015289;
+}
+
+.download-button{
+  background-color: #2e8540; /* green */
+  color: #fff !important;
+  float: right;
+}
+
+.download-button:hover, .download-button:focus{
+  background-color: #276f36 !important; /* darker green not usa*/
+}
+
+.right{
+  float: right !important;
+}
+
+[data-value="Table"] {
+  overflow-x: auto;
+}
+
+
+
+
+
+
+
+
+
+

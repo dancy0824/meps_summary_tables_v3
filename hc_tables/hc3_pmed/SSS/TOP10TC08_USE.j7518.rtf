@@ -1,0 +1,1840 @@
+{\rtf1\ansi\deff0 
+{\fonttbl {\f0\fmodern Courier New;}
+{\colortbl;\red0\green0\blue0;}
+}
+\deflang1033\margl1450\margr360\margt1170\margb360\fs14\sl-180\slmult0\landscape\paperw15840\paperh12240
+1                                                          The SAS System                           18:02 Monday, September 20, 2010
+\par 
+\par NOTE: Copyright (c) 2002-2008 by SAS Institute Inc., Cary, NC, USA.
+\par NOTE: SAS (r) Proprietary Software 9.2 (TS1M0)
+\par       Licensed to SOCIAL & SCIENTIFIC SYSTEMS INC/AHRQ3, Site 0070086875.
+\par NOTE: This session is executing on the XP_PRO  platform.
+\par 
+\par 
+\par 
+\par NOTE: SAS initialization used:
+\par       real time           0:00.37
+\par       user cpu time       0:00.06
+\par       system cpu time     0:00.17
+\par       Memory                            2948k
+\par       OS Memory                         3812k
+\par       Timestamp            9/20/2010  6:02:42 PM
+\par 
+\par 
+\par NOTE: AUTOEXEC processing beginning; file is C:\\PROGRA~1\\SAS92\\SASFOU~1\\9.2\\autoexec.sas.
+\par 
+\par 
+\par NOTE: AUTOEXEC processing completed.
+\par 
+\par 1          %JOBSTART;
+\par |~~~~~~~~~~~~~~~~~~~~~~~~|
+\par | JOB ID      : 7518     |
+\par | DATE        : 09/20/10 |
+\par | START TIME  : 18:02:42 |
+\par |~~~~~~~~~~~~~~~~~~~~~~~~|
+\par 2
+\par 3          ODS NOPROCTITLE;
+\par 4          OPTIONS LS=155 PS=55;
+\par 5
+\par 6          *OPTIONS OBS=0;
+\par 7          ********************************************************************************************
+\par 8          Software Version:   9.2
+\par 9          Creation Date:      2008-08-29
+\par 10         Task:               AH3.FD001
+\par 11         Task Title:         2007 Prescribed Medicines Event PUF
+\par 12
+\par 13         Program Name: AHRQ3\\F_DSO\\FD001NKK\\PROG\\TOP10TC07_USE.SAS
+\par 14
+\par 15         Description:  Produces estimates with standard errors of the top 10 therapeutic classes (TC)
+\par 16                       of drugs in 2007 by weighted utilization for the Tables Compendia on the Web.
+\par 17                       Produce Z-scores comparing weighted utilization of top 10 TC to each other.
+\par 18
+\par 19                       Outputs the table statistics and formats in order for conversion to HTML.
+\par 20
+\par 21         Reference:    Marie Stagnitti / Nancy Kieffer
+\par 22                       Stagnitti email dated 4/30/2007
+\par 23                       Stabnitti email 06/25/2009 re final person weights
+\par 24
+\par 25         Input file:   AHRQ3\\F_DSO\\FD001NKK\\DATA\\RX07V05.SAS7BDAT		(encrypted PMED PUF)
+\par 26                       AHRQPUF\\HCPUFS\\HC107\\DATA\\H107V1.SAS7BDAT			(FY Person Char. PUF)
+\par 27                                                           (Final expenditure person level weight)
+\par \page 2                                                                     The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par 28
+\par 29         Programmer:   Nancy Kieffer
+\par 30
+\par 31         Update History:  2009-07-14 Blaine Byars -- Use expenditure person level weight
+\par 32                         in place of Master person level weight -- these weights were declared final
+\par 33         							2009-08-08 Use updated VARSTR/VARPSU
+\par 34         *******************************************************************************************;
+\par 35         %LET YY=08;
+\par 36
+\par 37         %LET RXPUF=RX&YY.V05;
+\par 38         %LET FYPUF=H115V1;     /* FY Person Characteristics PUF file name   */
+\par 39         %LET FYNUM=115;        /* FY Person Characteristics PUF file number */
+\par 40
+\par 41         LIBNAME FMT   "C:\\AHRQ3\\F_DSO\\FD001NKK\\DATA\\FMTLIB";
+\par NOTE: Libref FMT was successfully assigned as follows:
+\par       Engine:        V9
+\par       Physical Name: C:\\AHRQ3\\F_DSO\\FD001NKK\\DATA\\FMTLIB
+\par 42         LIBNAME RXPUF "C:\\AHRQ3\\F_DSO\\FD001NKK\\DATA";
+\par NOTE: Libref RXPUF was successfully assigned as follows:
+\par       Engine:        V9
+\par       Physical Name: C:\\AHRQ3\\F_DSO\\FD001NKK\\DATA
+\par 43         LIBNAME TCTAB "C:\\AHRQ3\\F_DSO\\FD001NKK\\DATA\\TABLES";
+\par NOTE: Libref TCTAB was successfully assigned as follows:
+\par       Engine:        V9
+\par       Physical Name: C:\\AHRQ3\\F_DSO\\FD001NKK\\DATA\\TABLES
+\par 44         LIBNAME WGT "C:\\AHRQ3\\BC002XXX\\DATA\\MEPSHC2008\\D082410";
+\par NOTE: Libref WGT was successfully assigned as follows:
+\par       Engine:        V9
+\par       Physical Name: C:\\AHRQ3\\BC002XXX\\DATA\\MEPSHC2008\\D082410
+\par 45         /*LIBNAME VARSTR "C:\\AHRQ2\\BA002XXX\\Data\\WGTS\\D072409";   2007 only */
+\par 46
+\par 47         LIBNAME FYPUF "C:\\AHRQPUF\\HCPUFS\\HC&FYNUM\\DATA";
+\par NOTE: Libref FYPUF was successfully assigned as follows:
+\par       Engine:        V9
+\par       Physical Name: C:\\AHRQPUF\\HCPUFS\\HC115\\DATA
+\par 48
+\par 49         OPTIONS FMTSEARCH=(FMT.FORMATS FMT.TC&YY._USEFMT);
+\par 50
+\par 51         TITLE1 "Task AH3.FD001: 20&YY Prescribed Medicines Event PUF";
+\par 52
+\par 53         *---------------------------------------------------------------------------------------------
+\par 54         * Add final person-level weight to all FY persons and subset to persons with positive weight.
+\par 55         * File will be used in SUDAAN to read in the full FY sample.
+\par 56         *---------------------------------------------------------------------------------------------;
+\par 57         PROC SORT DATA=FYPUF.&FYPUF (KEEP=PERSID VARSTR VARPSU READ=&PWD)
+\par 58                    OUT=FYPUF;
+\par 59           BY PERSID;
+\par 60         RUN;
+\par 
+\par NOTE: There were 33066 observations read from the data set FYPUF.H115V1.
+\par NOTE: The data set WORK.FYPUF has 33066 observations and 3 variables.
+\par NOTE: PROCEDURE SORT used (Total process time):
+\par       real time           0:00.64
+\par \page 3                                                                     The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par       user cpu time       0:00.56
+\par       system cpu time     0:00.07
+\par       Memory                            2091k
+\par       OS Memory                         6636k
+\par       Timestamp            9/20/2010  6:02:43 PM
+\par 
+\par 
+\par 61
+\par 62         PROC SORT DATA=WGT.PERWT&YY.F_ADJ(KEEP=PERSID PERWT_ADJ2 RENAME=(PERWT_ADJ2=PERWT&YY.F))
+\par 63                    OUT=PERWT;
+\par 64           BY PERSID;
+\par 65         RUN;
+\par 
+\par NOTE: There were 50092 observations read from the data set WGT.PERWT08F_ADJ.
+\par NOTE: The data set WORK.PERWT has 50092 observations and 2 variables.
+\par NOTE: PROCEDURE SORT used (Total process time):
+\par       real time           0:00.03
+\par       user cpu time       0:00.03
+\par       system cpu time     0:00.00
+\par       Memory                            2420k
+\par       OS Memory                         7924k
+\par       Timestamp            9/20/2010  6:02:43 PM
+\par 
+\par 
+\par 66
+\par 67         /*For 2007, a special update of VARSTR, VARPSU was delivered;
+\par 68         PROC SORT DATA=VARSTR.p11p12varstr_v2 (KEEP=PERSID VARSTR VARPSU )
+\par 69                    OUT=VARSTR;
+\par 70           BY PERSID;
+\par 71         RUN;*/
+\par 72
+\par 73         DATA FYPERS;
+\par 74           MERGE FYPUF (IN=A)
+\par 75                 PERWT (IN=B)
+\par 76                 /*VARSTR (IN=INVARSTR)*/
+\par 77                 END=EOF;
+\par 78           BY PERSID;
+\par 79
+\par 80           C1 + (A AND NOT B);
+\par 81           C2 + (B AND NOT A);
+\par 82           C3 + (A AND B);
+\par 83           /*V3 + (A AND B AND INVARSTR); */
+\par 84
+\par 85           IF EOF THEN DO;
+\par 86              PUT "IN FYPUF ONLY:  " C1;
+\par 87              PUT "IN WEIGHT FILE ONLY: " C2;
+\par 88              PUT "IN BOTH:        " C3;
+\par 89              /*PUT "IN FYPUF & WEIGHT FILE & NEW VARSTR: " V3;*/
+\par 90           END;
+\par 91
+\par 92           IF A and PERWT&YY.F > 0;
+\par 93           DROP C1 C2 C3;
+\par 94         RUN;
+\par \page 4                                                                     The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par 
+\par IN FYPUF ONLY:  0
+\par IN WEIGHT FILE ONLY: 17026
+\par IN BOTH:        33066
+\par NOTE: There were 33066 observations read from the data set WORK.FYPUF.
+\par NOTE: There were 50092 observations read from the data set WORK.PERWT.
+\par NOTE: The data set WORK.FYPERS has 31262 observations and 4 variables.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.04
+\par       user cpu time       0:00.04
+\par       system cpu time     0:00.00
+\par       Memory                            1395k
+\par       OS Memory                         8452k
+\par       Timestamp            9/20/2010  6:02:43 PM
+\par 
+\par 
+\par 95
+\par 96         *--------------------------------------------------------------------------------------
+\par 97         * Get PMEDs for positive weight persons.
+\par 98         *--------------------------------------------------------------------------------------;
+\par 99         DATA PMEDS;
+\par 100          SET RXPUF.&RXPUF (KEEP=PERSID TC1 RXXP&YY.X PERWT&YY.F VARSTR VARPSU READ=&PWD);
+\par 101          IF PERWT&YY.F > 0;
+\par 102
+\par 103          LABEL TCNAME = "TC1 name";
+\par 104
+\par 105          LENGTH TCNAME $45.;
+\par 106
+\par 107          TCNAME=PUT(TC1,TCNAME.);
+\par 108
+\par 109        RUN;
+\par 
+\par NOTE: There were 293379 observations read from the data set RXPUF.RX08V05.
+\par NOTE: The data set WORK.PMEDS has 287606 observations and 7 variables.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.56
+\par       user cpu time       0:00.21
+\par       system cpu time     0:00.34
+\par       Memory                            23612k
+\par       OS Memory                         32108k
+\par       Timestamp            9/20/2010  6:02:43 PM
+\par 
+\par 
+\par 110
+\par 111        PROC FREQ DATA=PMEDS;
+\par 112          TABLES TCNAME / MISSING;
+\par 113          TABLES TC1*TCNAME / LIST MISSING;
+\par 114          FORMAT TC1 TCNAME.;
+\par 115          TITLE3 "Frequency of therapeutic class variables";
+\par 116          TITLE4 "Verification of creating TCNAME";
+\par 117          FOOTNOTE1 "Source file: AHRQ3\\F_DSO\\FD001NKK\\DATA\\&RXPUF..SAS7BDAT";
+\par 118          FOOTNOTE2 "PERWT&YY.F > 0";
+\par 119        RUN;
+\par \page 5                                                                     The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par 
+\par NOTE: There were 287606 observations read from the data set WORK.PMEDS.
+\par NOTE: The PROCEDURE FREQ printed pages 1-2.
+\par NOTE: PROCEDURE FREQ used (Total process time):
+\par       real time           0:00.15
+\par       user cpu time       0:00.14
+\par       system cpu time     0:00.01
+\par       Memory                            1416k
+\par       OS Memory                         32648k
+\par       Timestamp            9/20/2010  6:02:44 PM
+\par 
+\par 
+\par 120
+\par 121        PROC SUMMARY DATA=PMEDS NWAY MISSING;
+\par 122          VAR RXXP&YY.X;
+\par 123          WEIGHT PERWT&YY.F;
+\par 124          OUTPUT OUT=TOTRX (DROP=_TYPE_) SUMWGT=TOTUSE SUM=TOTEXP;
+\par 125        RUN;
+\par 
+\par NOTE: There were 287606 observations read from the data set WORK.PMEDS.
+\par NOTE: The data set WORK.TOTRX has 1 observations and 3 variables.
+\par NOTE: PROCEDURE SUMMARY used (Total process time):
+\par       real time           0:00.06
+\par       user cpu time       0:00.09
+\par       system cpu time     0:00.01
+\par       Memory                            6210k
+\par       OS Memory                         38548k
+\par       Timestamp            9/20/2010  6:02:44 PM
+\par 
+\par 
+\par 126        PROC PRINT DATA=TOTRX NOOBS SPLIT="*";
+\par 127          SUM _FREQ_ TOTUSE TOTEXP;
+\par 128          LABEL _FREQ_ = "# of Rx*Unweighted"
+\par 129                TOTUSE = "# of Rx*Weighted"
+\par 130                TOTEXP = "Total Exp.*Weighted";
+\par 131          FORMAT _FREQ_ COMMA8.;
+\par 132          FORMAT TOTUSE TOTEXP COMMA20.2;
+\par 133          TITLE3 "QC check on total Rx utilization and expenditures";
+\par 134          FOOTNOTE1 "Source file: AHRQ3\\F_DSO\\FD001NKK\\DATA\\&RXPUF..SAS7BDAT";
+\par 135          FOOTNOTE2 "PERWT&YY.F > 0";
+\par 136        RUN;
+\par 
+\par NOTE: There were 1 observations read from the data set WORK.TOTRX.
+\par NOTE: The PROCEDURE PRINT printed page 3.
+\par NOTE: PROCEDURE PRINT used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            128k
+\par       OS Memory                         33388k
+\par       Timestamp            9/20/2010  6:02:44 PM
+\par 
+\par 
+\par \page 6                                                                     The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par 137
+\par 138        *--------------------------------------------------------------------------------------------
+\par 139        * Determine RANK for non-missing TC1 by weighted Rx utilization.
+\par 140        *--------------------------------------------------------------------------------------------;
+\par 141        DATA HASTC;
+\par 142          SET PMEDS;
+\par 143          IF TC1 NOT IN (-1, -9);
+\par 144        RUN;
+\par 
+\par NOTE: There were 287606 observations read from the data set WORK.PMEDS.
+\par NOTE: The data set WORK.HASTC has 283755 observations and 7 variables.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.14
+\par       user cpu time       0:00.10
+\par       system cpu time     0:00.03
+\par       Memory                            23032k
+\par       OS Memory                         56268k
+\par       Timestamp            9/20/2010  6:02:44 PM
+\par 
+\par 
+\par 145
+\par 146        PROC SUMMARY DATA=HASTC NWAY;
+\par 147          CLASS TC1;
+\par 148          ID TCNAME;
+\par 149          VAR PERWT&YY.F;
+\par 150          OUTPUT OUT=TCFREQ (DROP=_TYPE_) SUM=RXUSESUM;
+\par 151        RUN;
+\par 
+\par NOTE: There were 283755 observations read from the data set WORK.HASTC.
+\par NOTE: The data set WORK.TCFREQ has 18 observations and 4 variables.
+\par NOTE: PROCEDURE SUMMARY used (Total process time):
+\par       real time           0:00.15
+\par       user cpu time       0:00.26
+\par       system cpu time     0:00.01
+\par       Memory                            6585k
+\par       OS Memory                         61684k
+\par       Timestamp            9/20/2010  6:02:44 PM
+\par 
+\par 
+\par 152
+\par 153        PROC SORT DATA=TCFREQ; BY DESCENDING RXUSESUM; RUN;
+\par 
+\par NOTE: There were 18 observations read from the data set WORK.TCFREQ.
+\par NOTE: The data set WORK.TCFREQ has 18 observations and 4 variables.
+\par NOTE: PROCEDURE SORT used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            107k
+\par       OS Memory                         56524k
+\par       Timestamp            9/20/2010  6:02:44 PM
+\par 
+\par 
+\par \page 7                                                                     The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par 154
+\par 155        PROC PRINT DATA=TCFREQ;
+\par 156          SUM _FREQ_ RXUSESUM;
+\par 157          FORMAT _FREQ_ COMMA8.;
+\par 158          FORMAT RXUSESUM COMMA20.;
+\par 159          TITLE3 "WORK.TCFREQ: Sum of Rx utilization for non-missing TC1, sorted in descending order";
+\par 160          FOOTNOTE1 "Source file: AHRQ3\\F_DSO\\FD001NKK\\DATA\\&RXPUF..SAS7BDAT";
+\par 161          FOOTNOTE2 "PERWT&YY.F > 0";
+\par 162        RUN;
+\par 
+\par NOTE: There were 18 observations read from the data set WORK.TCFREQ.
+\par NOTE: The PROCEDURE PRINT printed page 4.
+\par NOTE: PROCEDURE PRINT used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            122k
+\par       OS Memory                         56524k
+\par       Timestamp            9/20/2010  6:02:44 PM
+\par 
+\par 
+\par 163
+\par 164        DATA TCRANK;
+\par 165          SET TCFREQ;
+\par 166          LENGTH RANK 3.;
+\par 167
+\par 168          LABEL RXUSESUM = "Weighted*Utilization"
+\par 169                RANK     = "TC rank by utilization";
+\par 170
+\par 171          IF _N_ LE 10 THEN RANK=_N_; ELSE RANK=11;
+\par 172
+\par 173        RUN;
+\par 
+\par NOTE: There were 18 observations read from the data set WORK.TCFREQ.
+\par NOTE: The data set WORK.TCRANK has 18 observations and 5 variables.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            203k
+\par       OS Memory                         56524k
+\par       Timestamp            9/20/2010  6:02:44 PM
+\par 
+\par 
+\par 174
+\par 175        PROC SORT DATA=TCRANK; BY RANK; RUN;
+\par 
+\par NOTE: There were 18 observations read from the data set WORK.TCRANK.
+\par NOTE: The data set WORK.TCRANK has 18 observations and 5 variables.
+\par NOTE: PROCEDURE SORT used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par \page 8                                                                     The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par       Memory                            111k
+\par       OS Memory                         56524k
+\par       Timestamp            9/20/2010  6:02:44 PM
+\par 
+\par 
+\par 176
+\par 177        PROC PRINT DATA=TCRANK;
+\par 178          SUM _FREQ_ RXUSESUM;
+\par 179          FORMAT _FREQ_ COMMA8.;
+\par 180          FORMAT RXUSESUM COMMA20.;
+\par 181          TITLE3 "WORK.TCRANK: Sum of Rx utilization for non-missing TC1, sorted in descending order";
+\par 182          FOOTNOTE1 "Source file: AHRQ3\\F_DSO\\FD001NKK\\DATA\\&RXPUF..SAS7BDAT";
+\par 183          FOOTNOTE2 "PERWT&YY.F > 0";
+\par 184        RUN;
+\par 
+\par NOTE: There were 18 observations read from the data set WORK.TCRANK.
+\par NOTE: The PROCEDURE PRINT printed page 5.
+\par NOTE: PROCEDURE PRINT used (Total process time):
+\par       real time           0:00.01
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.01
+\par       Memory                            122k
+\par       OS Memory                         56524k
+\par       Timestamp            9/20/2010  6:02:44 PM
+\par 
+\par 
+\par 185
+\par 186        *---------------------------------------------------------------------------------------------
+\par 187        * Create format, RANKFMT, for RANK using TCNAME.
+\par 188        *---------------------------------------------------------------------------------------------;
+\par 189        DATA FMTTC;
+\par 190          SET TCRANK;
+\par 191          BY RANK;
+\par 192          IF FIRST.RANK;
+\par 193        RUN;
+\par 
+\par NOTE: There were 18 observations read from the data set WORK.TCRANK.
+\par NOTE: The data set WORK.FMTTC has 11 observations and 5 variables.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            213k
+\par       OS Memory                         56524k
+\par       Timestamp            9/20/2010  6:02:44 PM
+\par 
+\par 
+\par 194
+\par 195        DATA FMTTC (KEEP=FMTNAME START LABEL TYPE);
+\par 196          SET FMTTC END=EOF;
+\par 197
+\par 198          LENGTH FMTNAME $8 START $2 LABEL $45;
+\par 199
+\par \page 9                                                                     The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par 200          FMTNAME="RANKFMT";
+\par 201          START=PUT(RANK,2.);
+\par 202          NUMLABEL=TRIM(PUT(RANK,8.));
+\par 203          TYPE="N";
+\par 204
+\par 205          IF RANK NE 11 THEN DO;
+\par 206             LABEL=NUMLABEL || "    " || TCNAME;
+\par 207             LABEL=LEFT(RIGHT(LABEL));
+\par 208             OUTPUT;
+\par 209          END; ELSE
+\par 210          IF RANK=11 THEN DO;
+\par 211             LABEL=NUMLABEL || "    ALL OTHERS";
+\par 212             LABEL=LEFT(RIGHT(LABEL));
+\par 213             OUTPUT;
+\par 214          END;
+\par 215
+\par 216          IF EOF THEN DO; /* Format for the total line in SUDAAN */
+\par 217             START="99";
+\par 218             LABEL="TOTAL";
+\par 219             LABEL=LEFT(RIGHT(LABEL));
+\par 220             OUTPUT;
+\par 221          END;
+\par 222        RUN;
+\par 
+\par NOTE: There were 11 observations read from the data set WORK.FMTTC.
+\par NOTE: The data set WORK.FMTTC has 12 observations and 4 variables.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.01
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.01
+\par       Memory                            231k
+\par       OS Memory                         56524k
+\par       Timestamp            9/20/2010  6:02:44 PM
+\par 
+\par 
+\par 223
+\par 224        PROC SORT DATA=FMTTC; BY START; RUN;
+\par 
+\par NOTE: There were 12 observations read from the data set WORK.FMTTC.
+\par NOTE: The data set WORK.FMTTC has 12 observations and 4 variables.
+\par NOTE: PROCEDURE SORT used (Total process time):
+\par       real time           0:00.01
+\par       user cpu time       0:00.01
+\par       system cpu time     0:00.00
+\par       Memory                            109k
+\par       OS Memory                         56524k
+\par       Timestamp            9/20/2010  6:02:44 PM
+\par 
+\par 
+\par 225
+\par 226        PROC PRINT DATA=FMTTC;
+\par 227          TITLE3 "Verification of creating formats for variable RANK";
+\par 228          TITLE5 "WORK.FMTTC: Input Control Dataset used to create permanent format for RANK";
+\par \page 10                                                                    The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par 229          FOOTNOTE1;
+\par 230        RUN;
+\par 
+\par NOTE: There were 12 observations read from the data set WORK.FMTTC.
+\par NOTE: The PROCEDURE PRINT printed page 6.
+\par NOTE: PROCEDURE PRINT used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            98k
+\par       OS Memory                         56524k
+\par       Timestamp            9/20/2010  6:02:44 PM
+\par 
+\par 
+\par 231
+\par 232        PROC FORMAT LIBRARY=FMT.TC&YY._USEFMT CNTLIN=FMTTC FMTLIB;
+\par NOTE: Format RANKFMT has been written to FMT.TC08_USEFMT.
+\par 233          TITLE3 "Contents of permanent format library for RANK";
+\par 234          FOOTNOTE1 "C:\\AHRQ3\\F_DSO\\FD001NKK\\DATA\\FMTLIB\\TC&YY._USEFMT.SAS7BCAT";
+\par 235        RUN;
+\par 
+\par NOTE: PROCEDURE FORMAT used (Total process time):
+\par       real time           0:00.06
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.01
+\par       Memory                            207k
+\par       OS Memory                         56524k
+\par       Timestamp            9/20/2010  6:02:45 PM
+\par 
+\par NOTE: There were 12 observations read from the data set WORK.FMTTC.
+\par NOTE: The PROCEDURE FORMAT printed page 7.
+\par 
+\par 236
+\par 237        *-----------------------------------------------------------------------------------
+\par 238        * Merge RANK onto PMEDs by TC1.
+\par 239        *-----------------------------------------------------------------------------------;
+\par 240        PROC SORT DATA=PMEDS;  BY TC1; RUN;
+\par 
+\par NOTE: There were 287606 observations read from the data set WORK.PMEDS.
+\par NOTE: The data set WORK.PMEDS has 287606 observations and 7 variables.
+\par NOTE: PROCEDURE SORT used (Total process time):
+\par       real time           0:00.29
+\par       user cpu time       0:00.37
+\par       system cpu time     0:00.14
+\par       Memory                            56679k
+\par       OS Memory                         113244k
+\par       Timestamp            9/20/2010  6:02:45 PM
+\par 
+\par 
+\par 241        PROC SORT DATA=TCRANK; BY TC1; RUN;
+\par 
+\par NOTE: There were 18 observations read from the data set WORK.TCRANK.
+\par NOTE: The data set WORK.TCRANK has 18 observations and 5 variables.
+\par \page 11                                                                    The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par NOTE: PROCEDURE SORT used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            105k
+\par       OS Memory                         60420k
+\par       Timestamp            9/20/2010  6:02:45 PM
+\par 
+\par 
+\par 242
+\par 243        DATA PMEDS;
+\par 244          MERGE PMEDS  (IN=A)
+\par 245                TCRANK (IN=B KEEP=TC1 RANK);
+\par 246          BY TC1;
+\par 247          IF A;
+\par 248
+\par 249          IF TC1 IN (-1,-9) THEN RANK=11;
+\par 250
+\par 251        RUN;
+\par 
+\par NOTE: There were 287606 observations read from the data set WORK.PMEDS.
+\par NOTE: There were 18 observations read from the data set WORK.TCRANK.
+\par NOTE: The data set WORK.PMEDS has 287606 observations and 8 variables.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.20
+\par       user cpu time       0:00.18
+\par       system cpu time     0:00.01
+\par       Memory                            25660k
+\par       OS Memory                         85900k
+\par       Timestamp            9/20/2010  6:02:45 PM
+\par 
+\par 
+\par 252
+\par 253        PROC FREQ DATA=PMEDS;
+\par 254          TABLES RANK*TC1 / LIST MISSING;
+\par 255          FORMAT RANK RANKFMT.;
+\par 256          FORMAT TC1 TCNAME.;
+\par 257          TITLE3 "Verification of RANK by TC1";
+\par 258          FOOTNOTE1 "Source file: AHRQ3\\F_DSO\\FD001NKK\\DATA\\&RXPUF..SAS7BDAT";
+\par 259          FOOTNOTE2 "PERWT&YY.F > 0";
+\par 260        RUN;
+\par 
+\par NOTE: There were 287606 observations read from the data set WORK.PMEDS.
+\par NOTE: The PROCEDURE FREQ printed page 8.
+\par NOTE: PROCEDURE FREQ used (Total process time):
+\par       real time           0:00.10
+\par       user cpu time       0:00.11
+\par       system cpu time     0:00.00
+\par       Memory                            608k
+\par       OS Memory                         63304k
+\par       Timestamp            9/20/2010  6:02:45 PM
+\par 
+\par 
+\par \page 12                                                                    The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par 261
+\par 262        PROC FREQ DATA=PMEDS;
+\par 263          TABLES RANK / MISSING;
+\par 264          WEIGHT PERWT&YY.F;
+\par 265          FORMAT RANK RANKFMT.;
+\par 266          TITLE3 "Weighted frequency of RANK";
+\par 267          FOOTNOTE1 "Source file: AHRQ3\\F_DSO\\FD001NKK\\DATA\\&RXPUF..SAS7BDAT";
+\par 268          FOOTNOTE2 "PERWT&YY.F > 0";
+\par 269        RUN;
+\par 
+\par NOTE: There were 287606 observations read from the data set WORK.PMEDS.
+\par NOTE: The PROCEDURE FREQ printed page 9.
+\par NOTE: PROCEDURE FREQ used (Total process time):
+\par       real time           0:00.06
+\par       user cpu time       0:00.06
+\par       system cpu time     0:00.00
+\par       Memory                            536k
+\par       OS Memory                         63304k
+\par       Timestamp            9/20/2010  6:02:46 PM
+\par 
+\par 
+\par 270
+\par 271        *--------------------------------------------------------------------------------------
+\par 272        * Create dummy variable to identify unique persons in RANK.
+\par 273        *--------------------------------------------------------------------------------------;
+\par 274        PROC SORT DATA=PMEDS; BY RANK PERSID; RUN;
+\par 
+\par NOTE: There were 287606 observations read from the data set WORK.PMEDS.
+\par NOTE: The data set WORK.PMEDS has 287606 observations and 8 variables.
+\par NOTE: PROCEDURE SORT used (Total process time):
+\par       real time           0:00.26
+\par       user cpu time       0:00.39
+\par       system cpu time     0:00.07
+\par       Memory                            62334k
+\par       OS Memory                         124880k
+\par       Timestamp            9/20/2010  6:02:46 PM
+\par 
+\par 
+\par 275
+\par 276        DATA PMEDS;
+\par 277          SET PMEDS;
+\par 278          BY RANK PERSID;
+\par 279
+\par 280          IF FIRST.PERSID THEN RANKPERS=1; ELSE RANKPERS=0;
+\par 281
+\par 282        RUN;
+\par 
+\par NOTE: There were 287606 observations read from the data set WORK.PMEDS.
+\par NOTE: The data set WORK.PMEDS has 287606 observations and 9 variables.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.20
+\par       user cpu time       0:00.18
+\par       system cpu time     0:00.01
+\par \page 13                                                                    The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par       Memory                            27683k
+\par       OS Memory                         90588k
+\par       Timestamp            9/20/2010  6:02:46 PM
+\par 
+\par 
+\par 283
+\par 284        *--------------------------------------------------------------------------------------
+\par 285        * Bring in all persons from FY PUF for SUDAAN.
+\par 286        * Flag persons with PMEDs.
+\par 287        *--------------------------------------------------------------------------------------;
+\par 288        PROC SORT DATA=PMEDS; BY PERSID; RUN;
+\par 
+\par NOTE: There were 287606 observations read from the data set WORK.PMEDS.
+\par NOTE: The data set WORK.PMEDS has 287606 observations and 9 variables.
+\par NOTE: PROCEDURE SORT used (Total process time):
+\par       real time           0:00.26
+\par       user cpu time       0:00.28
+\par       system cpu time     0:00.15
+\par       Memory                            64394k
+\par       OS Memory                         129568k
+\par       Timestamp            9/20/2010  6:02:46 PM
+\par 
+\par 
+\par 289
+\par 290        DATA PMEDS;
+\par 291          MERGE FYPERS (IN=INFY)
+\par 292                PMEDS  (IN=INRX)
+\par 293          END=EOF;
+\par 294          BY PERSID;
+\par 295          IF INFY;
+\par 296
+\par 297          LABEL HASPMED = "1 if person has PMED event";
+\par 298
+\par 299          HASPMED=INRX;
+\par 300
+\par 301          C1 + (INFY AND NOT INRX);
+\par 302          C2 + (INRX AND NOT INFY);
+\par 303          C3 + (INRX AND INFY);
+\par 304
+\par 305          IF EOF THEN DO;
+\par 306             PUT "IN FY CONSOLIDATED PUF ONLY: " C1;
+\par 307             PUT "IN PMED EVENT FILE ONLY: " C2;
+\par 308             PUT "IN BOTH:                 " C3;
+\par 309           END;
+\par 310
+\par 311           DROP C1 C2 C3;
+\par 312        RUN;
+\par 
+\par IN FY CONSOLIDATED PUF ONLY: 13293
+\par IN PMED EVENT FILE ONLY: 0
+\par IN BOTH:                 287606
+\par NOTE: There were 31262 observations read from the data set WORK.FYPERS.
+\par NOTE: There were 287606 observations read from the data set WORK.PMEDS.
+\par \page 14                                                                    The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par NOTE: The data set WORK.PMEDS has 300899 observations and 10 variables.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.25
+\par       user cpu time       0:00.21
+\par       system cpu time     0:00.03
+\par       Memory                            30885k
+\par       OS Memory                         96308k
+\par       Timestamp            9/20/2010  6:02:47 PM
+\par 
+\par 
+\par 313
+\par 314        *===============================================================================
+\par 315        * SUDAAN.
+\par 316        *===============================================================================;
+\par 317        PROC SORT DATA=PMEDS; BY VARSTR VARPSU; RUN;
+\par 
+\par NOTE: There were 300899 observations read from the data set WORK.PMEDS.
+\par NOTE: The data set WORK.PMEDS has 300899 observations and 10 variables.
+\par NOTE: PROCEDURE SORT used (Total process time):
+\par       real time           0:00.31
+\par       user cpu time       0:00.40
+\par       system cpu time     0:00.17
+\par       Memory                            72131k
+\par       OS Memory                         140948k
+\par       Timestamp            9/20/2010  6:02:47 PM
+\par 
+\par 
+\par 318
+\par 319        FOOTNOTE1;
+\par 320        TITLE3;
+\par 321        PROC DESCRIPT DATA=PMEDS FILETYPE=SAS NOPRINT;
+\par 322          SUBPOPN HASPMED=1;
+\par 323          NEST VARSTR VARPSU;
+\par 324          WEIGHT PERWT&YY.F;
+\par 325          VAR _ONE_ RXXP&YY.X RANKPERS;
+\par 326          SUBGROUPS RANK;
+\par 327          LEVEL     11;
+\par 328          OUTPUT NSUM WSUM TOTAL SETOTAL / FILENAME=SESTATS FILETYPE=SAS REPLACE;
+\par 329        RUN;
+\par 
+\par 
+\par ******************************************************************
+\par SUDAAN Release 10.0.1 (SAS-Callable SUDAAN, x32 version)
+\par Serial Number A0003992, for 5 user(s) is licensed to
+\par Social and Scientific Systems, Inc. (Employee Owner).
+\par It expires on January 31, 2011.
+\par ******************************************************************
+\par 
+\par 
+\par 
+\par 
+\par Opened SAS data file PMEDS for reading.
+\par 
+\par \page 15                                                                    The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par Opened SAS data file SESTATS for writing.
+\par Note:
+\par  36 records written to file SESTATS
+\par 
+\par 
+\par NOTE: There were 300899 observations read from the data set WORK.PMEDS.
+\par NOTE: The data set WORK.SESTATS has 36 observations and 9 variables.
+\par NOTE: The PROCEDURE DESCRIPT printed page 10.
+\par NOTE: PROCEDURE DESCRIPT used (Total process time):
+\par       real time           0:01.67
+\par       user cpu time       0:01.62
+\par       system cpu time     0:00.04
+\par       Memory                            1160k
+\par       OS Memory                         69528k
+\par       Timestamp            9/20/2010  6:02:49 PM
+\par 
+\par 
+\par 330
+\par 331        *----------------------------------------------------------------------------------
+\par 332        * Reformat SUDAAN output for printing.
+\par 333        *----------------------------------------------------------------------------------;
+\par 334        DATA USE (RENAME=(TOTAL=TOT_USE SETOTAL=SE_USE))
+\par 335             EXP (RENAME=(TOTAL=TOT_EXP SETOTAL=SE_EXP))
+\par 336             PER (RENAME=(TOTAL=TOT_PER SETOTAL=SE_PER));
+\par 337          SET SESTATS;
+\par 338
+\par 339          IF RANK=0 THEN RANK=99;  /* total line */
+\par 340
+\par 341          IF VARIABLE=1 THEN OUTPUT USE; ELSE
+\par 342          IF VARIABLE=2 THEN OUTPUT EXP; ELSE
+\par 343          IF VARIABLE=3 THEN OUTPUT PER;
+\par 344
+\par 345          DROP PROCNUM TABLENO VARIABLE _C1;
+\par 346        RUN;
+\par 
+\par NOTE: There were 36 observations read from the data set WORK.SESTATS.
+\par NOTE: The data set WORK.USE has 12 observations and 5 variables.
+\par NOTE: The data set WORK.EXP has 12 observations and 5 variables.
+\par NOTE: The data set WORK.PER has 12 observations and 5 variables.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            249k
+\par       OS Memory                         69268k
+\par       Timestamp            9/20/2010  6:02:49 PM
+\par 
+\par 
+\par 347
+\par 348        PROC SORT DATA=USE; BY RANK; RUN;
+\par 
+\par NOTE: There were 12 observations read from the data set WORK.USE.
+\par NOTE: The data set WORK.USE has 12 observations and 5 variables.
+\par \page 16                                                                    The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par NOTE: PROCEDURE SORT used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            88k
+\par       OS Memory                         69268k
+\par       Timestamp            9/20/2010  6:02:49 PM
+\par 
+\par 
+\par 349        PROC SORT DATA=EXP; BY RANK; RUN;
+\par 
+\par NOTE: There were 12 observations read from the data set WORK.EXP.
+\par NOTE: The data set WORK.EXP has 12 observations and 5 variables.
+\par NOTE: PROCEDURE SORT used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            88k
+\par       OS Memory                         69268k
+\par       Timestamp            9/20/2010  6:02:49 PM
+\par 
+\par 
+\par 350        PROC SORT DATA=PER; BY RANK; RUN;
+\par 
+\par NOTE: There were 12 observations read from the data set WORK.PER.
+\par NOTE: The data set WORK.PER has 12 observations and 5 variables.
+\par NOTE: PROCEDURE SORT used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            88k
+\par       OS Memory                         69268k
+\par       Timestamp            9/20/2010  6:02:49 PM
+\par 
+\par 
+\par 351
+\par 352        DATA TCTAB.TOP10TC&YY._USE;
+\par 353          MERGE USE
+\par 354                EXP
+\par 355                PER;
+\par 356          BY RANK;
+\par 357          LABEL RANK    = "Therapeutic Class Rank & Name"
+\par 358                NSUM    = "Drug Mentions, Unweighted"
+\par 359                TOT_USE = "Drug Mentions, Weighted"
+\par 360                 SE_USE = "Drug Mentions SE"
+\par 361                TOT_EXP = "Dollars Spent, Weighted"
+\par 362                 SE_EXP = "Dollars Spent SE"
+\par 363                TOT_PER = "Count of Persons, Weighted"
+\par 364                 SE_PER = "Count of Persons SE";
+\par 365        RUN;
+\par 
+\par NOTE: There were 12 observations read from the data set WORK.USE.
+\par NOTE: There were 12 observations read from the data set WORK.EXP.
+\par \page 17                                                                    The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par NOTE: There were 12 observations read from the data set WORK.PER.
+\par NOTE: The data set TCTAB.TOP10TC08_USE has 12 observations and 9 variables.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            305k
+\par       OS Memory                         69268k
+\par       Timestamp            9/20/2010  6:02:49 PM
+\par 
+\par 
+\par 366
+\par 367        PROC PRINT DATA=TCTAB.TOP10TC&YY._USE NOOBS SPLIT="*";
+\par 368          ID RANK;
+\par 369          VAR NSUM
+\par 370              TOT_USE SE_USE
+\par 371              TOT_EXP SE_EXP
+\par 372              TOT_PER SE_PER;
+\par 373           LABEL RANK    = "Therapeputic Class*Rank & Name"
+\par 374                 NSUM    = "Drug*Mentions*Unweighted"
+\par 375                 TOT_USE = "Drug*Mentions*Weighted"
+\par 376                  SE_USE = "Drug*Mentions*SE"
+\par 377                 TOT_EXP = "Dollars*Spent*Weighted"
+\par 378                  SE_EXP = "Dollars*Spent*SE"
+\par 379                 TOT_PER = "Count of*Persons*Weighted"
+\par 380                  SE_PER = "Count of*Persons*SE";
+\par 381          FORMAT RANK RANKFMT.;
+\par 382          FORMAT NSUM COMMA8.;
+\par 383          FORMAT TOT_USE TOT_EXP TOT_PER COMMA20.;
+\par 384          FORMAT  SE_USE  SE_EXP  SE_PER COMMA20.2;
+\par 385          TITLE3 "Utilization and Expenditures for the Top 10 Therapeutic Classes for Prescribed Drugs";
+\par 386          TITLE5 "Ranked by Weighted Utilization";
+\par 387          TITLE7 "SUDAAN Output";
+\par 388        RUN;
+\par 
+\par NOTE: There were 12 observations read from the data set TCTAB.TOP10TC08_USE.
+\par NOTE: The PROCEDURE PRINT printed page 11.
+\par NOTE: PROCEDURE PRINT used (Total process time):
+\par       real time           0:00.01
+\par       user cpu time       0:00.01
+\par       system cpu time     0:00.00
+\par       Memory                            157k
+\par       OS Memory                         69268k
+\par       Timestamp            9/20/2010  6:02:49 PM
+\par 
+\par 
+\par 389
+\par 390        *---------------------------------------------------------------------------------------------
+\par 391        * Compute z-scores.
+\par 392        *---------------------------------------------------------------------------------------------;
+\par 393        PROC SORT DATA=TCTAB.TOP10TC&YY._USE (KEEP=RANK TOT_USE SE_USE WHERE=(1 LE RANK LE 11))
+\par 394                         OUT=SETABLE;
+\par 395          BY RANK;
+\par \page 18                                                                    The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par 396        RUN;
+\par 
+\par NOTE: There were 11 observations read from the data set TCTAB.TOP10TC08_USE.
+\par       WHERE (RANK>=1 and RANK<=11);
+\par NOTE: The data set WORK.SETABLE has 11 observations and 3 variables.
+\par NOTE: PROCEDURE SORT used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            430k
+\par       OS Memory                         69552k
+\par       Timestamp            9/20/2010  6:02:49 PM
+\par 
+\par 
+\par 397
+\par 398        /* Put the stats for each observation into arrays */
+\par 399        DATA SIGSTAT;
+\par 400          SET SETABLE END=EOF;
+\par 401          BY RANK;
+\par 402
+\par 403          RETAIN RANK1-RANK11
+\par 404                 STAT1-STAT11
+\par 405                 SE1-SE11;
+\par 406
+\par 407          ARRAY RNK(11)  RANK1-RANK11;
+\par 408          ARRAY STAT(11) STAT1-STAT11;
+\par 409          ARRAY SE(11)   SE1-SE11;
+\par 410
+\par 411          IF _N_=1 THEN NSTAT=0;
+\par 412
+\par 413          NSTAT+1;
+\par 414          RNK(NSTAT)=NSTAT;
+\par 415          STAT(NSTAT)=TOT_USE;
+\par 416          SE(NSTAT)=SE_USE;
+\par 417
+\par 418          DROP RANK TOT_USE SE_USE;
+\par 419
+\par 420          IF EOF THEN OUTPUT;
+\par 421        RUN;
+\par 
+\par NOTE: There were 11 observations read from the data set WORK.SETABLE.
+\par NOTE: The data set WORK.SIGSTAT has 1 observations and 34 variables.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            277k
+\par       OS Memory                         69268k
+\par       Timestamp            9/20/2010  6:02:49 PM
+\par 
+\par 
+\par 422
+\par 423        PROC PRINT DATA=SIGSTAT;
+\par \page 19                                                                    The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par 424          TITLE3 "QC testing for Z-Score computation after collapsing stats into an arrays";
+\par 425        RUN;
+\par 
+\par NOTE: There were 1 observations read from the data set WORK.SIGSTAT.
+\par NOTE: The PROCEDURE PRINT printed page 12.
+\par NOTE: PROCEDURE PRINT used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            186k
+\par       OS Memory                         69268k
+\par       Timestamp            9/20/2010  6:02:49 PM
+\par 
+\par 
+\par 426
+\par 427        /* Compute Z-Scores */
+\par 428        DATA ZSCORE (KEEP=TC1 EST1 EST1SE
+\par 429                          TC2 EST2 EST2SE
+\par 430                          STATDIFF SESQRT ZSTAT PVALUE);
+\par 431          SET SIGSTAT;
+\par 432
+\par 433          ARRAY CRANK(11) RANK1-RANK11;
+\par 434          ARRAY CSTAT(11) STAT1-STAT11;
+\par 435          ARRAY CSE(11)   SE1-SE11;
+\par 436
+\par 437          DO M=1 TO NSTAT-1;
+\par 438             DO J=1 TO (NSTAT-M);
+\par 439                TC1=CRANK(M);
+\par 440                EST1=CSTAT(M);
+\par 441                EST1SE=CSE(M);
+\par 442
+\par 443                TC2=CRANK(M+J);
+\par 444                EST2=CSTAT(M+J);
+\par 445                EST2SE=CSE(M+J);
+\par 446
+\par 447                STATDIFF=EST1-EST2;
+\par 448                SESQRT=SQRT((EST1SE)**2 + (EST2SE)**2);
+\par 449                ZSTAT=ABS(STATDIFF / SESQRT);
+\par 450                PVALUE=PDF("NORMAL",ZSTAT);
+\par 451
+\par 452                OUTPUT;
+\par 453             END;
+\par 454          END;
+\par 455
+\par 456        RUN;
+\par 
+\par NOTE: There were 1 observations read from the data set WORK.SIGSTAT.
+\par NOTE: The data set WORK.ZSCORE has 55 observations and 10 variables.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.00
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            291k
+\par \page 20                                                                    The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par       OS Memory                         69268k
+\par       Timestamp            9/20/2010  6:02:49 PM
+\par 
+\par 
+\par 457
+\par 458        PROC PRINT DATA=ZSCORE NOOBS SPLIT="*";
+\par 459          BY TC1;
+\par 460          ID TC1 TC2;
+\par 461          VAR EST1 EST2 EST1SE EST2SE /*STATDIFF SESQRT*/ ZSTAT PVALUE;
+\par 462          FORMAT TC1 TC2 RANKFMT.;
+\par 463          FORMAT EST1 EST2 COMMA18.2;
+\par 464          FORMAT EST1SE EST2SE COMMA18.2;
+\par 465          FORMAT ZSTAT 6.3;
+\par 466          FORMAT PVALUE PVALUE6.3;
+\par 467          LABEL TC1    = "RANK/TC #1"
+\par 468                TC2    = "RANK/TC #2"
+\par 469                EST1   = "Estimate #1"
+\par 470                EST2   = "Estimate #2"
+\par 471                EST1SE = "SE #1"
+\par 472                EST2SE = "SE #2"
+\par 473                ZSTAT    = "Z-SCORE"
+\par 474                PVALUE   = "P-VALUE";
+\par 475          TITLE3 "Z Scores to Compare Top 10 Therapeutic Classes when Ranked by Weighted Utilization";
+\par 476        RUN;
+\par 
+\par NOTE: There were 55 observations read from the data set WORK.ZSCORE.
+\par NOTE: The PROCEDURE PRINT printed pages 13-16.
+\par NOTE: PROCEDURE PRINT used (Total process time):
+\par       real time           0:00.01
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.01
+\par       Memory                            166k
+\par       OS Memory                         69268k
+\par       Timestamp            9/20/2010  6:02:50 PM
+\par 
+\par 
+\par 477
+\par 478        %JOBEND;
+\par |~~~~~~~~~~~~~~~~~~~~~~~~|
+\par | FINISH DATE : 09/20/10 |
+\par | FINISH TIME : 18:02:50 |
+\par | JOB DURATION:  0:00:07 |
+\par |~~~~~~~~~~~~~~~~~~~~~~~~|
+\par 479
+\par 
+\par NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+\par NOTE: The SAS System used:
+\par       real time           0:08.03
+\par       user cpu time       0:05.49
+\par       system cpu time     0:01.48
+\par       Memory                            133818k
+\par       OS Memory                         140948k
+\par       Timestamp            9/20/2010  6:02:50 PM
+\par \page 21                                                                    The SAS System                                       18:02 Monday, September 20, 2010
+\par 
+\par 
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010   1
+\par 
+\par                                                          Frequency of therapeutic class variables
+\par                                                               Verification of creating TCNAME
+\par 
+\par                                                                          TC1 name
+\par 
+\par                                                                                                 Cumulative    Cumulative
+\par                                    TCNAME                              Frequency     Percent     Frequency      Percent
+\par                                    -------------------------------------------------------------------------------------
+\par                                    -9 NOT ASCERTAINED                      3851        1.34          3851         1.34
+\par                                    1 ANTI-INFECTIVES                      14485        5.04         18336         6.38
+\par                                    105 MISCELLANEOUS AGENTS                2437        0.85         20773         7.22
+\par                                    113 GENITOURINARY TRACT AGENTS          1645        0.57         22418         7.79
+\par                                    115 NUTRITIONAL PRODUCTS                9664        3.36         32082        11.15
+\par                                    122 RESPIRATORY AGENTS                 18475        6.42         50557        17.58
+\par                                    133 TOPICAL AGENTS                     11440        3.98         61997        21.56
+\par                                    20 ANTINEOPLASTICS                      2084        0.72         64081        22.28
+\par                                    218 ALTERNATIVE MEDICINES                338        0.12         64419        22.40
+\par                                    242 PSYCHOTHERAPEUTIC AGENTS           17710        6.16         82129        28.56
+\par                                    254 IMMUNOLOGIC AGENTS                   628        0.22         82757        28.77
+\par                                    28 BIOLOGICALS                           149        0.05         82906        28.83
+\par                                    331 RADIOLOGIC AGENTS                    118        0.04         83024        28.87
+\par                                    358 METABOLIC AGENTS                   48154       16.74        131178        45.61
+\par                                    40 CARDIOVASCULAR AGENTS               68927       23.97        200105        69.58
+\par                                    57 CENTRAL NERVOUS SYSTEM AGENTS       47975       16.68        248080        86.26
+\par                                    81 COAGULATION MODIFIERS                4848        1.69        252928        87.94
+\par                                    87 GASTROINTESTINAL AGENTS             14421        5.01        267349        92.96
+\par                                    97 HORMONES/HORMONE MODIFIERS          20257        7.04        287606       100.00
+\par 
+\par 
+\par                                                                                                                             Cumulative    Cumulative
+\par                                                         TC1    TCNAME                              Frequency     Percent     Frequency      Percent
+\par       ----------------------------------------------------------------------------------------------------------------------------------------------
+\par       -9 NOT ASCERTAINED                                       -9 NOT ASCERTAINED                      3851        1.34          3851         1.34
+\par       1 ANTI-INFECTIVES                                        1 ANTI-INFECTIVES                      14485        5.04         18336         6.38
+\par       20 ANTINEOPLASTICS                                       20 ANTINEOPLASTICS                      2084        0.72         20420         7.10
+\par       28 BIOLOGICALS                                           28 BIOLOGICALS                           149        0.05         20569         7.15
+\par       40 CARDIOVASCULAR AGENTS                                 40 CARDIOVASCULAR AGENTS               68927       23.97         89496        31.12
+\par       57 CENTRAL NERVOUS SYSTEM AGENTS                         57 CENTRAL NERVOUS SYSTEM AGENTS       47975       16.68        137471        47.80
+\par       81 COAGULATION MODIFIERS                                 81 COAGULATION MODIFIERS                4848        1.69        142319        49.48
+\par       87 GASTROINTESTINAL AGENTS                               87 GASTROINTESTINAL AGENTS             14421        5.01        156740        54.50
+\par       97 HORMONES/HORMONE MODIFIERS                            97 HORMONES/HORMONE MODIFIERS          20257        7.04        176997        61.54
+\par       105 MISCELLANEOUS AGENTS                                 105 MISCELLANEOUS AGENTS                2437        0.85        179434        62.39
+\par       113 GENITOURINARY TRACT AGENTS                           113 GENITOURINARY TRACT AGENTS          1645        0.57        181079        62.96
+\par       115 NUTRITIONAL PRODUCTS                                 115 NUTRITIONAL PRODUCTS                9664        3.36        190743        66.32
+\par       122 RESPIRATORY AGENTS                                   122 RESPIRATORY AGENTS                 18475        6.42        209218        72.74
+\par       133 TOPICAL AGENTS                                       133 TOPICAL AGENTS                     11440        3.98        220658        76.72
+\par       218 ALTERNATIVE MEDICINES                                218 ALTERNATIVE MEDICINES                338        0.12        220996        76.84
+\par       242 PSYCHOTHERAPEUTIC AGENTS                             242 PSYCHOTHERAPEUTIC AGENTS           17710        6.16        238706        83.00
+\par       254 IMMUNOLOGIC AGENTS                                   254 IMMUNOLOGIC AGENTS                   628        0.22        239334        83.22
+\par       331 RADIOLOGIC AGENTS                                    331 RADIOLOGIC AGENTS                    118        0.04        239452        83.26
+\par 
+\par                                                   Source file: AHRQ3\\F_DSO\\FD001NKK\\DATA\\RX08V05.SAS7BDAT
+\par                                                                        PERWT08F > 0
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010   2
+\par 
+\par                                                          Frequency of therapeutic class variables
+\par                                                               Verification of creating TCNAME
+\par 
+\par                                                                                                                             Cumulative    Cumulative
+\par                                                         TC1    TCNAME                              Frequency     Percent     Frequency      Percent
+\par       ----------------------------------------------------------------------------------------------------------------------------------------------
+\par       358 METABOLIC AGENTS                                     358 METABOLIC AGENTS                   48154       16.74        287606       100.00
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par                                                   Source file: AHRQ3\\F_DSO\\FD001NKK\\DATA\\RX08V05.SAS7BDAT
+\par                                                                        PERWT08F > 0
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010   3
+\par 
+\par                                                      QC check on total Rx utilization and expenditures
+\par 
+\par                                                  # of Rx                   # of Rx              Total Exp.
+\par                                                 Unweighted                Weighted                Weighted
+\par 
+\par                                                   287,606         3,149,914,962.82      247,434,483,143.43
+\par                                                 ==========    ====================    ====================
+\par                                                   287,606         3,149,914,962.82      247,434,483,143.43
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par                                                   Source file: AHRQ3\\F_DSO\\FD001NKK\\DATA\\RX08V05.SAS7BDAT
+\par                                                                        PERWT08F > 0
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010   4
+\par 
+\par                                     WORK.TCFREQ: Sum of Rx utilization for non-missing TC1, sorted in descending order
+\par 
+\par                                     Obs    TC1    TCNAME                                _FREQ_                RXUSESUM
+\par 
+\par                                       1     40    40 CARDIOVASCULAR AGENTS              68,927             746,383,929
+\par                                       2     57    57 CENTRAL NERVOUS SYSTEM AGENTS      47,975             523,338,602
+\par                                       3    358    358 METABOLIC AGENTS                  48,154             517,483,301
+\par                                       4     97    97 HORMONES/HORMONE MODIFIERS         20,257             248,018,840
+\par                                       5    242    242 PSYCHOTHERAPEUTIC AGENTS          17,710             206,294,564
+\par                                       6    122    122 RESPIRATORY AGENTS                18,475             187,977,268
+\par                                       7      1    1 ANTI-INFECTIVES                     14,485             159,561,698
+\par                                       8     87    87 GASTROINTESTINAL AGENTS            14,421             157,678,909
+\par                                       9    133    133 TOPICAL AGENTS                    11,440             125,268,283
+\par                                      10    115    115 NUTRITIONAL PRODUCTS               9,664              95,743,838
+\par                                      11     81    81 COAGULATION MODIFIERS               4,848              56,107,279
+\par                                      12    105    105 MISCELLANEOUS AGENTS               2,437              29,975,656
+\par                                      13     20    20 ANTINEOPLASTICS                     2,084              24,683,042
+\par                                      14    113    113 GENITOURINARY TRACT AGENTS         1,645              18,181,737
+\par                                      15    254    254 IMMUNOLOGIC AGENTS                   628               6,392,636
+\par                                      16    218    218 ALTERNATIVE MEDICINES                338               3,548,167
+\par                                      17     28    28 BIOLOGICALS                           149               1,721,780
+\par                                      18    331    331 RADIOLOGIC AGENTS                    118               1,187,837
+\par                                                                                       ========    ====================
+\par                                                                                        283,755           3,109,547,364
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par                                                   Source file: AHRQ3\\F_DSO\\FD001NKK\\DATA\\RX08V05.SAS7BDAT
+\par                                                                        PERWT08F > 0
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010   5
+\par 
+\par                                     WORK.TCRANK: Sum of Rx utilization for non-missing TC1, sorted in descending order
+\par 
+\par                                 Obs    TC1    TCNAME                                _FREQ_                RXUSESUM    RANK
+\par 
+\par                                   1     40    40 CARDIOVASCULAR AGENTS              68,927             746,383,929      1
+\par                                   2     57    57 CENTRAL NERVOUS SYSTEM AGENTS      47,975             523,338,602      2
+\par                                   3    358    358 METABOLIC AGENTS                  48,154             517,483,301      3
+\par                                   4     97    97 HORMONES/HORMONE MODIFIERS         20,257             248,018,840      4
+\par                                   5    242    242 PSYCHOTHERAPEUTIC AGENTS          17,710             206,294,564      5
+\par                                   6    122    122 RESPIRATORY AGENTS                18,475             187,977,268      6
+\par                                   7      1    1 ANTI-INFECTIVES                     14,485             159,561,698      7
+\par                                   8     87    87 GASTROINTESTINAL AGENTS            14,421             157,678,909      8
+\par                                   9    133    133 TOPICAL AGENTS                    11,440             125,268,283      9
+\par                                  10    115    115 NUTRITIONAL PRODUCTS               9,664              95,743,838     10
+\par                                  11     81    81 COAGULATION MODIFIERS               4,848              56,107,279     11
+\par                                  12    105    105 MISCELLANEOUS AGENTS               2,437              29,975,656     11
+\par                                  13     20    20 ANTINEOPLASTICS                     2,084              24,683,042     11
+\par                                  14    113    113 GENITOURINARY TRACT AGENTS         1,645              18,181,737     11
+\par                                  15    254    254 IMMUNOLOGIC AGENTS                   628               6,392,636     11
+\par                                  16    218    218 ALTERNATIVE MEDICINES                338               3,548,167     11
+\par                                  17     28    28 BIOLOGICALS                           149               1,721,780     11
+\par                                  18    331    331 RADIOLOGIC AGENTS                    118               1,187,837     11
+\par                                                                                   ========    ====================
+\par                                                                                    283,755           3,109,547,364
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par                                                   Source file: AHRQ3\\F_DSO\\FD001NKK\\DATA\\RX08V05.SAS7BDAT
+\par                                                                        PERWT08F > 0
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010   6
+\par 
+\par                                                     Verification of creating formats for variable RANK
+\par 
+\par                                         WORK.FMTTC: Input Control Dataset used to create permanent format for RANK
+\par 
+\par                                          Obs    FMTNAME    START    LABEL                                    TYPE
+\par 
+\par                                            1    RANKFMT      1      1    40 CARDIOVASCULAR AGENTS             N
+\par                                            2    RANKFMT      2      2    57 CENTRAL NERVOUS SYSTEM AGENTS     N
+\par                                            3    RANKFMT      3      3    358 METABOLIC AGENTS                 N
+\par                                            4    RANKFMT      4      4    97 HORMONES/HORMONE MODIFIERS        N
+\par                                            5    RANKFMT      5      5    242 PSYCHOTHERAPEUTIC AGENTS         N
+\par                                            6    RANKFMT      6      6    122 RESPIRATORY AGENTS               N
+\par                                            7    RANKFMT      7      7    1 ANTI-INFECTIVES                    N
+\par                                            8    RANKFMT      8      8    87 GASTROINTESTINAL AGENTS           N
+\par                                            9    RANKFMT      9      9    133 TOPICAL AGENTS                   N
+\par                                           10    RANKFMT     10      10    115 NUTRITIONAL PRODUCTS            N
+\par                                           11    RANKFMT     11      11    ALL OTHERS                          N
+\par                                           12    RANKFMT     99      TOTAL                                     N
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010   7
+\par 
+\par                                                        Contents of permanent format library for RANK
+\par 
+\par                                        ----------------------------------------------------------------------------
+\par                                        |       FORMAT NAME: RANKFMT  LENGTH:   37   NUMBER OF VALUES:   12        |
+\par                                        |   MIN LENGTH:   1  MAX LENGTH:  40  DEFAULT LENGTH  37  FUZZ: STD        |
+\par                                        |--------------------------------------------------------------------------|
+\par                                        |START           |END             |LABEL  (VER. V7|V8   20SEP2010:18:02:45)|
+\par                                        |----------------+----------------+----------------------------------------|
+\par                                        |               1|               1|1    40 CARDIOVASCULAR AGENTS           |
+\par                                        |               2|               2|2    57 CENTRAL NERVOUS SYSTEM AGENTS   |
+\par                                        |               3|               3|3    358 METABOLIC AGENTS               |
+\par                                        |               4|               4|4    97 HORMONES/HORMONE MODIFIERS      |
+\par                                        |               5|               5|5    242 PSYCHOTHERAPEUTIC AGENTS       |
+\par                                        |               6|               6|6    122 RESPIRATORY AGENTS             |
+\par                                        |               7|               7|7    1 ANTI-INFECTIVES                  |
+\par                                        |               8|               8|8    87 GASTROINTESTINAL AGENTS         |
+\par                                        |               9|               9|9    133 TOPICAL AGENTS                 |
+\par                                        |              10|              10|10    115 NUTRITIONAL PRODUCTS          |
+\par                                        |              11|              11|11    ALL OTHERS                        |
+\par                                        |              99|              99|TOTAL                                   |
+\par                                        ----------------------------------------------------------------------------
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par                                                  C:\\AHRQ3\\F_DSO\\FD001NKK\\DATA\\FMTLIB\\TC08_USEFMT.SAS7BCAT
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010   8
+\par 
+\par                                                                 Verification of RANK by TC1
+\par 
+\par                                                                                                                                Cumulative    Cumulative
+\par                                      RANK                                                      TC1    Frequency     Percent     Frequency      Percent
+\par     ---------------------------------------------------------------------------------------------------------------------------------------------------
+\par     1    40 CARDIOVASCULAR AGENTS            40 CARDIOVASCULAR AGENTS                                    68927       23.97         68927        23.97
+\par     2    57 CENTRAL NERVOUS SYSTEM AGENTS    57 CENTRAL NERVOUS SYSTEM AGENTS                            47975       16.68        116902        40.65
+\par     3    358 METABOLIC AGENTS                358 METABOLIC AGENTS                                        48154       16.74        165056        57.39
+\par     4    97 HORMONES/HORMONE MODIFIERS       97 HORMONES/HORMONE MODIFIERS                               20257        7.04        185313        64.43
+\par     5    242 PSYCHOTHERAPEUTIC AGENTS        242 PSYCHOTHERAPEUTIC AGENTS                                17710        6.16        203023        70.59
+\par     6    122 RESPIRATORY AGENTS              122 RESPIRATORY AGENTS                                      18475        6.42        221498        77.01
+\par     7    1 ANTI-INFECTIVES                   1 ANTI-INFECTIVES                                           14485        5.04        235983        82.05
+\par     8    87 GASTROINTESTINAL AGENTS          87 GASTROINTESTINAL AGENTS                                  14421        5.01        250404        87.06
+\par     9    133 TOPICAL AGENTS                  133 TOPICAL AGENTS                                          11440        3.98        261844        91.04
+\par     10    115 NUTRITIONAL PRODUCTS           115 NUTRITIONAL PRODUCTS                                     9664        3.36        271508        94.40
+\par     11    ALL OTHERS                         -9 NOT ASCERTAINED                                           3851        1.34        275359        95.74
+\par     11    ALL OTHERS                         20 ANTINEOPLASTICS                                           2084        0.72        277443        96.47
+\par     11    ALL OTHERS                         28 BIOLOGICALS                                                149        0.05        277592        96.52
+\par     11    ALL OTHERS                         81 COAGULATION MODIFIERS                                     4848        1.69        282440        98.20
+\par     11    ALL OTHERS                         105 MISCELLANEOUS AGENTS                                     2437        0.85        284877        99.05
+\par     11    ALL OTHERS                         113 GENITOURINARY TRACT AGENTS                               1645        0.57        286522        99.62
+\par     11    ALL OTHERS                         218 ALTERNATIVE MEDICINES                                     338        0.12        286860        99.74
+\par     11    ALL OTHERS                         254 IMMUNOLOGIC AGENTS                                        628        0.22        287488        99.96
+\par     11    ALL OTHERS                         331 RADIOLOGIC AGENTS                                         118        0.04        287606       100.00
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par                                                   Source file: AHRQ3\\F_DSO\\FD001NKK\\DATA\\RX08V05.SAS7BDAT
+\par                                                                        PERWT08F > 0
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010   9
+\par 
+\par                                                                 Weighted frequency of RANK
+\par 
+\par                                                                   TC rank by utilization
+\par 
+\par                                                                                                   Cumulative    Cumulative
+\par                                                                  RANK    Frequency     Percent     Frequency      Percent
+\par                                 ------------------------------------------------------------------------------------------
+\par                                 1    40 CARDIOVASCULAR AGENTS            7.4638E8       23.70      7.4638E8        23.70
+\par                                 2    57 CENTRAL NERVOUS SYSTEM AGENTS    5.2334E8       16.61      1.2697E9        40.31
+\par                                 3    358 METABOLIC AGENTS                5.1748E8       16.43      1.7872E9        56.74
+\par                                 4    97 HORMONES/HORMONE MODIFIERS       2.4802E8        7.87      2.0352E9        64.61
+\par                                 5    242 PSYCHOTHERAPEUTIC AGENTS        2.0629E8        6.55      2.2415E9        71.16
+\par                                 6    122 RESPIRATORY AGENTS              1.8798E8        5.97      2.4295E9        77.13
+\par                                 7    1 ANTI-INFECTIVES                   1.5956E8        5.07      2.5891E9        82.19
+\par                                 8    87 GASTROINTESTINAL AGENTS          1.5768E8        5.01      2.7467E9        87.20
+\par                                 9    133 TOPICAL AGENTS                  1.2527E8        3.98       2.872E9        91.18
+\par                                 10    115 NUTRITIONAL PRODUCTS           95743838        3.04      2.9677E9        94.22
+\par                                 11    ALL OTHERS                         1.8217E8        5.78      3.1499E9       100.00
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par 
+\par                                                   Source file: AHRQ3\\F_DSO\\FD001NKK\\DATA\\RX08V05.SAS7BDAT
+\par                                                                        PERWT08F > 0
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010  10
+\par 
+\par 
+\par 
+\par 
+\par                                   S U D A A N
+\par             Software for the Statistical Analysis of Correlated Data
+\par           Copyright      Research Triangle Institute      October 2009
+\par                                 Release 10.0.1
+\par 
+\par 
+\par DESIGN SUMMARY: Variances will be computed using the Taylor Linearization Method, Assuming a With Replacement (WR) Design
+\par     Sample Weight: PERWT08F
+\par     Stratification Variables(s): VARSTR
+\par     Primary Sampling Unit: VARPSU
+\par 
+\par 
+\par Number of observations read    : 300899    Weighted count :3264656788
+\par Observations in subpopulation  : 287606    Weighted count :3149914963
+\par Denominator degrees of freedom :    205
+\par 
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010  11
+\par 
+\par                                    Utilization and Expenditures for the Top 10 Therapeutic Classes for Prescribed Drugs
+\par 
+\par                                                               Ranked by Weighted Utilization
+\par 
+\par                                                                        SUDAAN Output
+\par 
+\par                                                             Drug                       Drug                    Drug                 Dollars
+\par                 Therapeputic Class                        Mentions                 Mentions                Mentions                   Spent
+\par                 Rank & Name                              Unweighted                Weighted                      SE                Weighted
+\par 
+\par                 1    40 CARDIOVASCULAR AGENTS               68,927              746,383,929           24,464,502.93          29,705,919,970
+\par                 2    57 CENTRAL NERVOUS SYSTEM AGENTS       47,975              523,338,602           17,068,310.15          38,752,272,935
+\par                 3    358 METABOLIC AGENTS                   48,154              517,483,301           16,922,573.52          52,479,293,659
+\par                 4    97 HORMONES/HORMONE MODIFIERS          20,257              248,018,840            8,748,466.92          11,251,932,014
+\par                 5    242 PSYCHOTHERAPEUTIC AGENTS           17,710              206,294,564            8,154,577.85          20,891,873,419
+\par                 6    122 RESPIRATORY AGENTS                 18,475              187,977,268            8,456,850.64          18,400,822,985
+\par                 7    1 ANTI-INFECTIVES                      14,485              159,561,698            4,684,145.56           9,620,072,344
+\par                 8    87 GASTROINTESTINAL AGENTS             14,421              157,678,909            6,224,495.69          20,843,667,820
+\par                 9    133 TOPICAL AGENTS                     11,440              125,268,283            4,779,105.42           8,835,831,505
+\par                 10    115 NUTRITIONAL PRODUCTS               9,664               95,743,838            4,506,337.89           2,980,195,617
+\par                 11    ALL OTHERS                            16,098              182,165,732            6,988,103.59          33,672,600,876
+\par                 TOTAL                                      287,606            3,149,914,963           85,732,655.29         247,434,483,143
+\par 
+\par                                                                       Dollars                Count of                Count of
+\par                 Therapeputic Class                                      Spent                 Persons                 Persons
+\par                 Rank & Name                                                SE                Weighted                      SE
+\par 
+\par                 1    40 CARDIOVASCULAR AGENTS                1,404,821,864.84              64,994,628            1,745,995.87
+\par                 2    57 CENTRAL NERVOUS SYSTEM AGENTS        1,869,464,324.96              79,936,494            2,034,950.06
+\par                 3    358 METABOLIC AGENTS                    1,909,379,309.64              52,638,328            1,569,930.60
+\par                 4    97 HORMONES/HORMONE MODIFIERS             761,912,386.50              44,769,431            1,374,505.19
+\par                 5    242 PSYCHOTHERAPEUTIC AGENTS            1,020,820,487.67              27,953,909            1,045,461.02
+\par                 6    122 RESPIRATORY AGENTS                  1,005,196,700.26              38,635,588            1,295,890.18
+\par                 7    1 ANTI-INFECTIVES                         864,974,763.10              74,905,581            1,848,788.02
+\par                 8    87 GASTROINTESTINAL AGENTS              1,055,485,284.32              29,245,556              961,746.84
+\par                 9    133 TOPICAL AGENTS                        491,621,851.93              40,891,759            1,222,391.73
+\par                 10    115 NUTRITIONAL PRODUCTS                 321,968,730.58              19,338,719              724,701.96
+\par                 11    ALL OTHERS                             2,635,812,599.00              31,741,785            1,018,689.62
+\par                 TOTAL                                        7,432,088,023.09             505,051,777           11,873,888.99
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010  12
+\par 
+\par                                          QC testing for Z-Score computation after collapsing stats into an arrays
+\par 
+\par                       R  R                                                                                                                         S
+\par    R R R R R R R R R  A  A      S            S            S            S            S           S            S            S            S           T
+\par    A A A A A A A A A  N  N      T            T            T            T            T           T            T            T            T           A
+\par  O N N N N N N N N N  K  K      A            A            A            A            A           A            A            A            A           T
+\par  b K K K K K K K K K  1  1      T            T            T            T            T           T            T            T            T           1
+\par  s 1 2 3 4 5 6 7 8 9  0  1      1            2            3            4            5           6            7            8            9           0
+\par 
+\par  1 1 2 3 4 5 6 7 8 9 10 11 746383928.7 523338601.56 517483300.91 248018839.98 206294563.86 187977268.2 159561698.27 157678908.62 125268282.53 95743837.74
+\par 
+\par          S
+\par          T                                                                                                                                               N
+\par          A                                                                                                                           S           S       S
+\par  O       T            S            S            S            S           S           S           S           S           S           E           E       T
+\par  b       1            E            E            E            E           E           E           E           E           E           1           1       A
+\par  s       1            1            2            3            4           5           6           7           8           9           0           1       T
+\par 
+\par  1 182165732.46  24464502.93  17068310.15  16922573.52  8748466.92  8154577.85  8456850.64  4684145.56  6224495.69  4779105.42  4506337.89  6988103.59  11
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010  13
+\par 
+\par                                     Z Scores to Compare Top 10 Therapeutic Classes when Ranked by Weighted Utilization
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                      Estimate #1           Estimate #2                 SE #1
+\par 
+\par      1    40 CARDIOVASCULAR AGENTS            2    57 CENTRAL NERVOUS SYSTEM AGENTS        746,383,928.70        523,338,601.56         24,464,502.93
+\par                                               3    358 METABOLIC AGENTS                    746,383,928.70        517,483,300.91         24,464,502.93
+\par                                               4    97 HORMONES/HORMONE MODIFIERS           746,383,928.70        248,018,839.98         24,464,502.93
+\par                                               5    242 PSYCHOTHERAPEUTIC AGENTS            746,383,928.70        206,294,563.86         24,464,502.93
+\par                                               6    122 RESPIRATORY AGENTS                  746,383,928.70        187,977,268.20         24,464,502.93
+\par                                               7    1 ANTI-INFECTIVES                       746,383,928.70        159,561,698.27         24,464,502.93
+\par                                               8    87 GASTROINTESTINAL AGENTS              746,383,928.70        157,678,908.62         24,464,502.93
+\par                                               9    133 TOPICAL AGENTS                      746,383,928.70        125,268,282.53         24,464,502.93
+\par                                               10    115 NUTRITIONAL PRODUCTS               746,383,928.70         95,743,837.74         24,464,502.93
+\par                                               11    ALL OTHERS                             746,383,928.70        182,165,732.46         24,464,502.93
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                            SE #2    Z-SCORE    P-VALUE
+\par 
+\par      1    40 CARDIOVASCULAR AGENTS            2    57 CENTRAL NERVOUS SYSTEM AGENTS         17,068,310.15     7.477      <.001
+\par                                               3    358 METABOLIC AGENTS                     16,922,573.52     7.695      <.001
+\par                                               4    97 HORMONES/HORMONE MODIFIERS             8,748,466.92    19.181      <.001
+\par                                               5    242 PSYCHOTHERAPEUTIC AGENTS              8,154,577.85    20.944      <.001
+\par                                               6    122 RESPIRATORY AGENTS                    8,456,850.64    21.573      <.001
+\par                                               7    1 ANTI-INFECTIVES                         4,684,145.56    23.559      <.001
+\par                                               8    87 GASTROINTESTINAL AGENTS                6,224,495.69    23.321      <.001
+\par                                               9    133 TOPICAL AGENTS                        4,779,105.42    24.917      <.001
+\par                                               10    115 NUTRITIONAL PRODUCTS                 4,506,337.89    26.155      <.001
+\par                                               11    ALL OTHERS                               6,988,103.59    22.176      <.001
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                      Estimate #1           Estimate #2                 SE #1
+\par 
+\par      2    57 CENTRAL NERVOUS SYSTEM AGENTS    3    358 METABOLIC AGENTS                    523,338,601.56        517,483,300.91         17,068,310.15
+\par                                               4    97 HORMONES/HORMONE MODIFIERS           523,338,601.56        248,018,839.98         17,068,310.15
+\par                                               5    242 PSYCHOTHERAPEUTIC AGENTS            523,338,601.56        206,294,563.86         17,068,310.15
+\par                                               6    122 RESPIRATORY AGENTS                  523,338,601.56        187,977,268.20         17,068,310.15
+\par                                               7    1 ANTI-INFECTIVES                       523,338,601.56        159,561,698.27         17,068,310.15
+\par                                               8    87 GASTROINTESTINAL AGENTS              523,338,601.56        157,678,908.62         17,068,310.15
+\par                                               9    133 TOPICAL AGENTS                      523,338,601.56        125,268,282.53         17,068,310.15
+\par                                               10    115 NUTRITIONAL PRODUCTS               523,338,601.56         95,743,837.74         17,068,310.15
+\par                                               11    ALL OTHERS                             523,338,601.56        182,165,732.46         17,068,310.15
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                            SE #2    Z-SCORE    P-VALUE
+\par 
+\par      2    57 CENTRAL NERVOUS SYSTEM AGENTS    3    358 METABOLIC AGENTS                     16,922,573.52     0.244      0.387
+\par                                               4    97 HORMONES/HORMONE MODIFIERS             8,748,466.92    14.355      <.001
+\par                                               5    242 PSYCHOTHERAPEUTIC AGENTS              8,154,577.85    16.760      <.001
+\par                                               6    122 RESPIRATORY AGENTS                    8,456,850.64    17.606      <.001
+\par                                               7    1 ANTI-INFECTIVES                         4,684,145.56    20.553      <.001
+\par                                               8    87 GASTROINTESTINAL AGENTS                6,224,495.69    20.127      <.001
+\par                                               9    133 TOPICAL AGENTS                        4,779,105.42    22.458      <.001
+\par                                               10    115 NUTRITIONAL PRODUCTS                 4,506,337.89    24.222      <.001
+\par                                               11    ALL OTHERS                               6,988,103.59    18.498      <.001
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010  14
+\par 
+\par                                     Z Scores to Compare Top 10 Therapeutic Classes when Ranked by Weighted Utilization
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                      Estimate #1           Estimate #2                 SE #1
+\par 
+\par      3    358 METABOLIC AGENTS                4    97 HORMONES/HORMONE MODIFIERS           517,483,300.91        248,018,839.98         16,922,573.52
+\par                                               5    242 PSYCHOTHERAPEUTIC AGENTS            517,483,300.91        206,294,563.86         16,922,573.52
+\par                                               6    122 RESPIRATORY AGENTS                  517,483,300.91        187,977,268.20         16,922,573.52
+\par                                               7    1 ANTI-INFECTIVES                       517,483,300.91        159,561,698.27         16,922,573.52
+\par                                               8    87 GASTROINTESTINAL AGENTS              517,483,300.91        157,678,908.62         16,922,573.52
+\par                                               9    133 TOPICAL AGENTS                      517,483,300.91        125,268,282.53         16,922,573.52
+\par                                               10    115 NUTRITIONAL PRODUCTS               517,483,300.91         95,743,837.74         16,922,573.52
+\par                                               11    ALL OTHERS                             517,483,300.91        182,165,732.46         16,922,573.52
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                            SE #2    Z-SCORE    P-VALUE
+\par 
+\par      3    358 METABOLIC AGENTS                4    97 HORMONES/HORMONE MODIFIERS             8,748,466.92    14.145      <.001
+\par                                               5    242 PSYCHOTHERAPEUTIC AGENTS              8,154,577.85    16.566      <.001
+\par                                               6    122 RESPIRATORY AGENTS                    8,456,850.64    17.418      <.001
+\par                                               7    1 ANTI-INFECTIVES                         4,684,145.56    20.384      <.001
+\par                                               8    87 GASTROINTESTINAL AGENTS                6,224,495.69    19.955      <.001
+\par                                               9    133 TOPICAL AGENTS                        4,779,105.42    22.305      <.001
+\par                                               10    115 NUTRITIONAL PRODUCTS                 4,506,337.89    24.082      <.001
+\par                                               11    ALL OTHERS                               6,988,103.59    18.315      <.001
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                      Estimate #1           Estimate #2                 SE #1
+\par 
+\par      4    97 HORMONES/HORMONE MODIFIERS       5    242 PSYCHOTHERAPEUTIC AGENTS            248,018,839.98        206,294,563.86          8,748,466.92
+\par                                               6    122 RESPIRATORY AGENTS                  248,018,839.98        187,977,268.20          8,748,466.92
+\par                                               7    1 ANTI-INFECTIVES                       248,018,839.98        159,561,698.27          8,748,466.92
+\par                                               8    87 GASTROINTESTINAL AGENTS              248,018,839.98        157,678,908.62          8,748,466.92
+\par                                               9    133 TOPICAL AGENTS                      248,018,839.98        125,268,282.53          8,748,466.92
+\par                                               10    115 NUTRITIONAL PRODUCTS               248,018,839.98         95,743,837.74          8,748,466.92
+\par                                               11    ALL OTHERS                             248,018,839.98        182,165,732.46          8,748,466.92
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                            SE #2    Z-SCORE    P-VALUE
+\par 
+\par      4    97 HORMONES/HORMONE MODIFIERS       5    242 PSYCHOTHERAPEUTIC AGENTS              8,154,577.85     3.489      <.001
+\par                                               6    122 RESPIRATORY AGENTS                    8,456,850.64     4.934      <.001
+\par                                               7    1 ANTI-INFECTIVES                         4,684,145.56     8.914      <.001
+\par                                               8    87 GASTROINTESTINAL AGENTS                6,224,495.69     8.414      <.001
+\par                                               9    133 TOPICAL AGENTS                        4,779,105.42    12.314      <.001
+\par                                               10    115 NUTRITIONAL PRODUCTS                 4,506,337.89    15.474      <.001
+\par                                               11    ALL OTHERS                               6,988,103.59     5.881      <.001
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                      Estimate #1           Estimate #2                 SE #1
+\par 
+\par      5    242 PSYCHOTHERAPEUTIC AGENTS        6    122 RESPIRATORY AGENTS                  206,294,563.86        187,977,268.20          8,154,577.85
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                            SE #2    Z-SCORE    P-VALUE
+\par 
+\par      5    242 PSYCHOTHERAPEUTIC AGENTS        6    122 RESPIRATORY AGENTS                    8,456,850.64     1.559      0.118
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010  15
+\par 
+\par                                     Z Scores to Compare Top 10 Therapeutic Classes when Ranked by Weighted Utilization
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                      Estimate #1           Estimate #2                 SE #1
+\par 
+\par      5    242 PSYCHOTHERAPEUTIC AGENTS        7    1 ANTI-INFECTIVES                       206,294,563.86        159,561,698.27          8,154,577.85
+\par                                               8    87 GASTROINTESTINAL AGENTS              206,294,563.86        157,678,908.62          8,154,577.85
+\par                                               9    133 TOPICAL AGENTS                      206,294,563.86        125,268,282.53          8,154,577.85
+\par                                               10    115 NUTRITIONAL PRODUCTS               206,294,563.86         95,743,837.74          8,154,577.85
+\par                                               11    ALL OTHERS                             206,294,563.86        182,165,732.46          8,154,577.85
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                            SE #2    Z-SCORE    P-VALUE
+\par 
+\par                                               7    1 ANTI-INFECTIVES                         4,684,145.56     4.969      <.001
+\par                                               8    87 GASTROINTESTINAL AGENTS                6,224,495.69     4.739      <.001
+\par                                               9    133 TOPICAL AGENTS                        4,779,105.42     8.573      <.001
+\par                                               10    115 NUTRITIONAL PRODUCTS                 4,506,337.89    11.866      <.001
+\par                                               11    ALL OTHERS                               6,988,103.59     2.247      0.032
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                      Estimate #1           Estimate #2                 SE #1
+\par 
+\par      6    122 RESPIRATORY AGENTS              7    1 ANTI-INFECTIVES                       187,977,268.20        159,561,698.27          8,456,850.64
+\par                                               8    87 GASTROINTESTINAL AGENTS              187,977,268.20        157,678,908.62          8,456,850.64
+\par                                               9    133 TOPICAL AGENTS                      187,977,268.20        125,268,282.53          8,456,850.64
+\par                                               10    115 NUTRITIONAL PRODUCTS               187,977,268.20         95,743,837.74          8,456,850.64
+\par                                               11    ALL OTHERS                             187,977,268.20        182,165,732.46          8,456,850.64
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                            SE #2    Z-SCORE    P-VALUE
+\par 
+\par      6    122 RESPIRATORY AGENTS              7    1 ANTI-INFECTIVES                         4,684,145.56     2.939      0.005
+\par                                               8    87 GASTROINTESTINAL AGENTS                6,224,495.69     2.885      0.006
+\par                                               9    133 TOPICAL AGENTS                        4,779,105.42     6.456      <.001
+\par                                               10    115 NUTRITIONAL PRODUCTS                 4,506,337.89     9.625      <.001
+\par                                               11    ALL OTHERS                               6,988,103.59     0.530      0.347
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                      Estimate #1           Estimate #2                 SE #1
+\par 
+\par      7    1 ANTI-INFECTIVES                   8    87 GASTROINTESTINAL AGENTS              159,561,698.27        157,678,908.62          4,684,145.56
+\par                                               9    133 TOPICAL AGENTS                      159,561,698.27        125,268,282.53          4,684,145.56
+\par                                               10    115 NUTRITIONAL PRODUCTS               159,561,698.27         95,743,837.74          4,684,145.56
+\par                                               11    ALL OTHERS                             159,561,698.27        182,165,732.46          4,684,145.56
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                            SE #2    Z-SCORE    P-VALUE
+\par 
+\par      7    1 ANTI-INFECTIVES                   8    87 GASTROINTESTINAL AGENTS                6,224,495.69     0.242      0.387
+\par                                               9    133 TOPICAL AGENTS                        4,779,105.42     5.125      <.001
+\par                                               10    115 NUTRITIONAL PRODUCTS                 4,506,337.89     9.818      <.001
+\par                                               11    ALL OTHERS                               6,988,103.59     2.687      0.011
+\par \page                                                     Task AH3.FD001: 2008 Prescribed Medicines Event PUF                18:02 Monday, September 20, 2010  16
+\par 
+\par                                     Z Scores to Compare Top 10 Therapeutic Classes when Ranked by Weighted Utilization
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                      Estimate #1           Estimate #2                 SE #1
+\par 
+\par      8    87 GASTROINTESTINAL AGENTS          9    133 TOPICAL AGENTS                      157,678,908.62        125,268,282.53          6,224,495.69
+\par                                               10    115 NUTRITIONAL PRODUCTS               157,678,908.62         95,743,837.74          6,224,495.69
+\par                                               11    ALL OTHERS                             157,678,908.62        182,165,732.46          6,224,495.69
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                            SE #2    Z-SCORE    P-VALUE
+\par 
+\par      8    87 GASTROINTESTINAL AGENTS          9    133 TOPICAL AGENTS                        4,779,105.42     4.130      <.001
+\par                                               10    115 NUTRITIONAL PRODUCTS                 4,506,337.89     8.060      <.001
+\par                                               11    ALL OTHERS                               6,988,103.59     2.617      0.013
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                      Estimate #1           Estimate #2                 SE #1
+\par 
+\par      9    133 TOPICAL AGENTS                  10    115 NUTRITIONAL PRODUCTS               125,268,282.53         95,743,837.74          4,779,105.42
+\par                                               11    ALL OTHERS                             125,268,282.53        182,165,732.46          4,779,105.42
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                            SE #2    Z-SCORE    P-VALUE
+\par 
+\par      9    133 TOPICAL AGENTS                  10    115 NUTRITIONAL PRODUCTS                 4,506,337.89     4.495      <.001
+\par                                               11    ALL OTHERS                               6,988,103.59     6.721      <.001
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                      Estimate #1           Estimate #2                 SE #1
+\par 
+\par      10    115 NUTRITIONAL PRODUCTS           11    ALL OTHERS                              95,743,837.74        182,165,732.46          4,506,337.89
+\par 
+\par      RANK/TC #1                               RANK/TC #2                                            SE #2    Z-SCORE    P-VALUE
+\par 
+\par      10    115 NUTRITIONAL PRODUCTS           11    ALL OTHERS                               6,988,103.59    10.393      <.001
+}

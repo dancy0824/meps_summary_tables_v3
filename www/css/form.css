@@ -1,0 +1,132 @@
+
+
+.select-box{
+  background-color: #015289; /* cool-blue */
+  color: white;
+  padding: 2rem 0;
+}
+
+.em-fieldset{
+  margin-top:2rem !important;
+}
+
+fieldset input[type="radio"]{
+   width: 0;
+}
+
+fieldset .dropdown{
+  color:black;
+}
+
+
+
+/* Standard error control total message */
+.control-message{
+  font-size: 1.4rem;
+}
+
+/* Year start, year end */
+.half{
+  width: 49%;
+  display: inline-block;
+}
+
+/* Show/hide based on trend or cross-sectional selection */
+.hide-if-trend{
+  visibility:hidden;
+}
+
+.show-if-trend{
+ /* overflow: hidden;*/
+}
+
+
+/* Group select dropdown */
+
+.dropdown-menu-form{
+  background-color: #fff;
+  padding: 3rem;
+  font-size: 1.7rem;
+  width: 100%;
+  min-width: 28rem;
+  z-index: 99999;
+}
+
+.tooltip-inner {
+  max-width: 200px;
+  padding: 3px 8px;
+  color: #fff;
+  text-align: center;
+  background-color: #000;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: Source Sans Pro,Helvetica Neue,Helvetica,Roboto,Arial,sans-serif;
+}
+
+.arrow-button{
+  border: 1px solid #5b616b !important;
+  height: 4.4rem;
+  padding: 0;
+  margin: 0.2em;
+  width: 4.4rem;
+  background-position: 8px center;
+}
+
+.arrow-button[aria-expanded=false] {
+  background-image: url(../img/angle-double-right.png);
+  background-image: url(../img/angle-double-right.svg);
+  background-repeat: no-repeat;
+  background-size: 2.7rem;
+}
+
+.arrow-button[aria-expanded=true] {
+  background-image: url(../img/angle-double-down.png);
+  background-image: url(../img/angle-double-down.svg);
+  background-repeat: no-repeat;
+  background-size: 2.7rem;
+}
+
+
+/* SWITCH ROWS/COLUMNS BUTTON */
+
+/* Do better programming and detect these using child elemnts instead*/
+
+.rc-group{
+  display: flex;
+}
+
+.rc-select{
+  width: 100%;
+}
+
+.rc-switch {
+    height: 7rem;
+    width: 5rem;
+    background-position: 0.3rem center;
+    background-image: url(../img/reverse_icon.png);
+    background-repeat: no-repeat;
+    background-size: 4rem;
+    border: solid 2px white;
+    background-color: transparent;
+}
+
+.rc-switch:hover, .rc-switch:focus{
+  box-shadow: inset 0 0 0 2px #d6d7d9;
+  border: solid 2px white;
+}
+
+
+.flex-parent{
+  display: flex;
+  align-items: center;
+}
+
+.col1{
+  width: 100%;
+}
+
+.col2{
+  width: 70px;
+  margin-top: 2em;
+  margin-left: 0.5em;
+}

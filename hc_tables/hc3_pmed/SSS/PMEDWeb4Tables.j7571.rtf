@@ -1,0 +1,1387 @@
+{\rtf1\ansi\deff0 
+{\fonttbl {\f0\fmodern Courier New;}
+{\colortbl;\red0\green0\blue0;}
+}
+\deflang1033\margl610\margr360\margt810\margb360\fs14\sl-180\slmult0\paperw12240\paperh15840
+1                                                          The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par NOTE: Copyright (c) 2002-2008 by SAS Institute Inc., Cary, NC, USA.
+\par NOTE: SAS (r) Proprietary Software 9.2 (TS1M0)
+\par       Licensed to SOCIAL & SCIENTIFIC SYSTEMS INC/AHRQ3, Site 0070086875.
+\par NOTE: This session is executing on the XP_PRO  platform.
+\par 
+\par 
+\par 
+\par NOTE: SAS initialization used:
+\par       real time           0:00.39
+\par       user cpu time       0:00.03
+\par       system cpu time     0:00.28
+\par       Memory                            2948k
+\par       OS Memory                         3812k
+\par       Timestamp            9/20/2010  6:10:15 PM
+\par 
+\par 
+\par NOTE: AUTOEXEC processing beginning; file is C:\\PROGRA~1\\SAS92\\SASFOU~1\\9.2\\autoexec.sas.
+\par 
+\par 
+\par NOTE: AUTOEXEC processing completed.
+\par 
+\par 1          *********************************************************************************************
+\par 2          Software Version:   9.2
+\par 3          Creation Date:      2008-08-29
+\par 4          Task:               AH3.FD001
+\par 5          Task Title:         AH3.FD001: 2007 Prescribed Medicines Event PUF
+\par 6
+\par 7          Program Name:  AHRQ3\\F_DSO\\FD001NKK\\Prog\\PMEDWeb4Tables.sas
+\par 8
+\par 9          Description:   Create Prescription Drug Estimates Tables for Web Site
+\par 10
+\par 11         Programmer:    Ed Hock
+\par 12
+\par 13         Reference:
+\par 14
+\par 15         Input files:   AHRQ3\\F_DSO\\FD001NKK\\Data\\Tables\\top10rx07_use.sas7bdat		
+\par 16                        AHRQ3\\F_DSO\\FD001NKK\\Data\\Tables\\top25rx07_exp.sas7bdat
+\par 17                        AHRQ3\\F_DSO\\FD001NKK\\Data\\Tables\\top10tc07_use.sas7bdat		
+\par 18                        AHRQ3\\F_DSO\\FD001NKK\\Data\\Tables\\top10tc07_exp.sas7bdat
+\par 19                        AHRQ3\\F_DSO\\FD001NKK\\Data\\Fmtlib\\rx07_usefmt.sas7bcat
+\par 20                        AHRQ3\\F_DSO\\FD001NKK\\Data\\Fmtlib\\rx07_expfmt.sas7bcat
+\par 21                        AHRQ3\\F_DSO\\FD001NKK\\Data\\Fmtlib\\tc07_usefmt.sas7bcat
+\par 22                        AHRQ3\\F_DSO\\FD001NKK\\Data\\Fmtlib\\tc07_expfmt.sas7bcat
+\par 23
+\par 24         Output files:  AHRQ3\\F_DSO\\FD001NKK\\Out\\hcdrugest_totexp2007.htm
+\par 25                        AHRQ3\\F_DSO\\FD001NKK\\Out\\hcdrugest_totpur2007.htm
+\par 26                        AHRQ3\\F_DSO\\FD001NKK\\Out\\hctcest_totexp2007.htm
+\par 27                        AHRQ3\\F_DSO\\FD001NKK\\Out\\hctcest_totpur2007.htm
+\par 28
+\par 29         Update History:  Blaine Byars
+\par 30         							2008/11 Add censoring and footnotes
+\par 31         *********************************************************************************************;
+\par 32         %JOBSTART
+\par 33         OPTIONS LS=132 PS=79 MPRINT COMPRESS=NO;
+\par \page 2                                                          The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par |~~~~~~~~~~~~~~~~~~~~~~~~|
+\par | JOB ID      : 7571     |
+\par | DATE        : 09/20/10 |
+\par | START TIME  : 18:10:15 |
+\par |~~~~~~~~~~~~~~~~~~~~~~~~|
+\par 34         %LET YEAR=2008;
+\par 35         LIBNAME FMT 'C:\\AHRQ3\\F_DSO\\FD001NKK\\Data\\Fmtlib';
+\par NOTE: Libref FMT was successfully assigned as follows:
+\par       Engine:        V9
+\par       Physical Name: C:\\AHRQ3\\F_DSO\\FD001NKK\\Data\\Fmtlib
+\par 36         LIBNAME IN 'C:\\AHRQ3\\F_DSO\\FD001NKK\\Data\\TABLES';
+\par NOTE: Libref IN was successfully assigned as follows:
+\par       Engine:        V9
+\par       Physical Name: C:\\AHRQ3\\F_DSO\\FD001NKK\\Data\\TABLES
+\par 37         FILENAME RXHTMLxp "C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hcdrugest_totexp&YEAR..htm" RECFM=V LRECL=10000;
+\par 38         FILENAME RXHTMLut "C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hcdrugest_totpur&YEAR..htm" RECFM=V LRECL=10000;
+\par 39         FILENAME TCHTMLxp "C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hctcest_totexp&YEAR..htm" RECFM=V LRECL=10000;
+\par 40         FILENAME TCHTMLut "C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hctcest_totpur&YEAR..htm" RECFM=V LRECL=10000;
+\par 41         %LET NRXUSE=10; /* Number of drugs to include in utilization table */
+\par 42         %LET NRXEXP=25; /* Number of drugs to include in expenditure table */
+\par 43         %LET NTCUSE=10; /* Number of therapeutic classes to include in utilization table */
+\par 44         %LET NTCEXP=10; /* Number of therapeutic classes to include in expenditure table */
+\par 45         %LET RXUSEF=top10rx%SUBSTR(&YEAR,3,2)_use; /* PMED utilization input file */
+\par 46         %LET RXEXPF=top25rx%SUBSTR(&YEAR,3,2)_exp; /* PMED expenditure input file */
+\par 47         %LET TCUSEF=top10tc%SUBSTR(&YEAR,3,2)_use; /* therapeutic class utilization input file */
+\par 48         %LET TCEXPF=top10tc%SUBSTR(&YEAR,3,2)_exp; /* therapeutic class expenditure input file */
+\par 49         %LET TBRXUSE=1.2; /* Table number of utilization table */
+\par 50         %LET TBRXEXP=1.1; /* Table number of expenditure table */
+\par 51         %LET TBTCUSE=2.2; /* Table number of utilization table */
+\par 52         %LET TBTCEXP=2.1; /* Table number of expenditure table */
+\par 53
+\par 54         *======================================================================================;
+\par 55         %global typestrt
+\par 56         				typestrc
+\par 57         				;
+\par 58         				
+\par 59         %MACRO header(catg);
+\par 60         /* catg is XP for expense report, or UT for utilization */
+\par 61
+\par 62          /* Write out beginning HTML */
+\par 63         DATA _NULL_;
+\par 64           FILE &TYPE.HTML&catg.;
+\par 65           PUT '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">'
+\par 66             / '<html lang="en">'
+\par 67             / '<head>'
+\par 68             / '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">'
+\par 69           %LET TYPESTRT=;
+\par 70           %LET TYPESTRC=;
+\par 71           %IF "&TYPE" EQ "RX" %THEN %DO;
+\par 72             %IF &NRXUSE EQ &NRXEXP %THEN %DO;
+\par 73             / "<title>&YEAR Drug Estimates: Top &NRXUSE Drugs</title>"
+\par 74             %END;
+\par 75             %ELSE %DO;
+\par 76             / "<title>&YEAR Drug Estimates: Top Drugs</title>"
+\par 77             %END;
+\par 78             %LET TYPESTRT=Prescribed Drugs;
+\par 79             %LET TYPESTRC=Prescribed<br />drug;
+\par 80           %END;
+\par 81           %ELSE %DO;
+\par 82             %IF &NTCUSE EQ &NTCEXP %THEN %DO;
+\par 83             / "<title>&YEAR Drug Estimates: Top &NTCUSE Therapeutic Classes</title>"
+\par 84             %END;
+\par 85             %ELSE %DO;
+\par 86             / "<title>&YEAR Drug Estimates: Top Therapeutic Classes</title>"
+\par 87             %END;
+\par 88             %LET TYPESTRT=Therapeutic Classes;
+\par 89             %LET TYPESTRC=Therapeutic<br />class;
+\par 90           %END;
+\par 91             / '<link href="/mepsweb/css/meps_style.css" rel="stylesheet" type="text/css">'
+\par 92             / '</head>'
+\par 93             / ' '
+\par 94             / '<body><!--#include virtual="/mepsweb/_include/ahrqheader.html" -->'
+\par 95
+\par 96             / '<table width="765" border="0" align="center" cellpadding="0" cellspacing="0">'
+\par 97             / '  <tr bgcolor="#FFFFFF">'
+\par 98             / '    <td bgcolor="#FFFFFF"><div align="right">'
+\par 99             / '      <!--#include virtual="/mepsweb/_include/header_NOBC.html" --> '
+\par \page 3                                                          The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par 100            / '    </div></td>'
+\par 101            / '  </tr>'
+\par 102            / '  <tr>'
+\par 103            / '    <td valign="top" bgcolor="#FFFFFF">'
+\par 104            / '      <table width="765"  border="0" align="center" cellpadding="5" cellspacing="0">'
+\par 105            ;
+\par 106          STOP;
+\par 107        RUN;
+\par 108        %mend header;
+\par 109        *======================================================================================;
+\par 110        %macro tail(catg);
+\par 111
+\par 112         /* Write out ending HTML */
+\par 113        DATA _NULL_;
+\par 114          FILE &TYPE.HTML&catg. MOD;
+\par 115          PUT ' '
+\par 116            / '      </td>'
+\par 117            / '    </tr>'
+\par 118            / ' '
+\par 119            / '    </table>    </td>'
+\par 120            / '  </tr>'
+\par 121            / '  <tr>'
+\par 122            / '    <td><!--#include virtual="/mepsweb/_include/footer.html" --></td>'
+\par 123            / '  </tr>'
+\par 124            / '</table>'
+\par 125            / '</body>'
+\par 126            / '</html>'
+\par 127            ;
+\par 128          STOP;
+\par 129        RUN;
+\par 130
+\par 131        %mend tail;
+\par 132        *======================================================================================;
+\par 133
+\par 134        %MACRO ONEFILE(TYPE);
+\par 135
+\par 136        %header(xp);
+\par 137
+\par 138        /* initialize flags for footnotes */
+\par 139        %let rse30=0;
+\par 140        %let less100=0;
+\par 141
+\par 142         /* Write out expenditures table  */
+\par 143        OPTIONS FMTSEARCH=(FMT.&TYPE%SUBSTR(&YEAR,3,2)_expfmt);
+\par 144        DATA _NULL_;
+\par 145          FILE &TYPE.HTMLxp MOD;
+\par 146          SET IN.&&&TYPE.EXPF(WHERE=(RANK LE &&N&TYPE.EXP)) END=EOF;
+\par 147
+\par 148          length tot_exp_ tot_per_ $18;
+\par 149
+\par 150          TOT_EXP_=PUT(TOT_EXP,COMMA16.);
+\par 151          TOT_PER_=PUT(TOT_PER,COMMA16.);
+\par 152
+\par 153          IF NSUM LT 100 THEN DO;
+\par 154            TOT_EXP_='--';
+\par 155        		TOT_PER_='--';
+\par 156        		call symput('less100','1');
+\par 157          END;
+\par 158          ELSE do;
+\par 159          				IF SE_EXP/TOT_EXP*100 GT 30
+\par 160          				 	THEN do;
+\par 161          				 					TOT_EXP_=compress(TOT_EXP_)||"*";
+\par 162          				 					call symput('rse30','1');
+\par 163          				 			 end;
+\par 164          				 			
+\par 165            			if se_per/tot_per*100 > 30
+\par 166            				then do;
+\par 167            								TOT_PER_=compress(TOT_PER_)||"*";
+\par 168            								call symput('rse30','1');
+\par 169            						 end;			
+\par 170          	  END;
+\par 171
+\par 172
+\par 173          IF _N_ EQ 1 THEN DO;
+\par 174            PUT '  <tr>'
+\par 175              / '    <td>&nbsp;</td>'
+\par 176              / '    <td valign="top" bgcolor="#FFFFFF" class="contentStyle"><div align="center">'
+\par \page 4                                                          The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par 177              / '	     <table border="0" align="center" cellpadding="7" >'
+\par 178              / '        <thead>'
+\par 179              / '          <tr>'
+\par 180              / '      <td colspan="4" align="center" nowrap ><span class="contentStyle"><strong>Prescribed Drug Estimates: '
+\par 180      ! "&YEAR<br>"
+\par 181              / '			 <hr align="center"></td>'
+\par 182              / '          </tr>'
+\par 183              / '          <tr>'
+\par 184              / '      <td colspan="4" align="center"><b>Table' " &&TB&TYPE.EXP Top &TYPESTRT by Total Expenditures,
+\par 184      ! &YEAR</font></b>"
+\par 185              / '           <hr align="center"></td>'
+\par 186              / '          <tr>'
+\par 187              / '            <td align="center" nowrap> '
+\par 188              / '              <p align="left"><strong>' "&TYPESTRC</strong></p>"
+\par 189              / '            </td>'
+\par 190              / '            <td align="center"  nowrap scope="col"> '
+\par 191              / '              <p align="center"><strong>Total <br>expenditures<br>ranking<s/trong></p>'
+\par 192              / '            </td>'
+\par 193              / '            <td align="center"  nowrap scope="col">'
+\par 194              / '              <p align="center"><strong>Total<br>expenditures</strong></p>'
+\par 195              / '            </td>'
+\par 196              / '            <td align="center"  nowrap scope="col">'
+\par 197              / '              <p align="center"><strong>Total number<br>of persons<br>with expenditures</strong></p>'
+\par 198              / '            </td>'
+\par 199              / '          </tr>'
+\par 200              / '        </thead>'
+\par 201              / '        <tbody>'
+\par 202              / '          <tr>'
+\par 203              / '           <td colspan="4" scope="row"><hr align="center"></td>'
+\par 204              / '          </tr>'
+\par 205              ;
+\par 206          END;
+\par 207          LENGTH PMEDSTR $ 50;
+\par 208          PMEDSTR = PUT(RANK,RANKFMT.);
+\par 209          P = INDEX(PMEDSTR,' ');
+\par 210          IF (P LE 3) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par 211        %IF "&TYPE" EQ "TC" %THEN %DO;
+\par 212          PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par 213          P = INDEX(PMEDSTR,' ');
+\par 214          IF (P LE 4) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par 215          PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par 216        %END;
+\par 217          PUT '    <tr>'
+\par 218            / '      <td align="left" scope="row"><strong>' PMEDSTR '</td>'
+\par 219            / '      <td align="center">' RANK 2. '</td>'
+\par 220            / '      <td align="right">' TOT_EXP_ '</td>'
+\par 221            / '      <td align="right">' TOT_PER_ '</td>'
+\par 222            / '    </tr>'
+\par 223            ;
+\par 224          IF EOF THEN DO;
+\par 225            PUT '        </tbody>'
+\par 226              / '      </table>'
+\par 227              ;
+\par 228          END;
+\par 229        RUN;
+\par 230        %put RSE30=&RSE30.;
+\par 231        %put LESS100=&LESS100.;
+\par 232
+\par 233         /* Write out standard errors for expenditures table  */
+\par 234        DATA _NULL_;
+\par 235          FILE &TYPE.HTMLxp MOD;
+\par 236          SET IN.&&&TYPE.EXPF(WHERE=(RANK LE &&N&TYPE.EXP)) END=EOF;
+\par 237
+\par 238          length se_exp_ se_per_ $18;
+\par 239
+\par 240          se_EXP_=PUT(se_EXP,COMMA16.);
+\par 241          se_PER_=PUT(se_PER,COMMA16.);
+\par 242
+\par 243          IF NSUM LT 100 THEN DO;
+\par 244            se_EXP_='--';
+\par 245        		se_PER_='--';
+\par 246        		call symput('less100','1');
+\par 247          END;
+\par 248          ELSE do;
+\par 249          				IF SE_EXP/TOT_EXP*100 GT 30
+\par 250          				 	THEN do;
+\par 251          				 					se_EXP_=compress(se_EXP_)||"*";
+\par \page 5                                                          The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par 252          				 					call symput('rse30','1');
+\par 253          				 			 end;
+\par 254          				 			
+\par 255            			if se_per/tot_per*100 > 30
+\par 256            				then do;
+\par 257            								se_PER_=compress(se_PER_)||"*";
+\par 258            								call symput('rse30','1');
+\par 259            						 end;			
+\par 260          	  END;
+\par 261
+\par 262          IF _N_ EQ 1 THEN DO;
+\par 263            PUT '      <p class="contentStyle">'
+\par 264              / ' <table border="0" align="center" cellpadding="6" class="contentStyle">'
+\par 265              / '  <thead>'
+\par 266              / '    <tr>'
+\par 267              / '      <td colspan="3" align="center" nowrap ><b><strong>Standard Errors for Table' " &&TB&TYPE.EXP: Top
+\par 267      ! &TYPESTRT by Total Expenditures, &YEAR" '</strong></b>'
+\par 268              / '        <hr align="center"></td>'
+\par 269              / '      </tr>'
+\par 270              / '          <tr>'
+\par 271              / '            <td align="center"  nowrap> '
+\par 272              / '              <p align="left"><strong>' "&TYPESTRC</strong></p>"
+\par 273              / '            </td>'
+\par 274              / '            <td align="center"  scope="col">'
+\par 275              / '              <p align="center"><strong>Total<br>expenditures</strong></p>'
+\par 276              / '            </td>'
+\par 277              / '            <td align="center"  nowrap scope="col">'
+\par 278              / '              <p align="center"><strong>Total number<br>of persons<br>with expenditures</strong></p>'
+\par 279              / '            </td>'
+\par 280              / '          </tr>'
+\par 281              / '      </thead>'
+\par 282              / '      <tbody>'
+\par 283              / '          <tr>'
+\par 284              / '           <td colspan="4" scope="row"><hr align="center"></td>'
+\par 285              / '          </tr>'
+\par 286              ;
+\par 287          END;
+\par 288          LENGTH PMEDSTR $ 50;
+\par 289          PMEDSTR = PUT(RANK,RANKFMT.);
+\par 290          P = INDEX(PMEDSTR,' ');
+\par 291          IF (P LE 3) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par 292        %IF "&TYPE" EQ "TC" %THEN %DO;
+\par 293          PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par 294          P = INDEX(PMEDSTR,' ');
+\par 295          IF (P LE 4) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par 296          PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par 297        %END;
+\par 298          PUT '    <tr>'
+\par 299            / '      <td align="left" scope="row"><strong>' PMEDSTR '</strong></td>'
+\par 300            / '      <td align="right">' SE_EXP_ '</td>'
+\par 301            / '      <td align="right">' SE_PER_ '</td>'
+\par 302            / '    </tr>'
+\par 303            ;
+\par 304          IF EOF THEN DO;
+\par 305            PUT '      </tbody>'
+\par 306              / '    </table>'
+\par 307              ;
+\par 308              %if &less100=1
+\par 309               %then %do;
+\par 310              					PUT '<p align="left" class="footnotetext">-- Less than 100 sample cases.</TD>';
+\par 311              			 %end;
+\par 312              %if &rse30=1
+\par 313               %then %do;
+\par 314              					PUT '<p align="left" class="footnotetext">* Relative standard error equal to or greater than 30%.</TD>';
+\par 315              			 %end;
+\par 316          END;
+\par 317        RUN;
+\par 318        %put RSE30=&RSE30.;
+\par 319        %put LESS100=&LESS100.;
+\par 320
+\par 321        %tail(xp);
+\par 322
+\par 323        *======================================================================================;
+\par 324
+\par 325        *======================================================================================;
+\par 326
+\par 327        %header(ut);
+\par \page 6                                                          The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par 328
+\par 329        /* initialize flags for footnotes */
+\par 330        %let rse30=0;
+\par 331        %let less100=0;
+\par 332
+\par 333         /* Write out purchases table  */
+\par 334        OPTIONS FMTSEARCH=(FMT.&TYPE%SUBSTR(&YEAR,3,2)_usefmt);
+\par 335        DATA _NULL_;
+\par 336          FILE &TYPE.HTMLut MOD;
+\par 337          SET IN.&&&TYPE.USEF(WHERE=(RANK LE &&N&TYPE.USE)) END=EOF;
+\par 338
+\par 339          length tot_use_ tot_per_ $18;
+\par 340
+\par 341          TOT_use_=PUT(TOT_use,COMMA16.);
+\par 342          TOT_PER_=PUT(TOT_PER,COMMA16.);
+\par 343
+\par 344          IF NSUM LT 100 THEN DO;
+\par 345            TOT_use_='--';
+\par 346        		TOT_PER_='--';
+\par 347        		call symput('less100','1');
+\par 348          END;
+\par 349          ELSE do;
+\par 350          				IF SE_use/TOT_use*100 GT 30
+\par 351          				 	THEN do;
+\par 352          				 					TOT_use_=compress(TOT_use_)||"*";
+\par 353          				 					call symput('rse30','1');
+\par 354          				 			 end;
+\par 355          				 			
+\par 356            			if se_per/tot_per*100 > 30
+\par 357            				then do;
+\par 358            								TOT_PER_=compress(TOT_PER_)||"*";
+\par 359            								call symput('rse30','1');
+\par 360            						 end;			
+\par 361          	  END;
+\par 362
+\par 363          IF _N_ EQ 1 THEN DO;
+\par 364            PUT '  <tr>'
+\par 365              / '    <td>&nbsp;</td>'
+\par 366              / '    <td valign="top" bgcolor="#FFFFFF" class="contentStyle"><div align="center">'
+\par 367              / '	     <table border="0" align="center" cellpadding="7" >'
+\par 368              / '        <thead>'
+\par 369              / '          <tr>'
+\par 370              / '      <td colspan="4" align="center" nowrap ><span class="contentStyle"><strong>Prescribed Drug Estimates: '
+\par 370      ! "&YEAR<br>"
+\par 371              / '			 <hr align="center"></td>'
+\par 372              / '          </tr>'
+\par 373              / '          <tr>'
+\par 374              / '      <td colspan="4" align="center"><b>Table' " &&TB&TYPE.USE Top &TYPESTRT by Total Purchases, &YEAR</b>"
+\par 375              / '           <hr align="center"></td>'
+\par 376              / '          <tr>'
+\par 377              / '            <td align="center"  nowrap> '
+\par 378              / '              <p align="left"><strong>' "&TYPESTRC</strong></p>"
+\par 379              / '            </td>'
+\par 380              / '            <td align="center" nowrap scope="col"> '
+\par 381              / '              <p align="center"><strong>Total <br>purchases<br>ranking</strong></p>'
+\par 382              / '            </td>'
+\par 383              / '            <td align="center"  scope="col">'
+\par 384              / '              <p align="center"><strong>Total<br>purchases</strong></p>'
+\par 385              / '            </td>'
+\par 386              / '            <td align="center"  nowrap scope="col">'
+\par 387              / '              <p align="center"><strong>Total number<br>of persons<br>with purchases</strong></p>'
+\par 388              / '            </td>'
+\par 389              / '          </tr>'
+\par 390              / '        </thead>'
+\par 391              / '        <tbody>'
+\par 392              ;
+\par 393          END;
+\par 394          LENGTH PMEDSTR $ 50;
+\par 395          PMEDSTR = PUT(RANK,RANKFMT.);
+\par 396          P = INDEX(PMEDSTR,' ');
+\par 397          IF (P LE 3) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par 398        %IF "&TYPE" EQ "TC" %THEN %DO;
+\par 399          PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par 400          P = INDEX(PMEDSTR,' ');
+\par 401          IF (P LE 4) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par 402          PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par 403        %END;
+\par \page 7                                                          The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par 404          PUT '    <tr>'
+\par 405            / '      <td align="left" scope="row"><strong>' PMEDSTR '</strong></td>'
+\par 406            / '      <td align="center">' RANK 2. '</td>'
+\par 407            / '      <td align="right">' TOT_USE_ '</td>'
+\par 408            / '      <td align="right">' TOT_PER_ '</td>'
+\par 409            / '    </tr>'
+\par 410            ;
+\par 411          IF EOF THEN DO;
+\par 412            PUT '        </tbody>'
+\par 413              / '      </table>'
+\par 414              ;
+\par 415          END;
+\par 416        RUN;
+\par 417        %put RSE30=&RSE30.;
+\par 418        %put LESS100=&LESS100.;
+\par 419
+\par 420         /* Write out standard errors for purchases table  */
+\par 421        DATA _NULL_;
+\par 422          FILE &TYPE.HTMLut MOD;
+\par 423          SET IN.&&&TYPE.USEF(WHERE=(RANK LE &&N&TYPE.USE)) END=EOF;
+\par 424
+\par 425          length se_use_ se_per_ $18;
+\par 426
+\par 427          se_use_=PUT(se_use,COMMA16.);
+\par 428          se_PER_=PUT(se_PER,COMMA16.);
+\par 429
+\par 430          IF NSUM LT 100 THEN DO;
+\par 431            se_use_='--';
+\par 432        		se_PER_='--';
+\par 433        		call symput('less100','1');
+\par 434          END;
+\par 435          ELSE do;
+\par 436          				IF SE_use/TOT_use*100 GT 30
+\par 437          				 	THEN do;
+\par 438          				 					se_use_=compress(se_use_)||"*";
+\par 439          				 					call symput('rse30','1');
+\par 440          				 			 end;
+\par 441          				 			
+\par 442            			if se_per/tot_per*100 > 30
+\par 443            				then do;
+\par 444            								se_PER_=compress(se_PER_)||"*";
+\par 445            								call symput('rse30','1');
+\par 446            						 end;			
+\par 447          	  END;
+\par 448          	
+\par 449          IF _N_ EQ 1 THEN DO;
+\par 450            PUT '      <p class="contentStyle">'
+\par 451              / ' <table border="0" align="center" cellpadding="6" class="contentStyle">'
+\par 452              / '  <thead>'
+\par 453              / '    <tr>'
+\par 454              / '      <td colspan="3" align="center" nowrap ><b><strong>Standard Errors for Table' " &&TB&TYPE.USE: Top
+\par 454      ! &TYPESTRT by Total Purchases, &YEAR" '</strong></b>'
+\par 455              / '        <hr align="center"></td>'
+\par 456              / '      </tr>'
+\par 457              / '      		<tr>'
+\par 458              / '            <td align="center" nowrap> '
+\par 459              / '              <p align="left"><strong>' "&TYPESTRC</font></strong></p>"
+\par 460              / '            </td>'
+\par 461              / '            <td align="center" >'
+\par 462              / '              <p align="center"><strong>Total<br>purchases</strong></font></p>'
+\par 463              / '            </td>'
+\par 464              / '            <td align="center" >'
+\par 465              / '              <p align="center"><strong>Total number<br>of persons<br>with purchases</strong></font></p>'
+\par 466              / '            </td>'
+\par 467              / '          </tr>'
+\par 468              / '      </thead>'
+\par 469              / '      <tbody>'
+\par 470              / '          <tr>'
+\par 471              / '           <td colspan="4" scope="row"><hr align="center"></td>'
+\par 472              / '          </tr>'
+\par 473              ;
+\par 474          END;
+\par 475          LENGTH PMEDSTR $ 50;
+\par 476          PMEDSTR = PUT(RANK,RANKFMT.);
+\par 477          P = INDEX(PMEDSTR,' ');
+\par 478          IF (P LE 3) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par 479        %IF "&TYPE" EQ "TC" %THEN %DO;
+\par \page 8                                                          The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par 480          PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par 481          P = INDEX(PMEDSTR,' ');
+\par 482          IF (P LE 4) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par 483          PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par 484        %END;
+\par 485          PUT '    <tr>'
+\par 486            / '      <td align="left" scope="row"><strong>' PMEDSTR '</strong></td>'
+\par 487            / '      <td align="right">' SE_USE_ '</td>'
+\par 488            / '      <td align="right">' SE_PER_ '</td>'
+\par 489            / '    </tr>'
+\par 490            ;
+\par 491          IF EOF THEN DO;
+\par 492            PUT '      </tbody>'
+\par 493              / '    </table>'
+\par 494              ;
+\par 495              %if &less100=1
+\par 496               %then %do;
+\par 497              					PUT '<p class="footnotetext">-- Less than 100 sample cases.</TD>';
+\par 498              			 %end;
+\par 499              %if &rse30=1
+\par 500               %then %do;
+\par 501              					PUT '<p class="footnotetext">* Relative standard error equal to or greater than 30%.</TD>';
+\par 502              			 %end;
+\par 503          END;
+\par 504        RUN;
+\par 505        %put RSE30=&RSE30.;
+\par 506        %put LESS100=&LESS100.;
+\par 507
+\par 508        %tail(ut);
+\par 509
+\par 510
+\par 511        %MEND ONEFILE;
+\par 512
+\par 513        %ONEFILE(RX)
+\par MPRINT(HEADER):   DATA _NULL_;
+\par MPRINT(HEADER):   FILE RXHTMLxp;
+\par MPRINT(HEADER):   PUT '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">' /
+\par '<html lang="en">' / '<head>' / '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">' / "<title>2008 Drug
+\par Estimates: Top Drugs</title>" / '<link href="/mepsweb/css/meps_style.css" rel="stylesheet" type="text/css">' / '</head>' / ' ' /
+\par '<body><!--#include virtual="/mepsweb/_include/ahrqheader.html" -->' / '<table width="765" border="0" align="center"
+\par cellpadding="0" cellspacing="0">' / '  <tr bgcolor="#FFFFFF">' / '    <td bgcolor="#FFFFFF"><div align="right">' / '
+\par <!--#include virtual="/mepsweb/_include/header_NOBC.html" --> ' / '    </div></td>' / '  </tr>' / '  <tr>' / '    <td valign="top"
+\par bgcolor="#FFFFFF">' / '      <table width="765"  border="0" align="center" cellpadding="5" cellspacing="0">' ;
+\par MPRINT(HEADER):   STOP;
+\par MPRINT(HEADER):   RUN;
+\par 
+\par NOTE: The file RXHTMLXP is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hcdrugest_totexp2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=0,
+\par       Last Modified=20Sep2010:18:10:15,
+\par       Create Time=20Sep2010:18:10:15
+\par 
+\par NOTE: 18 records were written to the file RXHTMLXP.
+\par       The minimum record length was 1.
+\par       The maximum record length was 102.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.06
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.01
+\par       Memory                            277k
+\par       OS Memory                         4324k
+\par       Timestamp            9/20/2010  6:10:15 PM
+\par 
+\par 
+\par MPRINT(ONEFILE):  ;
+\par MPRINT(ONEFILE):   OPTIONS FMTSEARCH=(FMT.RX08_expfmt);
+\par MPRINT(ONEFILE):   DATA _NULL_;
+\par MPRINT(ONEFILE):   FILE RXHTMLxp MOD;
+\par MPRINT(ONEFILE):   SET IN.top25rx08_exp(WHERE=(RANK LE 25)) END=EOF;
+\par MPRINT(ONEFILE):   length tot_exp_ tot_per_ $18;
+\par MPRINT(ONEFILE):   TOT_EXP_=PUT(TOT_EXP,COMMA16.);
+\par MPRINT(ONEFILE):   TOT_PER_=PUT(TOT_PER,COMMA16.);
+\par MPRINT(ONEFILE):   IF NSUM LT 100 THEN DO;
+\par MPRINT(ONEFILE):   TOT_EXP_='--';
+\par MPRINT(ONEFILE):   TOT_PER_='--';
+\par MPRINT(ONEFILE):   call symput('less100','1');
+\par MPRINT(ONEFILE):   END;
+\par \page 9                                                          The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par MPRINT(ONEFILE):   ELSE do;
+\par MPRINT(ONEFILE):   IF SE_EXP/TOT_EXP*100 GT 30 THEN do;
+\par MPRINT(ONEFILE):   TOT_EXP_=compress(TOT_EXP_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par MPRINT(ONEFILE):   if se_per/tot_per*100 > 30 then do;
+\par MPRINT(ONEFILE):   TOT_PER_=compress(TOT_PER_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   IF _N_ EQ 1 THEN DO;
+\par MPRINT(ONEFILE):   PUT '  <tr>' / '    <td>&nbsp;</td>' / '    <td valign="top" bgcolor="#FFFFFF" class="contentStyle"><div
+\par align="center">' / '	     <table border="0" align="center" cellpadding="7" >' / '        <thead>' / '          <tr>' / '      <td
+\par colspan="4" align="center" nowrap ><span class="contentStyle"><strong>Prescribed Drug Estimates: ' "2008<br>" / '			 <hr
+\par align="center"></td>' / '          </tr>' / '          <tr>' / '      <td colspan="4" align="center"><b>Table' " 1.1 Top Prescribed
+\par Drugs by Total Expenditures, 2008</font></b>" / '           <hr align="center"></td>' / '          <tr>' / '            <td
+\par align="center" nowrap> ' / '              <p align="left"><strong>' "Prescribed<br />drug</strong></p>" / '            </td>' / '
+\par          <td align="center"  nowrap scope="col"> ' / '              <p align="center"><strong>Total
+\par <br>expenditures<br>ranking<s/trong></p>' / '            </td>' / '            <td align="center"  nowrap scope="col">' / '
+\par      <p align="center"><strong>Total<br>expenditures</strong></p>' / '            </td>' / '            <td align="center"  nowrap
+\par scope="col">' / '              <p align="center"><strong>Total number<br>of persons<br>with expenditures</strong></p>' / '
+\par   </td>' / '          </tr>' / '        </thead>' / '        <tbody>' / '          <tr>' / '           <td colspan="4"
+\par scope="row"><hr align="center"></td>' / '          </tr>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   LENGTH PMEDSTR $ 50;
+\par MPRINT(ONEFILE):   PMEDSTR = PUT(RANK,RANKFMT.);
+\par MPRINT(ONEFILE):   P = INDEX(PMEDSTR,' ');
+\par MPRINT(ONEFILE):   IF (P LE 3) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par MPRINT(ONEFILE):   PUT '    <tr>' / '      <td align="left" scope="row"><strong>' PMEDSTR '</td>' / '      <td align="center">'
+\par RANK 2. '</td>' / '      <td align="right">' TOT_EXP_ '</td>' / '      <td align="right">' TOT_PER_ '</td>' / '    </tr>' ;
+\par MPRINT(ONEFILE):   IF EOF THEN DO;
+\par MPRINT(ONEFILE):   PUT '        </tbody>' / '      </table>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   RUN;
+\par 
+\par NOTE: The file RXHTMLXP is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hcdrugest_totexp2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=790,
+\par       Last Modified=20Sep2010:18:10:15,
+\par       Create Time=20Sep2010:18:10:15
+\par 
+\par NOTE: 183 records were written to the file RXHTMLXP.
+\par       The minimum record length was 6.
+\par       The maximum record length was 115.
+\par NOTE: There were 25 observations read from the data set IN.TOP25RX08_EXP.
+\par       WHERE RANK<=25;
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.17
+\par       user cpu time       0:00.01
+\par       system cpu time     0:00.00
+\par       Memory                            557k
+\par       OS Memory                         4608k
+\par       Timestamp            9/20/2010  6:10:15 PM
+\par 
+\par 
+\par RSE30=0
+\par LESS100=0
+\par MPRINT(ONEFILE):   DATA _NULL_;
+\par MPRINT(ONEFILE):   FILE RXHTMLxp MOD;
+\par MPRINT(ONEFILE):   SET IN.top25rx08_exp(WHERE=(RANK LE 25)) END=EOF;
+\par MPRINT(ONEFILE):   length se_exp_ se_per_ $18;
+\par MPRINT(ONEFILE):   se_EXP_=PUT(se_EXP,COMMA16.);
+\par MPRINT(ONEFILE):   se_PER_=PUT(se_PER,COMMA16.);
+\par MPRINT(ONEFILE):   IF NSUM LT 100 THEN DO;
+\par MPRINT(ONEFILE):   se_EXP_='--';
+\par MPRINT(ONEFILE):   se_PER_='--';
+\par MPRINT(ONEFILE):   call symput('less100','1');
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   ELSE do;
+\par MPRINT(ONEFILE):   IF SE_EXP/TOT_EXP*100 GT 30 THEN do;
+\par MPRINT(ONEFILE):   se_EXP_=compress(se_EXP_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par MPRINT(ONEFILE):   if se_per/tot_per*100 > 30 then do;
+\par MPRINT(ONEFILE):   se_PER_=compress(se_PER_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par \page 10                                                         The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   IF _N_ EQ 1 THEN DO;
+\par MPRINT(ONEFILE):   PUT '      <p class="contentStyle">' / ' <table border="0" align="center" cellpadding="6" class="contentStyle">'
+\par / '  <thead>' / '    <tr>' / '      <td colspan="3" align="center" nowrap ><b><strong>Standard Errors for Table' " 1.1: Top
+\par Prescribed Drugs by Total Expenditures, 2008" '</strong></b>' / '        <hr align="center"></td>' / '      </tr>' / '
+\par <tr>' / '            <td align="center"  nowrap> ' / '              <p align="left"><strong>' "Prescribed<br />drug</strong></p>" /
+\par '            </td>' / '            <td align="center"  scope="col">' / '              <p
+\par align="center"><strong>Total<br>expenditures</strong></p>' / '            </td>' / '            <td align="center"  nowrap
+\par scope="col">' / '              <p align="center"><strong>Total number<br>of persons<br>with expenditures</strong></p>' / '
+\par   </td>' / '          </tr>' / '      </thead>' / '      <tbody>' / '          <tr>' / '           <td colspan="4" scope="row"><hr
+\par align="center"></td>' / '          </tr>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   LENGTH PMEDSTR $ 50;
+\par MPRINT(ONEFILE):   PMEDSTR = PUT(RANK,RANKFMT.);
+\par MPRINT(ONEFILE):   P = INDEX(PMEDSTR,' ');
+\par MPRINT(ONEFILE):   IF (P LE 3) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par MPRINT(ONEFILE):   PUT '    <tr>' / '      <td align="left" scope="row"><strong>' PMEDSTR '</strong></td>' / '      <td
+\par align="right">' SE_EXP_ '</td>' / '      <td align="right">' SE_PER_ '</td>' / '    </tr>' ;
+\par MPRINT(ONEFILE):   IF EOF THEN DO;
+\par MPRINT(ONEFILE):   PUT '      </tbody>' / '    </table>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   RUN;
+\par 
+\par NOTE: The file RXHTMLXP is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hcdrugest_totexp2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=7115,
+\par       Last Modified=20Sep2010:18:10:15,
+\par       Create Time=20Sep2010:18:10:15
+\par 
+\par NOTE: 150 records were written to the file RXHTMLXP.
+\par       The minimum record length was 8.
+\par       The maximum record length was 148.
+\par NOTE: There were 25 observations read from the data set IN.TOP25RX08_EXP.
+\par       WHERE RANK<=25;
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.03
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            555k
+\par       OS Memory                         4608k
+\par       Timestamp            9/20/2010  6:10:15 PM
+\par 
+\par 
+\par RSE30=0
+\par LESS100=0
+\par MPRINT(TAIL):   DATA _NULL_;
+\par MPRINT(TAIL):   FILE RXHTMLxp MOD;
+\par MPRINT(TAIL):   PUT ' ' / '      </td>' / '    </tr>' / ' ' / '    </table>    </td>' / '  </tr>' / '  <tr>' / '
+\par <td><!--#include virtual="/mepsweb/_include/footer.html" --></td>' / '  </tr>' / '</table>' / '</body>' / '</html>' ;
+\par MPRINT(TAIL):   STOP;
+\par MPRINT(TAIL):   RUN;
+\par 
+\par NOTE: The file RXHTMLXP is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hcdrugest_totexp2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=12333,
+\par       Last Modified=20Sep2010:18:10:15,
+\par       Create Time=20Sep2010:18:10:15
+\par 
+\par NOTE: 12 records were written to the file RXHTMLXP.
+\par       The minimum record length was 1.
+\par       The maximum record length was 69.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.04
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            155k
+\par       OS Memory                         4324k
+\par       Timestamp            9/20/2010  6:10:15 PM
+\par 
+\par 
+\par MPRINT(ONEFILE):  ;
+\par MPRINT(ONEFILE):   *======================================================================================;
+\par MPRINT(ONEFILE):   *======================================================================================;
+\par MPRINT(HEADER):   DATA _NULL_;
+\par MPRINT(HEADER):   FILE RXHTMLut;
+\par MPRINT(HEADER):   PUT '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">' /
+\par '<html lang="en">' / '<head>' / '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">' / "<title>2008 Drug
+\par \page 11                                                         The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par Estimates: Top Drugs</title>" / '<link href="/mepsweb/css/meps_style.css" rel="stylesheet" type="text/css">' / '</head>' / ' ' /
+\par '<body><!--#include virtual="/mepsweb/_include/ahrqheader.html" -->' / '<table width="765" border="0" align="center"
+\par cellpadding="0" cellspacing="0">' / '  <tr bgcolor="#FFFFFF">' / '    <td bgcolor="#FFFFFF"><div align="right">' / '
+\par <!--#include virtual="/mepsweb/_include/header_NOBC.html" --> ' / '    </div></td>' / '  </tr>' / '  <tr>' / '    <td valign="top"
+\par bgcolor="#FFFFFF">' / '      <table width="765"  border="0" align="center" cellpadding="5" cellspacing="0">' ;
+\par MPRINT(HEADER):   STOP;
+\par MPRINT(HEADER):   RUN;
+\par 
+\par NOTE: The file RXHTMLUT is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hcdrugest_totpur2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=0,
+\par       Last Modified=20Sep2010:18:10:15,
+\par       Create Time=20Sep2010:18:10:15
+\par 
+\par NOTE: 18 records were written to the file RXHTMLUT.
+\par       The minimum record length was 1.
+\par       The maximum record length was 102.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.03
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            155k
+\par       OS Memory                         4324k
+\par       Timestamp            9/20/2010  6:10:15 PM
+\par 
+\par 
+\par MPRINT(ONEFILE):  ;
+\par MPRINT(ONEFILE):   OPTIONS FMTSEARCH=(FMT.RX08_usefmt);
+\par MPRINT(ONEFILE):   DATA _NULL_;
+\par MPRINT(ONEFILE):   FILE RXHTMLut MOD;
+\par MPRINT(ONEFILE):   SET IN.top10rx08_use(WHERE=(RANK LE 10)) END=EOF;
+\par MPRINT(ONEFILE):   length tot_use_ tot_per_ $18;
+\par MPRINT(ONEFILE):   TOT_use_=PUT(TOT_use,COMMA16.);
+\par MPRINT(ONEFILE):   TOT_PER_=PUT(TOT_PER,COMMA16.);
+\par MPRINT(ONEFILE):   IF NSUM LT 100 THEN DO;
+\par MPRINT(ONEFILE):   TOT_use_='--';
+\par MPRINT(ONEFILE):   TOT_PER_='--';
+\par MPRINT(ONEFILE):   call symput('less100','1');
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   ELSE do;
+\par MPRINT(ONEFILE):   IF SE_use/TOT_use*100 GT 30 THEN do;
+\par MPRINT(ONEFILE):   TOT_use_=compress(TOT_use_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par MPRINT(ONEFILE):   if se_per/tot_per*100 > 30 then do;
+\par MPRINT(ONEFILE):   TOT_PER_=compress(TOT_PER_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   IF _N_ EQ 1 THEN DO;
+\par MPRINT(ONEFILE):   PUT '  <tr>' / '    <td>&nbsp;</td>' / '    <td valign="top" bgcolor="#FFFFFF" class="contentStyle"><div
+\par align="center">' / '	     <table border="0" align="center" cellpadding="7" >' / '        <thead>' / '          <tr>' / '      <td
+\par colspan="4" align="center" nowrap ><span class="contentStyle"><strong>Prescribed Drug Estimates: ' "2008<br>" / '			 <hr
+\par align="center"></td>' / '          </tr>' / '          <tr>' / '      <td colspan="4" align="center"><b>Table' " 1.2 Top Prescribed
+\par Drugs by Total Purchases, 2008</b>" / '           <hr align="center"></td>' / '          <tr>' / '            <td align="center"
+\par nowrap> ' / '              <p align="left"><strong>' "Prescribed<br />drug</strong></p>" / '            </td>' / '            <td
+\par align="center" nowrap scope="col"> ' / '              <p align="center"><strong>Total <br>purchases<br>ranking</strong></p>' / '
+\par         </td>' / '            <td align="center"  scope="col">' / '              <p
+\par align="center"><strong>Total<br>purchases</strong></p>' / '            </td>' / '            <td align="center"  nowrap
+\par scope="col">' / '              <p align="center"><strong>Total number<br>of persons<br>with purchases</strong></p>' / '
+\par </td>' / '          </tr>' / '        </thead>' / '        <tbody>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   LENGTH PMEDSTR $ 50;
+\par MPRINT(ONEFILE):   PMEDSTR = PUT(RANK,RANKFMT.);
+\par MPRINT(ONEFILE):   P = INDEX(PMEDSTR,' ');
+\par MPRINT(ONEFILE):   IF (P LE 3) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par MPRINT(ONEFILE):   PUT '    <tr>' / '      <td align="left" scope="row"><strong>' PMEDSTR '</strong></td>' / '      <td
+\par align="center">' RANK 2. '</td>' / '      <td align="right">' TOT_USE_ '</td>' / '      <td align="right">' TOT_PER_ '</td>' / '
+\par </tr>' ;
+\par MPRINT(ONEFILE):   IF EOF THEN DO;
+\par MPRINT(ONEFILE):   PUT '        </tbody>' / '      </table>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   RUN;
+\par 
+\par NOTE: The file RXHTMLUT is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hcdrugest_totpur2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=790,
+\par \page 12                                                         The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par       Last Modified=20Sep2010:18:10:15,
+\par       Create Time=20Sep2010:18:10:15
+\par 
+\par NOTE: 90 records were written to the file RXHTMLUT.
+\par       The minimum record length was 6.
+\par       The maximum record length was 115.
+\par NOTE: There were 10 observations read from the data set IN.TOP10RX08_USE.
+\par       WHERE RANK<=10;
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.03
+\par       user cpu time       0:00.01
+\par       system cpu time     0:00.00
+\par       Memory                            554k
+\par       OS Memory                         4608k
+\par       Timestamp            9/20/2010  6:10:15 PM
+\par 
+\par 
+\par RSE30=0
+\par LESS100=0
+\par MPRINT(ONEFILE):   DATA _NULL_;
+\par MPRINT(ONEFILE):   FILE RXHTMLut MOD;
+\par MPRINT(ONEFILE):   SET IN.top10rx08_use(WHERE=(RANK LE 10)) END=EOF;
+\par MPRINT(ONEFILE):   length se_use_ se_per_ $18;
+\par MPRINT(ONEFILE):   se_use_=PUT(se_use,COMMA16.);
+\par MPRINT(ONEFILE):   se_PER_=PUT(se_PER,COMMA16.);
+\par MPRINT(ONEFILE):   IF NSUM LT 100 THEN DO;
+\par MPRINT(ONEFILE):   se_use_='--';
+\par MPRINT(ONEFILE):   se_PER_='--';
+\par MPRINT(ONEFILE):   call symput('less100','1');
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   ELSE do;
+\par MPRINT(ONEFILE):   IF SE_use/TOT_use*100 GT 30 THEN do;
+\par MPRINT(ONEFILE):   se_use_=compress(se_use_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par MPRINT(ONEFILE):   if se_per/tot_per*100 > 30 then do;
+\par MPRINT(ONEFILE):   se_PER_=compress(se_PER_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   IF _N_ EQ 1 THEN DO;
+\par MPRINT(ONEFILE):   PUT '      <p class="contentStyle">' / ' <table border="0" align="center" cellpadding="6" class="contentStyle">'
+\par / '  <thead>' / '    <tr>' / '      <td colspan="3" align="center" nowrap ><b><strong>Standard Errors for Table' " 1.2: Top
+\par Prescribed Drugs by Total Purchases, 2008" '</strong></b>' / '        <hr align="center"></td>' / '      </tr>' / '      		<tr>' /
+\par '            <td align="center" nowrap> ' / '              <p align="left"><strong>' "Prescribed<br />drug</font></strong></p>" / '
+\par            </td>' / '            <td align="center" >' / '              <p
+\par align="center"><strong>Total<br>purchases</strong></font></p>' / '            </td>' / '            <td align="center" >' / '
+\par        <p align="center"><strong>Total number<br>of persons<br>with purchases</strong></font></p>' / '            </td>' / '
+\par   </tr>' / '      </thead>' / '      <tbody>' / '          <tr>' / '           <td colspan="4" scope="row"><hr
+\par align="center"></td>' / '          </tr>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   LENGTH PMEDSTR $ 50;
+\par MPRINT(ONEFILE):   PMEDSTR = PUT(RANK,RANKFMT.);
+\par MPRINT(ONEFILE):   P = INDEX(PMEDSTR,' ');
+\par MPRINT(ONEFILE):   IF (P LE 3) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par MPRINT(ONEFILE):   PUT '    <tr>' / '      <td align="left" scope="row"><strong>' PMEDSTR '</strong></td>' / '      <td
+\par align="right">' SE_USE_ '</td>' / '      <td align="right">' SE_PER_ '</td>' / '    </tr>' ;
+\par MPRINT(ONEFILE):   IF EOF THEN DO;
+\par MPRINT(ONEFILE):   PUT '      </tbody>' / '    </table>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   RUN;
+\par 
+\par NOTE: The file RXHTMLUT is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hcdrugest_totpur2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=4107,
+\par       Last Modified=20Sep2010:18:10:15,
+\par       Create Time=20Sep2010:18:10:15
+\par 
+\par NOTE: 75 records were written to the file RXHTMLUT.
+\par       The minimum record length was 8.
+\par       The maximum record length was 145.
+\par NOTE: There were 10 observations read from the data set IN.TOP10RX08_USE.
+\par       WHERE RANK<=10;
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.04
+\par       user cpu time       0:00.01
+\par       system cpu time     0:00.01
+\par \page 13                                                         The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par       Memory                            553k
+\par       OS Memory                         4608k
+\par       Timestamp            9/20/2010  6:10:15 PM
+\par 
+\par 
+\par RSE30=0
+\par LESS100=0
+\par MPRINT(TAIL):   DATA _NULL_;
+\par MPRINT(TAIL):   FILE RXHTMLut MOD;
+\par MPRINT(TAIL):   PUT ' ' / '      </td>' / '    </tr>' / ' ' / '    </table>    </td>' / '  </tr>' / '  <tr>' / '
+\par <td><!--#include virtual="/mepsweb/_include/footer.html" --></td>' / '  </tr>' / '</table>' / '</body>' / '</html>' ;
+\par MPRINT(TAIL):   STOP;
+\par MPRINT(TAIL):   RUN;
+\par 
+\par NOTE: The file RXHTMLUT is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hcdrugest_totpur2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=6767,
+\par       Last Modified=20Sep2010:18:10:15,
+\par       Create Time=20Sep2010:18:10:15
+\par 
+\par NOTE: 12 records were written to the file RXHTMLUT.
+\par       The minimum record length was 1.
+\par       The maximum record length was 69.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.01
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            155k
+\par       OS Memory                         4324k
+\par       Timestamp            9/20/2010  6:10:15 PM
+\par 
+\par 
+\par MPRINT(ONEFILE):  ;
+\par 514        %ONEFILE(TC)
+\par MPRINT(HEADER):   DATA _NULL_;
+\par MPRINT(HEADER):   FILE TCHTMLxp;
+\par MPRINT(HEADER):   PUT '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">' /
+\par '<html lang="en">' / '<head>' / '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">' / "<title>2008 Drug
+\par Estimates: Top 10 Therapeutic Classes</title>" / '<link href="/mepsweb/css/meps_style.css" rel="stylesheet" type="text/css">' /
+\par '</head>' / ' ' / '<body><!--#include virtual="/mepsweb/_include/ahrqheader.html" -->' / '<table width="765" border="0"
+\par align="center" cellpadding="0" cellspacing="0">' / '  <tr bgcolor="#FFFFFF">' / '    <td bgcolor="#FFFFFF"><div align="right">' / '
+\par      <!--#include virtual="/mepsweb/_include/header_NOBC.html" --> ' / '    </div></td>' / '  </tr>' / '  <tr>' / '    <td
+\par valign="top" bgcolor="#FFFFFF">' / '      <table width="765"  border="0" align="center" cellpadding="5" cellspacing="0">' ;
+\par MPRINT(HEADER):   STOP;
+\par MPRINT(HEADER):   RUN;
+\par 
+\par NOTE: The file TCHTMLXP is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hctcest_totexp2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=0,
+\par       Last Modified=20Sep2010:18:10:15,
+\par       Create Time=20Sep2010:18:10:15
+\par 
+\par NOTE: 18 records were written to the file TCHTMLXP.
+\par       The minimum record length was 1.
+\par       The maximum record length was 102.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.01
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            155k
+\par       OS Memory                         4324k
+\par       Timestamp            9/20/2010  6:10:15 PM
+\par 
+\par 
+\par MPRINT(ONEFILE):  ;
+\par MPRINT(ONEFILE):   OPTIONS FMTSEARCH=(FMT.TC08_expfmt);
+\par MPRINT(ONEFILE):   DATA _NULL_;
+\par MPRINT(ONEFILE):   FILE TCHTMLxp MOD;
+\par MPRINT(ONEFILE):   SET IN.top10tc08_exp(WHERE=(RANK LE 10)) END=EOF;
+\par MPRINT(ONEFILE):   length tot_exp_ tot_per_ $18;
+\par MPRINT(ONEFILE):   TOT_EXP_=PUT(TOT_EXP,COMMA16.);
+\par MPRINT(ONEFILE):   TOT_PER_=PUT(TOT_PER,COMMA16.);
+\par MPRINT(ONEFILE):   IF NSUM LT 100 THEN DO;
+\par MPRINT(ONEFILE):   TOT_EXP_='--';
+\par MPRINT(ONEFILE):   TOT_PER_='--';
+\par MPRINT(ONEFILE):   call symput('less100','1');
+\par MPRINT(ONEFILE):   END;
+\par \page 14                                                         The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par MPRINT(ONEFILE):   ELSE do;
+\par MPRINT(ONEFILE):   IF SE_EXP/TOT_EXP*100 GT 30 THEN do;
+\par MPRINT(ONEFILE):   TOT_EXP_=compress(TOT_EXP_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par MPRINT(ONEFILE):   if se_per/tot_per*100 > 30 then do;
+\par MPRINT(ONEFILE):   TOT_PER_=compress(TOT_PER_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   IF _N_ EQ 1 THEN DO;
+\par MPRINT(ONEFILE):   PUT '  <tr>' / '    <td>&nbsp;</td>' / '    <td valign="top" bgcolor="#FFFFFF" class="contentStyle"><div
+\par align="center">' / '	     <table border="0" align="center" cellpadding="7" >' / '        <thead>' / '          <tr>' / '      <td
+\par colspan="4" align="center" nowrap ><span class="contentStyle"><strong>Prescribed Drug Estimates: ' "2008<br>" / '			 <hr
+\par align="center"></td>' / '          </tr>' / '          <tr>' / '      <td colspan="4" align="center"><b>Table' " 2.1 Top
+\par Therapeutic Classes by Total Expenditures, 2008</font></b>" / '           <hr align="center"></td>' / '          <tr>' / '
+\par   <td align="center" nowrap> ' / '              <p align="left"><strong>' "Therapeutic<br />class</strong></p>" / '
+\par </td>' / '            <td align="center"  nowrap scope="col"> ' / '              <p align="center"><strong>Total
+\par <br>expenditures<br>ranking<s/trong></p>' / '            </td>' / '            <td align="center"  nowrap scope="col">' / '
+\par      <p align="center"><strong>Total<br>expenditures</strong></p>' / '            </td>' / '            <td align="center"  nowrap
+\par scope="col">' / '              <p align="center"><strong>Total number<br>of persons<br>with expenditures</strong></p>' / '
+\par   </td>' / '          </tr>' / '        </thead>' / '        <tbody>' / '          <tr>' / '           <td colspan="4"
+\par scope="row"><hr align="center"></td>' / '          </tr>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   LENGTH PMEDSTR $ 50;
+\par MPRINT(ONEFILE):   PMEDSTR = PUT(RANK,RANKFMT.);
+\par MPRINT(ONEFILE):   P = INDEX(PMEDSTR,' ');
+\par MPRINT(ONEFILE):   IF (P LE 3) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par MPRINT(ONEFILE):   PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par MPRINT(ONEFILE):   P = INDEX(PMEDSTR,' ');
+\par MPRINT(ONEFILE):   IF (P LE 4) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par MPRINT(ONEFILE):   PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par MPRINT(ONEFILE):   PUT '    <tr>' / '      <td align="left" scope="row"><strong>' PMEDSTR '</td>' / '      <td align="center">'
+\par RANK 2. '</td>' / '      <td align="right">' TOT_EXP_ '</td>' / '      <td align="right">' TOT_PER_ '</td>' / '    </tr>' ;
+\par MPRINT(ONEFILE):   IF EOF THEN DO;
+\par MPRINT(ONEFILE):   PUT '        </tbody>' / '      </table>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   RUN;
+\par 
+\par NOTE: The file TCHTMLXP is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hctcest_totexp2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=807,
+\par       Last Modified=20Sep2010:18:10:15,
+\par       Create Time=20Sep2010:18:10:15
+\par 
+\par NOTE: 93 records were written to the file TCHTMLXP.
+\par       The minimum record length was 6.
+\par       The maximum record length was 115.
+\par NOTE: There were 10 observations read from the data set IN.TOP10TC08_EXP.
+\par       WHERE RANK<=10;
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.04
+\par       user cpu time       0:00.01
+\par       system cpu time     0:00.00
+\par       Memory                            567k
+\par       OS Memory                         4608k
+\par       Timestamp            9/20/2010  6:10:15 PM
+\par 
+\par 
+\par RSE30=0
+\par LESS100=0
+\par MPRINT(ONEFILE):   DATA _NULL_;
+\par MPRINT(ONEFILE):   FILE TCHTMLxp MOD;
+\par MPRINT(ONEFILE):   SET IN.top10tc08_exp(WHERE=(RANK LE 10)) END=EOF;
+\par MPRINT(ONEFILE):   length se_exp_ se_per_ $18;
+\par MPRINT(ONEFILE):   se_EXP_=PUT(se_EXP,COMMA16.);
+\par MPRINT(ONEFILE):   se_PER_=PUT(se_PER,COMMA16.);
+\par MPRINT(ONEFILE):   IF NSUM LT 100 THEN DO;
+\par MPRINT(ONEFILE):   se_EXP_='--';
+\par MPRINT(ONEFILE):   se_PER_='--';
+\par MPRINT(ONEFILE):   call symput('less100','1');
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   ELSE do;
+\par MPRINT(ONEFILE):   IF SE_EXP/TOT_EXP*100 GT 30 THEN do;
+\par MPRINT(ONEFILE):   se_EXP_=compress(se_EXP_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par \page 15                                                         The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par MPRINT(ONEFILE):   if se_per/tot_per*100 > 30 then do;
+\par MPRINT(ONEFILE):   se_PER_=compress(se_PER_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   IF _N_ EQ 1 THEN DO;
+\par MPRINT(ONEFILE):   PUT '      <p class="contentStyle">' / ' <table border="0" align="center" cellpadding="6" class="contentStyle">'
+\par / '  <thead>' / '    <tr>' / '      <td colspan="3" align="center" nowrap ><b><strong>Standard Errors for Table' " 2.1: Top
+\par Therapeutic Classes by Total Expenditures, 2008" '</strong></b>' / '        <hr align="center"></td>' / '      </tr>' / '
+\par <tr>' / '            <td align="center"  nowrap> ' / '              <p align="left"><strong>' "Therapeutic<br />class</strong></p>"
+\par / '            </td>' / '            <td align="center"  scope="col">' / '              <p
+\par align="center"><strong>Total<br>expenditures</strong></p>' / '            </td>' / '            <td align="center"  nowrap
+\par scope="col">' / '              <p align="center"><strong>Total number<br>of persons<br>with expenditures</strong></p>' / '
+\par   </td>' / '          </tr>' / '      </thead>' / '      <tbody>' / '          <tr>' / '           <td colspan="4" scope="row"><hr
+\par align="center"></td>' / '          </tr>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   LENGTH PMEDSTR $ 50;
+\par MPRINT(ONEFILE):   PMEDSTR = PUT(RANK,RANKFMT.);
+\par MPRINT(ONEFILE):   P = INDEX(PMEDSTR,' ');
+\par MPRINT(ONEFILE):   IF (P LE 3) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par MPRINT(ONEFILE):   PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par MPRINT(ONEFILE):   P = INDEX(PMEDSTR,' ');
+\par MPRINT(ONEFILE):   IF (P LE 4) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par MPRINT(ONEFILE):   PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par MPRINT(ONEFILE):   PUT '    <tr>' / '      <td align="left" scope="row"><strong>' PMEDSTR '</strong></td>' / '      <td
+\par align="right">' SE_EXP_ '</td>' / '      <td align="right">' SE_PER_ '</td>' / '    </tr>' ;
+\par MPRINT(ONEFILE):   IF EOF THEN DO;
+\par MPRINT(ONEFILE):   PUT '      </tbody>' / '    </table>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   RUN;
+\par 
+\par NOTE: The file TCHTMLXP is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hctcest_totexp2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=4301,
+\par       Last Modified=20Sep2010:18:10:15,
+\par       Create Time=20Sep2010:18:10:15
+\par 
+\par NOTE: 75 records were written to the file TCHTMLXP.
+\par       The minimum record length was 8.
+\par       The maximum record length was 151.
+\par NOTE: There were 10 observations read from the data set IN.TOP10TC08_EXP.
+\par       WHERE RANK<=10;
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.03
+\par       user cpu time       0:00.01
+\par       system cpu time     0:00.00
+\par       Memory                            564k
+\par       OS Memory                         4608k
+\par       Timestamp            9/20/2010  6:10:15 PM
+\par 
+\par 
+\par RSE30=0
+\par LESS100=0
+\par MPRINT(TAIL):   DATA _NULL_;
+\par MPRINT(TAIL):   FILE TCHTMLxp MOD;
+\par MPRINT(TAIL):   PUT ' ' / '      </td>' / '    </tr>' / ' ' / '    </table>    </td>' / '  </tr>' / '  <tr>' / '
+\par <td><!--#include virtual="/mepsweb/_include/footer.html" --></td>' / '  </tr>' / '</table>' / '</body>' / '</html>' ;
+\par MPRINT(TAIL):   STOP;
+\par MPRINT(TAIL):   RUN;
+\par 
+\par NOTE: The file TCHTMLXP is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hctcest_totexp2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=7136,
+\par       Last Modified=20Sep2010:18:10:15,
+\par       Create Time=20Sep2010:18:10:15
+\par 
+\par NOTE: 12 records were written to the file TCHTMLXP.
+\par       The minimum record length was 1.
+\par       The maximum record length was 69.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.04
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.01
+\par       Memory                            155k
+\par       OS Memory                         4324k
+\par       Timestamp            9/20/2010  6:10:16 PM
+\par 
+\par \page 16                                                         The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par 
+\par MPRINT(ONEFILE):  ;
+\par MPRINT(ONEFILE):   *======================================================================================;
+\par MPRINT(ONEFILE):   *======================================================================================;
+\par MPRINT(HEADER):   DATA _NULL_;
+\par MPRINT(HEADER):   FILE TCHTMLut;
+\par MPRINT(HEADER):   PUT '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">' /
+\par '<html lang="en">' / '<head>' / '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">' / "<title>2008 Drug
+\par Estimates: Top 10 Therapeutic Classes</title>" / '<link href="/mepsweb/css/meps_style.css" rel="stylesheet" type="text/css">' /
+\par '</head>' / ' ' / '<body><!--#include virtual="/mepsweb/_include/ahrqheader.html" -->' / '<table width="765" border="0"
+\par align="center" cellpadding="0" cellspacing="0">' / '  <tr bgcolor="#FFFFFF">' / '    <td bgcolor="#FFFFFF"><div align="right">' / '
+\par      <!--#include virtual="/mepsweb/_include/header_NOBC.html" --> ' / '    </div></td>' / '  </tr>' / '  <tr>' / '    <td
+\par valign="top" bgcolor="#FFFFFF">' / '      <table width="765"  border="0" align="center" cellpadding="5" cellspacing="0">' ;
+\par MPRINT(HEADER):   STOP;
+\par MPRINT(HEADER):   RUN;
+\par 
+\par NOTE: The file TCHTMLUT is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hctcest_totpur2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=0,
+\par       Last Modified=20Sep2010:18:10:16,
+\par       Create Time=20Sep2010:18:10:16
+\par 
+\par NOTE: 18 records were written to the file TCHTMLUT.
+\par       The minimum record length was 1.
+\par       The maximum record length was 102.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.01
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            155k
+\par       OS Memory                         4324k
+\par       Timestamp            9/20/2010  6:10:16 PM
+\par 
+\par 
+\par MPRINT(ONEFILE):  ;
+\par MPRINT(ONEFILE):   OPTIONS FMTSEARCH=(FMT.TC08_usefmt);
+\par MPRINT(ONEFILE):   DATA _NULL_;
+\par MPRINT(ONEFILE):   FILE TCHTMLut MOD;
+\par MPRINT(ONEFILE):   SET IN.top10tc08_use(WHERE=(RANK LE 10)) END=EOF;
+\par MPRINT(ONEFILE):   length tot_use_ tot_per_ $18;
+\par MPRINT(ONEFILE):   TOT_use_=PUT(TOT_use,COMMA16.);
+\par MPRINT(ONEFILE):   TOT_PER_=PUT(TOT_PER,COMMA16.);
+\par MPRINT(ONEFILE):   IF NSUM LT 100 THEN DO;
+\par MPRINT(ONEFILE):   TOT_use_='--';
+\par MPRINT(ONEFILE):   TOT_PER_='--';
+\par MPRINT(ONEFILE):   call symput('less100','1');
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   ELSE do;
+\par MPRINT(ONEFILE):   IF SE_use/TOT_use*100 GT 30 THEN do;
+\par MPRINT(ONEFILE):   TOT_use_=compress(TOT_use_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par MPRINT(ONEFILE):   if se_per/tot_per*100 > 30 then do;
+\par MPRINT(ONEFILE):   TOT_PER_=compress(TOT_PER_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   IF _N_ EQ 1 THEN DO;
+\par MPRINT(ONEFILE):   PUT '  <tr>' / '    <td>&nbsp;</td>' / '    <td valign="top" bgcolor="#FFFFFF" class="contentStyle"><div
+\par align="center">' / '	     <table border="0" align="center" cellpadding="7" >' / '        <thead>' / '          <tr>' / '      <td
+\par colspan="4" align="center" nowrap ><span class="contentStyle"><strong>Prescribed Drug Estimates: ' "2008<br>" / '			 <hr
+\par align="center"></td>' / '          </tr>' / '          <tr>' / '      <td colspan="4" align="center"><b>Table' " 2.2 Top
+\par Therapeutic Classes by Total Purchases, 2008</b>" / '           <hr align="center"></td>' / '          <tr>' / '            <td
+\par align="center"  nowrap> ' / '              <p align="left"><strong>' "Therapeutic<br />class</strong></p>" / '            </td>' /
+\par '            <td align="center" nowrap scope="col"> ' / '              <p align="center"><strong>Total
+\par <br>purchases<br>ranking</strong></p>' / '            </td>' / '            <td align="center"  scope="col">' / '              <p
+\par align="center"><strong>Total<br>purchases</strong></p>' / '            </td>' / '            <td align="center"  nowrap
+\par scope="col">' / '              <p align="center"><strong>Total number<br>of persons<br>with purchases</strong></p>' / '
+\par </td>' / '          </tr>' / '        </thead>' / '        <tbody>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   LENGTH PMEDSTR $ 50;
+\par MPRINT(ONEFILE):   PMEDSTR = PUT(RANK,RANKFMT.);
+\par MPRINT(ONEFILE):   P = INDEX(PMEDSTR,' ');
+\par MPRINT(ONEFILE):   IF (P LE 3) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par MPRINT(ONEFILE):   PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par MPRINT(ONEFILE):   P = INDEX(PMEDSTR,' ');
+\par MPRINT(ONEFILE):   IF (P LE 4) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par \page 17                                                         The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par MPRINT(ONEFILE):   PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par MPRINT(ONEFILE):   PUT '    <tr>' / '      <td align="left" scope="row"><strong>' PMEDSTR '</strong></td>' / '      <td
+\par align="center">' RANK 2. '</td>' / '      <td align="right">' TOT_USE_ '</td>' / '      <td align="right">' TOT_PER_ '</td>' / '
+\par </tr>' ;
+\par MPRINT(ONEFILE):   IF EOF THEN DO;
+\par MPRINT(ONEFILE):   PUT '        </tbody>' / '      </table>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   RUN;
+\par 
+\par NOTE: The file TCHTMLUT is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hctcest_totpur2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=807,
+\par       Last Modified=20Sep2010:18:10:16,
+\par       Create Time=20Sep2010:18:10:16
+\par 
+\par NOTE: 90 records were written to the file TCHTMLUT.
+\par       The minimum record length was 6.
+\par       The maximum record length was 115.
+\par NOTE: There were 10 observations read from the data set IN.TOP10TC08_USE.
+\par       WHERE RANK<=10;
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.04
+\par       user cpu time       0:00.01
+\par       system cpu time     0:00.00
+\par       Memory                            566k
+\par       OS Memory                         4608k
+\par       Timestamp            9/20/2010  6:10:16 PM
+\par 
+\par 
+\par RSE30=0
+\par LESS100=0
+\par MPRINT(ONEFILE):   DATA _NULL_;
+\par MPRINT(ONEFILE):   FILE TCHTMLut MOD;
+\par MPRINT(ONEFILE):   SET IN.top10tc08_use(WHERE=(RANK LE 10)) END=EOF;
+\par MPRINT(ONEFILE):   length se_use_ se_per_ $18;
+\par MPRINT(ONEFILE):   se_use_=PUT(se_use,COMMA16.);
+\par MPRINT(ONEFILE):   se_PER_=PUT(se_PER,COMMA16.);
+\par MPRINT(ONEFILE):   IF NSUM LT 100 THEN DO;
+\par MPRINT(ONEFILE):   se_use_='--';
+\par MPRINT(ONEFILE):   se_PER_='--';
+\par MPRINT(ONEFILE):   call symput('less100','1');
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   ELSE do;
+\par MPRINT(ONEFILE):   IF SE_use/TOT_use*100 GT 30 THEN do;
+\par MPRINT(ONEFILE):   se_use_=compress(se_use_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par MPRINT(ONEFILE):   if se_per/tot_per*100 > 30 then do;
+\par MPRINT(ONEFILE):   se_PER_=compress(se_PER_)||"*";
+\par MPRINT(ONEFILE):   call symput('rse30','1');
+\par MPRINT(ONEFILE):   end;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   IF _N_ EQ 1 THEN DO;
+\par MPRINT(ONEFILE):   PUT '      <p class="contentStyle">' / ' <table border="0" align="center" cellpadding="6" class="contentStyle">'
+\par / '  <thead>' / '    <tr>' / '      <td colspan="3" align="center" nowrap ><b><strong>Standard Errors for Table' " 2.2: Top
+\par Therapeutic Classes by Total Purchases, 2008" '</strong></b>' / '        <hr align="center"></td>' / '      </tr>' / '      		<tr>'
+\par / '            <td align="center" nowrap> ' / '              <p align="left"><strong>' "Therapeutic<br />class</font></strong></p>"
+\par / '            </td>' / '            <td align="center" >' / '              <p
+\par align="center"><strong>Total<br>purchases</strong></font></p>' / '            </td>' / '            <td align="center" >' / '
+\par        <p align="center"><strong>Total number<br>of persons<br>with purchases</strong></font></p>' / '            </td>' / '
+\par   </tr>' / '      </thead>' / '      <tbody>' / '          <tr>' / '           <td colspan="4" scope="row"><hr
+\par align="center"></td>' / '          </tr>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   LENGTH PMEDSTR $ 50;
+\par MPRINT(ONEFILE):   PMEDSTR = PUT(RANK,RANKFMT.);
+\par MPRINT(ONEFILE):   P = INDEX(PMEDSTR,' ');
+\par MPRINT(ONEFILE):   IF (P LE 3) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par MPRINT(ONEFILE):   PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par MPRINT(ONEFILE):   P = INDEX(PMEDSTR,' ');
+\par MPRINT(ONEFILE):   IF (P LE 4) THEN PMEDSTR = PROPCASE(SUBSTR(PMEDSTR,P+1));
+\par MPRINT(ONEFILE):   PMEDSTR = REVERSE(TRIM(REVERSE(PMEDSTR)));
+\par MPRINT(ONEFILE):   PUT '    <tr>' / '      <td align="left" scope="row"><strong>' PMEDSTR '</strong></td>' / '      <td
+\par align="right">' SE_USE_ '</td>' / '      <td align="right">' SE_PER_ '</td>' / '    </tr>' ;
+\par MPRINT(ONEFILE):   IF EOF THEN DO;
+\par MPRINT(ONEFILE):   PUT '      </tbody>' / '    </table>' ;
+\par MPRINT(ONEFILE):   END;
+\par MPRINT(ONEFILE):   RUN;
+\par \page 18                                                         The SAS System                           18:10 Monday, September 20, 2010
+\par 
+\par 
+\par NOTE: The file TCHTMLUT is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hctcest_totpur2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=4239,
+\par       Last Modified=20Sep2010:18:10:16,
+\par       Create Time=20Sep2010:18:10:16
+\par 
+\par NOTE: 75 records were written to the file TCHTMLUT.
+\par       The minimum record length was 8.
+\par       The maximum record length was 148.
+\par NOTE: There were 10 observations read from the data set IN.TOP10TC08_USE.
+\par       WHERE RANK<=10;
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.03
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.00
+\par       Memory                            564k
+\par       OS Memory                         4608k
+\par       Timestamp            9/20/2010  6:10:16 PM
+\par 
+\par 
+\par RSE30=0
+\par LESS100=0
+\par MPRINT(TAIL):   DATA _NULL_;
+\par MPRINT(TAIL):   FILE TCHTMLut MOD;
+\par MPRINT(TAIL):   PUT ' ' / '      </td>' / '    </tr>' / ' ' / '    </table>    </td>' / '  </tr>' / '  <tr>' / '
+\par <td><!--#include virtual="/mepsweb/_include/footer.html" --></td>' / '  </tr>' / '</table>' / '</body>' / '</html>' ;
+\par MPRINT(TAIL):   STOP;
+\par MPRINT(TAIL):   RUN;
+\par 
+\par NOTE: The file TCHTMLUT is:
+\par       Filename=C:\\AHRQ3\\F_DSO\\FD001NKK\\Out\\hctcest_totpur2008.htm,
+\par       RECFM=V,LRECL=10000,File Size (bytes)=7021,
+\par       Last Modified=20Sep2010:18:10:16,
+\par       Create Time=20Sep2010:18:10:16
+\par 
+\par NOTE: 12 records were written to the file TCHTMLUT.
+\par       The minimum record length was 1.
+\par       The maximum record length was 69.
+\par NOTE: DATA statement used (Total process time):
+\par       real time           0:00.03
+\par       user cpu time       0:00.00
+\par       system cpu time     0:00.03
+\par       Memory                            155k
+\par       OS Memory                         4324k
+\par       Timestamp            9/20/2010  6:10:16 PM
+\par 
+\par 
+\par MPRINT(ONEFILE):  ;
+\par 
+\par NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+\par NOTE: The SAS System used:
+\par       real time           0:01.50
+\par       user cpu time       0:00.12
+\par       system cpu time     0:00.40
+\par       Memory                            3944k
+\par       OS Memory                         4608k
+\par       Timestamp            9/20/2010  6:10:16 PM
+\par 
+}
