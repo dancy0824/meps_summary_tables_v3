@@ -56,13 +56,15 @@ run;
 		levels1 = &grp1;
 		levels2 = &grp2;
 		has_exp = any_exp;
+		has_event = count_event;
 		if has_exp = . then has_exp = 1;
-		keep grp1 grp2 levels1 levels2 Sum Mean Estimate StdDev StdErr has_exp n ;
+		if has_event = . then has_event = 1;
+		keep grp1 grp2 levels1 levels2 Sum Mean Estimate StdDev StdErr has_exp has_event n ;
 	run;
 
 	data sas_results;
 		set sas_results;
-		where has_exp = 1;
+		where has_exp = 1 and has_event = 1;
 	run;
 %mend;
 

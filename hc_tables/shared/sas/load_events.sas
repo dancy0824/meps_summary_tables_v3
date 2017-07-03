@@ -61,19 +61,19 @@ data HH; set HH;
 	if year = 1996 then MPCELIG = SELFAGEN;
 	if MPCELIG = 1 then event_v2X = 'HHA';
 	else if MPCELIG = 2 then event_v2X = 'HHN';
-	else event_v2X = 'Missing';
+	else event_v2X = '';
 run;
 
 data OB; set OB;
 	if SEEDOC = 1 then event_v2X = 'OBD';
 	else if SEEDOC = 2 then event_v2X = 'OBO';
-	else event_v2X = 'Missing';
+	else event_v2X = '';
 run;
 
 data OP; set OP;
 	if SEEDOC = 1 then event_v2X = 'OPY';
 	else if SEEDOC = 2 then event_v2X = 'OPZ';
-	else event_v2X = 'Missing';
+	else event_v2X = '';
 run;
 
 /* Stack events into single dataset */

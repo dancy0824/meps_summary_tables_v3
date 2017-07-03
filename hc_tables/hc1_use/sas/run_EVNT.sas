@@ -10,7 +10,9 @@ ods listing close;
 
 %include "&shared\run_global.sas";
 
-%let sop_list   = EXP SLF PTR MCR MCD OTZ;
+%let sop_list = XP SF PR MR MD OZ;
+
+ %let subgrp_list = ind region;
 
 %let ngrps  = %sysfunc(countw(&subgrp_list));
 %let nsop   = %sysfunc(countw(&sop_list));
@@ -18,6 +20,7 @@ ods listing close;
 proc format; /* Blank format for sop and event */
 	value $ sop;
 	value $ event;
+	value $ event_v2X;
 run;
 
 /*********************  Define Macros  *************************/
@@ -38,13 +41,12 @@ run;
 	%standardize(grp1=&grp1, grp2=&grp2, char1=&char1,char2=&char2);
 %mend;
 
-
 %macro run_stat(stat,year);
 	%local i j grp1 grp2; 
 
 	%let yy = %substr(&year,3,2);
 	%let sop = XP;
-	%let countvar = XP&yy.X;
+	%let countvar = (XP&yy.X >= 0);
 
 /* Initialize results csv with ind*ind */
 	%survey(grp1=ind,grp2=ind,stat=&stat,char1=,char2=);
@@ -65,27 +67,27 @@ run;
 	%end;
 
 /* Demographic subgroups x source of payment */
-	%let grp2 = sop;
 
 	%do i = 1 %to &ngrps;
 		%do j = 1 %to &nsop;
 			%let grp1 = %scan(&subgrp_list, &i); 
 			%let sop = %scan(&sop_list, &j); 
-			%let countvar = &sop.&yy.X;
+			%let countvar = (&sop.&yy.X > 0);
 			
 			data EVENTS; set EVENTS; sop = "&sop"; run;
-			%survey(grp1=&grp1,grp2=&grp2,stat=&stat,char1=,char2=$);
+			%survey(grp1=&grp1,grp2=sop,stat=&stat,char1=,char2=$);
+
 			%append(stat=&stat,year=&year);
 		%end;
 	%end;
 
 /* Demographic subgroups x event type */
 	%let sop = XP;
-	%let countvar = XP&yy.X;
+	%let countvar = (XP&yy.X >= 0);
 
 	%do i = 1 %to &ngrps;
 		%let grp1 = %scan(&subgrp_list, &i); 
-			
+	
 		%survey(grp1=&grp1,grp2=event,stat=&stat,char1=,char2=$);
 		%append(stat=&stat,year=&year);
 
@@ -96,7 +98,7 @@ run;
 /* Source of payment x event type */
 	%do i = 1 %to &nsop;
 		%let sop = %scan(&sop_list, &i); 
-		%let countvar = &sop.&yy.X;
+		%let countvar = (&sop.&yy.X > 0);
 			
 		%survey(grp1=sop,grp2=event,stat=&stat,char1=$,char2=$);
 		%append(stat=&stat,year=&year);
@@ -132,6 +134,5 @@ run;
 
 /*********************************************************/
 
-%run_sas(1997,2014);
+%run_sas(1996,2014);
 
-*%run_year(2014);

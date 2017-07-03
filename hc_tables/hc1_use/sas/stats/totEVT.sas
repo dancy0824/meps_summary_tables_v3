@@ -1,7 +1,8 @@
 * totEVT ;
 
 data EVENTS; set EVENTS;
-	count = (&countvar. > 0);
+	count = &countvar.;
+	count_event = (&sop.&yy.X >= 0);
 run; 
 
 proc surveymeans data = EVENTS sum missing nobs;
@@ -10,5 +11,5 @@ proc surveymeans data = EVENTS sum missing nobs;
 	STRATA VARSTR;
 	CLUSTER VARPSU;
 	WEIGHT PERWT&yy.F;
-	DOMAIN &domain.;
+	DOMAIN &domain.*count_event;
 run;
