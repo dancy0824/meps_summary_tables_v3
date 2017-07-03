@@ -10,6 +10,8 @@
 		year = &year.;
 
 		%if &evnt in (IP OP ER) %then %do;
+			SF&yy.X=&evnt.DSF&yy.X+&evnt.FSF&yy.X;
+			MR&yy.X=&evnt.DMR&yy.X+&evnt.FMR&yy.X;
 			MD&yy.X=&evnt.DMD&yy.X+&evnt.FMD&yy.X;
 			PV&yy.X=&evnt.DPV&yy.X+&evnt.FPV&yy.X;
 			VA&yy.X=&evnt.DVA&yy.X+&evnt.FVA&yy.X;
@@ -21,11 +23,13 @@
 			OT&yy.X=&evnt.DOT&yy.X+&evnt.FOT&yy.X;
 			XP&yy.X=&evnt.DXP&yy.X+&evnt.FXP&yy.X;
 			
-			if year <= 1999 then TR&yy.X=&evnt.DTR&yy.X+&evnt.FTR&yy.X;
-			else TR&yy.X=&evnt.DCH&yy.X+&evnt.FCH&yy.X;
+			if year <= 1999 then TR&yy.X=&evnt.DCH&yy.X+&evnt.FCH&yy.X;
+			else TR&yy.X=&evnt.DTR&yy.X+&evnt.FTR&yy.X;
 		%end;
 
 		%else %do;
+			SF&yy.X=&evnt.SF&yy.X;
+			MR&yy.X=&evnt.MR&yy.X;
 			MD&yy.X=&evnt.MD&yy.X;
 			PV&yy.X=&evnt.PV&yy.X;
 			VA&yy.X=&evnt.VA&yy.X;			
@@ -37,8 +41,8 @@
 			OT&yy.X=&evnt.OT&yy.X;
 			XP&yy.X=&evnt.XP&yy.X;
 
-			if year <= 1999 then TR&yy.X=&evnt.TR&yy.X;
-			else TR&yy.X=&evnt.CH&yy.X;
+			if year <= 1999 then TR&yy.X=&evnt.CH&yy.X;
+			else TR&yy.X=&evnt.TR&yy.X;
 		%end;
 	run;
 %mend;
@@ -74,15 +78,16 @@ run;
 
 /* Stack events into single dataset */
 data stacked_events;
-	set RX DN OM IP ER OP OB HH;
+	set RX DV OM IP ER OP OB HH;
 	PR&yy.X = PV&yy.X+TR&yy.X;
     OZ&yy.X = OF&yy.X+SL&yy.X+OT&yy.X+OR&yy.X+OU&yy.X+WC&yy.X+VA&yy.X;
 	keep DUPERSID event:  XP&yy.X SF&yy.X PR&yy.X MR&yy.X MD&yy.X OZ&yy.X;
 run;
 
+
 /* Merge EVENTS onto FYC file */
 
-data FYCsub; set FYC;
+data FYCsub; set MEPS;
 	keep &subgrps. DUPERSID PERWT&yy.F VARSTR VARPSU;
 run;
 

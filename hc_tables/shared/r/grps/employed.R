@@ -12,5 +12,5 @@ FYC <- FYC %>% mutate(
     "1" = "Employed",
     "2" = "Not employed", 
     "9" = "Inapplicable (age < 16)",
-    .missing = "Missing"))
-
+    .missing = "Missing",
+    .default = "Missing"))

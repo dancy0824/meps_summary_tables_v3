@@ -11,8 +11,8 @@ meps_names = read.csv("../puf_expanded.csv",stringsAsFactors = F)
 
 subgrps = c("ind", "agevar",
             "agegrps", "region", "married", "race", "sex", # Demographics
-            "insurance", "health", "mental_health",               # Health Variables
-            "education", "employed", "poverty")                   # Socio-economic status
+            "insurance", "health", "mental_health",        # Health Variables
+            "education", "employed", "poverty")            # Socio-economic status
 
 subgrp_list = c(subgrps,"insurance_v2X","agegrps_v2X")
 subgrp_list = subgrp_list[subgrp_list!='agevar']

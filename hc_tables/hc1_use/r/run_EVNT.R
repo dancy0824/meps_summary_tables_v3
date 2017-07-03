@@ -36,7 +36,7 @@ survey <- function(grp1,grp2,stat,yr,sop="XP",use=sprintf("(%s.yy.X >= 0)",sop))
   stat_list = c("totEVT","meanEVT")
   year_list = 2014:1996
 
-  year_list=1999:1996
+  year_list=1996:1996
 ##################################################
 ###                   RUN                      ###
 ##################################################
@@ -45,8 +45,6 @@ survey <- function(grp1,grp2,stat,yr,sop="XP",use=sprintf("(%s.yy.X >= 0)",sop))
     dir.create(sprintf('%s/%s',tables,year), showWarnings = FALSE)
     
     yr <- substring(year,3,4); 
-    this_year <- meps_names %>% filter(Year==year) 
-    file_names <- as.list(this_year$url) %>% setNames(this_year$file_type)
     
     # Load FYC data
     runSource('load_fyc.R',dir=shared,

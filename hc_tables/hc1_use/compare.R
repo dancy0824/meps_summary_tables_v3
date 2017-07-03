@@ -40,7 +40,7 @@ compareR <- function(year,stat){
   
   stat_se = paste0(stat,"_se")
   
-  setwd("C:/Users/emily.mitchell/Desktop/Programming/GitHub/meps_summary_tables_v3/hc_tables")
+  setwd("C:/Users/emily.mitchell/Desktop/Programming/GitHub/meps_summary_tables/hc_tables")
   
   old_r = read.csv(sprintf("hc1_use/r/tables_old/%s%s.csv",ftype,year),stringsAsFactors = F)
   new_r = read.csv(sprintf("hc1_use/r/tables/%s/%s.csv",year,stat),stringsAsFactors = F)
@@ -85,57 +85,53 @@ compareR <- function(year,stat){
   
   return(list(diff=diff,diff_se=diff_se,miss_old=miss_old,miss_new=miss_new))
 }
-  
-  
-R1 = lapply(1996:2014,compareR,stat="totPOP") 
 
-
-for(i in 1:length(R1)){
-  print(i)
-  test = R1[[i]]
+  #some residual 1996 errors in old version for employed (go with new version)
   
-  test$diff <- test$diff %>% 
-    filter(!levels2 %in% c("OBV","OBD")) %>%
-    filter(!levels2 %in% c("EXP","TOT")) %>%
-    filter(!levels1 %in% c("EXP","TOT")); 
+yearlist = 1997:2014  
   
-  test$diff_se <- test$diff_se %>% 
-    filter(!levels2 %in% c("OBV","OBD")) %>%
-    filter(!levels2 %in% c("EXP","TOT")) %>%
-    filter(!levels1 %in% c("EXP","TOT")); 
+printdiffs <- function(difflist,rm_bad=F){
+  for(i in 1:length(difflist)){
+    cat(i,":",yearlist[[i]],"\n")
+    test = difflist[[i]]
   
-  for(d in test){
-    if(nrow(d) > 0) print(d)
+    if(rm_bad){
+      test$diff <- test$diff %>% 
+        filter(!levels2 %in% c("OBV","OBD")) %>%
+        filter(!levels2 %in% c("EXP","TOT")) %>%
+        filter(!levels1 %in% c("EXP","TOT")); 
+      
+      # old did not count only number of people with event/expense, for all event types/sops
+      test$diff_se <- test$diff_se %>% 
+        filter(!levels2 %in% c("OBV","OBD")) %>%
+        filter(!levels2 %in% c("EXP","TOT")) %>%
+        filter(!levels1 %in% c("EXP","TOT")); 
+    }
+    
+    
+    
+    for(d in test){
+      if(nrow(d) > 0) print(d,n=60)
+    }
   }
 }
 
-year=2011
+yearlist = 1996
 
-r1 = compareR(year,"totPOP");  
+R1 = lapply(yearlist,compareR,stat="totPOP") 
+R2 = lapply(yearlist,compareR,"pctEXP"); printdiffs(R2);
+R3 = lapply(yearlist,compareR,"totEXP"); printdiffs(R3);
+R4 = lapply(yearlist,compareR,"meanEXP0"); printdiffs(R4);
+R5 = lapply(yearlist,compareR,"meanEXP"); printdiffs(R5);
+R6 = lapply(yearlist,compareR,"medEXP"); printdiffs(R6);
+R7 = lapply(yearlist,compareR,"n"); printdiffs(R7);
+R8 = lapply(yearlist,compareR,"n_exp"); printdiffs(R8);
 
-# for totpop, old has wrong OBD/OBV utilization var
-r1$diff <- r1$diff %>% filter(!levels2 %in% c("OBV","OBD")); r1$diff;
+R9 = lapply(yearlist,compareR,"totEVT"); printdiffs(R9);
+R10 = lapply(yearlist,compareR,"meanEVT"); printdiffs(R10);
 
-# old did not count only number of people with event/expense, for all event types/sops
-r1$diff <- r1$diff %>% 
-  filter(!levels2 %in% c("EXP","TOT")) %>%
-  filter(!levels1 %in% c("EXP","TOT")); r1$diff;
-
-
-r2 = compareR(year,"pctEXP"); 
-r3 = compareR(year,"totEXP"); 
-r4 = compareR(year,"meanEXP0");
-r5 = compareR(year,"meanEXP");  #r5$miss_new %>% print(n=100);
-r6 = compareR(year,"medEXP");  #r6$miss_new %>% print(n=100);
-
-r7 = compareR(year,"n"); # this should have the same issues as r1
-r8 = compareR(year,"n_exp"); 
-
-r9 = compareR(year,"totEVT"); 
-r10 = compareR(year,"meanEVT"); 
-
-r9$diff %>% filter(grp1=="sop")
-
+R1 %>% printdiffs(rm_bad=T)
+R7 %>% printdiffs(rm_bad=T)
 
 
 ##################################################

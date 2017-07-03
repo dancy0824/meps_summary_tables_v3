@@ -18,11 +18,14 @@ write.csv(puf_names,file="puf_names.csv",row.names=F) # for file_transfer.R
 ## Expand puf_names.csv for easy access in run files
 
 event_letters <- list(DV="b",OM="c",IP="d",ER="e",OP="f",OB="g",HH="h")
-hc_list <- c("h26bf1",
+hc_list <- c("h10a","h26bf1",
              sprintf("h16%sf1",letters[2:8]),
              sprintf("h10%sf1",letters[2:8]))
 
 puf_expanded <- puf_names %>% rename(RX=RX.Events)
+
+puf_expanded <- puf_expanded %>% 
+  mutate(RX = replace(RX,RX=="h10a","hc10a"))
 
 for(evnt in names(event_letters)){
   letter = event_letters[[evnt]]

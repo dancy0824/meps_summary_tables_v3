@@ -127,6 +127,10 @@ run;
 	%include "&shared\load_FYC.sas" / source2;
 	%create_subgrps;
 
+	%include "&path\grp1\event.sas";
+	%include "&path\grp1\sop.sas";
+	%include "&path\grp1\event_sop.sas"; 
+
 	options dlcreatedir;
 	libname newdir "&path\tables\&year\";
 
@@ -149,9 +153,6 @@ run;
 
 /*********************************************************/
 
-%run_sas(1996,2014);
+*%run_sas(1996,2014);
 
-%run_year( (1996, 1997, 1998, 1999 ) );
-
-%let year = 1996;
-%run_year(&year);
+%run_sas(1997,1998);

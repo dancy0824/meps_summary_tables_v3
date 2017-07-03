@@ -49,7 +49,7 @@ source(paste0(shared,"/run_global.R"),chdir=T) # shared
   year_list = 2014:1996
  
   
-  year_list = 1999:1996
+  year_list = 1996:1996
 
 ##################################################
 ###                   RUN                      ###
@@ -57,10 +57,7 @@ source(paste0(shared,"/run_global.R"),chdir=T) # shared
 
 for(year in year_list){  
   dir.create(sprintf('%s/%s',tables,year), showWarnings = FALSE)
-  
   yr <- substring(year,3,4); 
-  this_year <- meps_names %>% filter(Year==year) 
-  file_names <- as.list(this_year$url) %>% setNames(this_year$file_type)
 
 # Load data
   runSource('load_fyc.R',dir=shared,

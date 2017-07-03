@@ -44,11 +44,6 @@ run;
 	   %let grp = %scan(&subgrps, &i);
 	   %include "&shared\grps\&grp..sas" / source2;
 	%end;
-
-	%do i=1 %to %sysfunc(countw(&usegrps));
-	   %let grp = %scan(&usegrps, &i);
-	   %include "&path\grps\&grp..sas" / source2;
-	%end;
 %mend;
 
 
