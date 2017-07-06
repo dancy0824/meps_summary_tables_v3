@@ -1,15 +1,22 @@
-
-survey <- function(grp1,grp2,stat,yr,event="TOT",sop="EXP",use="PERWT.yy.F"){
-  runSource("stats.R",dir=path,verbose=F)
-  svyString <- use_svyby[[stat]] %>% 
-    rsub(
-      by=sprintf("~%s+%s",grp1,grp2),
-      event=event, sop=sop, use=use, yy=yr)
+survey <- function(grp1,grp2,stat,...){
+  svyString <- r_svy(grp1=grp1,grp2=grp2,stat=stat,...)
   
   cat(stat,":",svyString %>% writeLines)
   
   results <- run(svyString)
-  results %>% standardize(grp1=grp1,grp2=grp2,stat=stat)
+  results %>% standardize(grp1=grp1,grp2=grp2,stat=stat) 
+}
+
+standardize <- function(results,grp1,grp2,stat){
+  out <- results %>% select(-contains("FALSE")) 
+  cc <- length(names(out))
+  key = c(stat,paste0(stat,"_se"))
+  names(out)[(cc-1):cc] = key
+  
+  out %>%
+    mutate(grp1=grp1,grp2=grp2) %>%
+    mutate_(levels1=grp1,levels2=grp2) %>%
+    select(grp1,grp2,levels1,levels2,one_of(key))
 }
 
 ##################################################
@@ -22,9 +29,10 @@ path = paste0(dir,"/hc1_use/r")
 tables = paste0(path,"/tables")
 PUFdir = paste0(dir,"/shared/PUFS")
 
-setwd(dir)
+setwd(dir) 
 
 source(paste0(shared,"/run_global.R"),chdir=T) # shared
+source("hc1_use/app_info.R",chdir=T)
 
 # Load packages
   runSource('load_pkg.R',dir=shared)
@@ -32,25 +40,10 @@ source(paste0(shared,"/run_global.R"),chdir=T) # shared
 # Define lists (subgrp_list defined in shared/r/run_functions.R)
   usegrps = c("sop", "event", "event_sop")
 
-  sop_list = c("EXP", "SLF", "PTR", "MCR", "MCD", "OTZ")
-
-  use_list = list(
-    'TOT'='any_use','DVT'='DVTOT', 'RX' ='RXTOT',
-    'OBV'='OBTOTV', 'OBD'='OBDRV', 'OBO'='OBOTHV',
-    'OPT'='OPTOTV', 'OPY'='OPDRV', 'OPZ'='OPOTHV',
-    'ERT'='ERTOT',  'IPT'='IPDIS',
-    'HHT'='HHTOTD', 'HHA'='HHAGD', 'HHN'='HHINDD',
-    'OMA'='OMAEXP')
+  stat_list = c(fyc_stats,evnt_stats,"n","n_exp")
+              
+  year_list = 2009:1996
  
-  event_list = names(use_list)
-  
-  stat_list = c("totPOP","pctEXP","totEXP","meanEXP0","meanEXP","medEXP","n","n_exp")
-  
-  year_list = 2014:1996
- 
-  
-  year_list = 1996:1996
-
 ##################################################
 ###                   RUN                      ###
 ##################################################
@@ -67,9 +60,15 @@ for(year in year_list){
 # Add subgroups  
   for(grp in subgrps) runSource(sprintf("grps/%s.R",grp),dir=shared,"yy"=yr)
   for(grp in usegrps) runSource(sprintf("grps/%s.R",grp),dir=path,"yy"=yr)
+
+# Load EVENTS and merge with FYC 
+  runSource('load_events.R',dir=shared,"yy"=yr,"PUFdir"=PUFdir,
+            "subgrps"=paste0(subgrp_list,",",collapse=""),
+            get_file_names(year))
   
 # Define survey design  
-  runSource("fyc_dsgn.R",dir=path,"yy"=yr)
+  runSource("design_fyc.R",dir=path,"yy"=yr)
+  runSource("design_evnt.R",dir=path,"yy"=yr)
   
 # Run for each statistic  
   for(stat in stat_list){
@@ -97,34 +96,55 @@ for(year in year_list){
       for(SOP in sop_list){ 
         if(done(outfile,dir=tables,grp1=grp1,levels2=SOP)) next
         
+        EVNTdsgn <- update(EVNTdsgn,sop=SOP)
         FYCdsgn <- update(FYCdsgn,sop=SOP)
-        use <- paste0("TOT",SOP,yr)
-        results <- survey(grp1=grp1,grp2='sop',sop=SOP,stat=stat,use=use,yr=yr)
+        results <- survey(grp1=grp1,grp2='sop',sop=SOP,stat=stat,yr=yr)
         update.csv(results,file=outfile,dir=tables)
       }
     }
-    
+
     # Demographic subgroups x event type
-    for(grp1 in subgrp_list){   
-      for(EVNT in event_list){ 
-        if(done(outfile,dir=tables,grp1=grp1,levels2=EVNT)) next
+    for(grp1 in subgrp_list){  
+      
+      if(stat %in% evnt_stats){
+        if(done(outfile,dir=tables,grp1=grp1,grp2='event_v2X')) next
         
-        FYCdsgn <- update(FYCdsgn,event=EVNT)
-        use <- paste0(use_list[[EVNT]],yr)
-        results <- survey(grp1=grp1,grp2='event',event=EVNT,stat=stat,use=use,yr=yr)
+        results <- survey(grp1=grp1,grp2='event',stat=stat,yr=yr)
         update.csv(results,file=outfile,dir=tables)
+        
+        results_v2 <- survey(grp1=grp1,grp2='event_v2X',stat=stat,yr=yr)
+        update.csv(results_v2,file=outfile,dir=tables)
+        
+      }else{
+        for(EVNT in event_list){ 
+          if(done(outfile,dir=tables,grp1=grp1,levels2=EVNT)) next
+          FYCdsgn <- update(FYCdsgn,event=EVNT)
+          results <- survey(grp1=grp1,grp2='event',event=EVNT,stat=stat,yr=yr)
+          update.csv(results,file=outfile,dir=tables)
+        }
       }
+      
     }  
     
     # Source of payment x event type
-    for(SOP in sop_list){   
-      for(EVNT in event_list){ 
-        if(done(outfile,dir=tables,levels1=SOP,levels2=EVNT)) next
-        
-        FYCdsgn <- update(FYCdsgn,event=EVNT,sop=SOP)
-        use <- paste0(EVNT,SOP,yr)
-        results <- survey(grp1='sop',grp2='event',sop=SOP,event=EVNT,stat=stat,use=use,yr=yr)
+    for(SOP in sop_list){
+      
+      if(stat %in% evnt_stats){
+        EVNTdsgn <- update(EVNTdsgn,sop=SOP)
+        results <- survey(grp1='sop',grp2='event',sop=SOP,stat=stat,yr=yr)
         update.csv(results,file=outfile,dir=tables)
+        
+        results_v2 <- survey(grp1='sop',grp2='event_v2X',sop=SOP,stat=stat,yr=yr)
+        update.csv(results_v2,file=outfile,dir=tables)
+        
+      }else{
+        for(EVNT in event_list){ 
+          if(done(outfile,dir=tables,levels1=SOP,levels2=EVNT)) next
+          
+          FYCdsgn <- update(FYCdsgn,event=EVNT,sop=SOP)
+          results <- survey(grp1='sop',grp2='event',sop=SOP,event=EVNT,stat=stat,yr=yr)
+          update.csv(results,file=outfile,dir=tables)
+        }
       }
     }  
     
