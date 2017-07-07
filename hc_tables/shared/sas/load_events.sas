@@ -45,10 +45,11 @@
 			else TR&yy.X=&evnt.TR&yy.X;
 		%end;
 
-		keep SF: MR: MD: PV: VA: OF: SL: WC: OR: OU: OT: XP: 
+		keep SF: MR: MD: PV: TR: VA: OF: SL: WC: OR: OU: OT: XP: 
 			DUPERSID event ;
 	run;
 %mend;
+
 
 %load_events(RX,&RX.);
 %load_events(DV,&DV.);

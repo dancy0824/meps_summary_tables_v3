@@ -1,14 +1,17 @@
-data MEPS; set MEPS;
-	any_exp = (&event.&sop.&yy. > 0);
+data MEPS_gt0; set MEPS;
+	array vars &vars.;
+	do over vars;
+		vars = (vars > 0);
+	end;
 run;
 
-proc surveymeans data = MEPS mean missing nobs; 
-	FORMAT &format.;
-	VAR any_exp;
+proc surveymeans data = MEPS_gt0 mean missing nobs; 
+	&format.;
+	VAR &vars.;
 	STRATA VARSTR;
 	CLUSTER VARPSU;
 	WEIGHT PERWT&yy.F; 
-	DOMAIN &domain.;
+	&domain.;
 run;
 
 

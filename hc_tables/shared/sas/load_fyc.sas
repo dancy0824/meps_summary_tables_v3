@@ -6,8 +6,9 @@ run;
 
 data MEPS;
 	SET &FYC.;
-	year = &year.;		
+	year = &year.;	
 	ind = 1;
+	count = 1;
 
 	if year <= 2001 then do;
 		VARPSU = VARPSU&yy.;

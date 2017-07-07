@@ -47,24 +47,29 @@ run;
 %mend;
 
 
-%macro standardize(grp1,grp2,char1,char2);
+%macro stdize(grp1,grp2,char1=,char2=,type=FYC);
+	%put &grp1, &grp2, &stat;
+
 	data sas_results;
 		format levels1 &char1.&grp1.. levels2 &char2.&grp2..;
 		set sas_results;
+
+		%if &type = FYC %then %do;
+			event = substr(VarName,1,3);
+			evnt = substr(VarName,1,2);
+			sop = substr(VarName,4,3);
+			if evnt = "RX" then event = evnt;
+		%end;
+		%else %if &type = EVNT %then %do;
+			sop = substr(VarName,1,2);
+		%end;
+
 		grp1 = "&grp1";
 		grp2 = "&grp2";
 		levels1 = &grp1;
 		levels2 = &grp2;
-		has_exp = any_exp;
-		has_event = count_event;
-		if has_exp = . then has_exp = 1;
-		if has_event = . then has_event = 1;
-		keep grp1 grp2 levels1 levels2 Sum Mean Estimate StdDev StdErr has_exp has_event n ;
-	run;
-
-	data sas_results;
-		set sas_results;
-		where has_exp = 1 and has_event = 1;
+		
+		keep grp1 grp2 levels1 levels2 Sum Mean Estimate StdDev StdErr n ;
 	run;
 %mend;
 

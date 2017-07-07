@@ -1,12 +1,15 @@
-data MEPS; set MEPS;
-	count = (&count. > 0);
+data MEPS_use; set MEPS;
+	array vars &counts.;
+	do over vars;
+		vars = (vars > 0);
+	end;
 run; 
 
-proc surveymeans data = MEPS sum missing nobs;
-	FORMAT &format.;	
-	VAR count;
+proc surveymeans data = MEPS_use sum missing nobs;
+	&format.;	
+	VAR &counts.;
 	STRATA VARSTR;
 	CLUSTER VARPSU;
 	WEIGHT PERWT&yy.F;
-	DOMAIN &domain.;
+	&domain.;
 run;

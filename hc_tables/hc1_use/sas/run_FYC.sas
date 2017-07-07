@@ -13,16 +13,6 @@ options minoperator;
 
 %let usegrps = sop event event_sop;
 
-%let sp_list    = XP  SF  PR  MR  MD  OZ;
-%let sop_list   = EXP SLF PTR MCR MCD OTZ;
-
-%let event_list = TOT DVT   RX    OBV    OBD   OBO    OPT    OPY   OPZ    ERT   IPT   HHT    HHA   HHN    OMA;
-%let use_list   = any_use DVTOT RXTOT OBTOTV OBDRV OBOTHV OPTOTV OPDRV OPOTHV ERTOT IPDIS HHTOTD HHAGD HHINDD OMAEXP; 
-
-%let nsop   = %sysfunc(countw(&sop_list));
-%let nevent = %sysfunc(countw(&event_list));
-%let nuse   = %sysfunc(countw(&use_list));
-
 proc format; /* Blank format for sop and event */
 	value $ sop;
 	value $ event;
@@ -40,33 +30,33 @@ run;
 
 /* Reminder: only inline comments are allowed in macros */
 
-%macro survey(grp1,grp2,stat,char1,char2);
-	%put &grp1, &grp2, &event, &sop, &stat;
-
-	%let format = &grp1. &char1.&grp1..  &grp2. &char2.&grp2.. ;
-	%let domain = &grp1.*&grp2.;
+%macro survey(grp1,grp2,stat,char1=,char2=);
+	%let format = FORMAT &grp1. &char1.&grp1.. &grp2. &char2.&grp2.. ;
+	%let domain = DOMAIN &grp1.*&grp2.;
 
 	%if &stat = medEXP %then %let ods_table = DomainQuantiles;
 	%else %let ods_table = Domain; 
 
 	ods output &ods_table. = sas_results; 
 	%include "&path\stats\&stat..sas" ;
-	%standardize(grp1=&grp1, grp2=&grp2, char1=&char1,char2=&char2);
 %mend;
 
 %macro run_stat(stat,year) / mindelimiter = ',';
 	%local i j grp1 grp2; 
-
 	%let yy = %substr(&year,3,2);
-	%let sp = XP;
-	%let sop = EXP;
-	%let event = TOT;
-
-	%let count = PERWT&yy.F;
-	%let use = (XP&yy.X >= 0);
+	
+	%if &stat in totEVT,meanEVT %then %let type = EVNT;
+	%else %let type = FYC;
 
 /* Initialize results csv with ind*ind */
-	%survey(grp1=ind,grp2=ind,stat=&stat,char1=,char2=);
+
+	%let counts = count;
+	%let vars = TOTEXP&yy.;
+	%let uses = XP&yy.X;
+	%let gt = >= ;
+
+	%survey(grp1=ind,grp2=ind,stat=&stat);
+	%stdize(grp1=ind,grp2=ind,type=&type);
 
 	proc export data=sas_results 
 		outfile="&path\tables\&year\&stat..csv" 
@@ -74,88 +64,111 @@ run;
 	run;
 
 /* Demographic subgroups, crossed */
+
 	%do i=1 %to &ngrps;
+		%let grp1 = %scan(&subgrp_list, &i); 
+
 		%do j = &i+1 %to &ngrps;
-			%let grp1 = %scan(&subgrp_list, &i); 
 			%let grp2 = %scan(&subgrp_list, &j);
-			%survey(grp1=&grp1,grp2=&grp2,stat=&stat,char1=,char2=);
+			%survey(grp1=&grp1,grp2=&grp2,stat=&stat);
+			%stdize(grp1=&grp1,grp2=&grp2,type=&type);
 			%append(stat=&stat,year=&year);
 		%end;
 	%end;
 
 /* Demographic subgroups x source of payment */
-	%let event = TOT;
-	%let grp2 = sop;
 
-	%do i = 1 %to &ngrps;
-		%do j = 1 %to &nsop;
-			%let grp1 = %scan(&subgrp_list, &i); 
-			%let sop = %scan(&sop_list, &j); 
-			%let sp = %scan(&sp_list,&j);
+	%do i=1 %to &ngrps;
+		%let grp1 = %scan(&subgrp_list, &i); 
 
-			%let count = &event.&sop.&yy.;
-			%let use = (&sp.&yy.X > 0);;
-			
-			data MEPS; set MEPS; sop = "&sop"; run;
-			data EVENTS; set EVENTS; sop = "&sop"; run;
+		%let gt = > ;
+		%let uses   = XP&yy.X SF&yy.X PR&yy.X MR&yy.X MD&yy.X OZ&yy.X;
+		
+		%let counts = TOTEXP&yy. TOTSLF&yy. TOTPTR&yy. TOTMCR&yy. TOTMCD&yy. TOTOTZ&yy.;
+		%let vars = &counts;
 
-			%survey(grp1=&grp1,grp2=&grp2,stat=&stat,char1=,char2=$);
-			%append(stat=&stat,year=&year);
-		%end;
+		%survey(grp1=&grp1, grp2=ind, stat=&stat);
+		%stdize(grp1=&grp1, grp2=sop, char2=$,type=&type);
+		%append(stat=&stat,year=&year);
+
 	%end;
 
 /* Demographic subgroups x event type */
-	%let sop = EXP;
-	%let grp2 = event;
 
-	%do i = 1 %to &ngrps;
-		%if &stat in totEVT,meanEVT %then %do;
-			%let grp1 = %scan(&subgrp_list, &i); 
-				
+	%do i=1 %to &ngrps;
+		%let grp1 = %scan(&subgrp_list, &i); 
+
+		%if type=EVNT %then %do;
+			%let gt = >= ;
+			%let uses = XP&yy.X;
+
 			%survey(grp1=&grp1,grp2=event,stat=&stat,char1=,char2=$);
+			%stdize(grp1=&grp1,grp2=event,char2=$,type=&type);
 			%append(stat=&stat,year=&year);
 
 			%survey(grp1=&grp1,grp2=event_v2X,stat=&stat,char1=,char2=$);
+			%stdize(grp1=&grp1,grp2=event,char2=$,type=&type);
 			%append(stat=&stat,year=&year);
 		%end;
 
-		%else %do j = 1 %to &nevent;		
-				%let event = %scan(&event_list, &j);
-				%let count = %scan(&use_list, &j)&yy.;
-				
-				data MEPS; set MEPS; event = "&event"; run;
-				%survey(grp1=&grp1,grp2=&grp2,stat=&stat,char1=,char2=$);
-				%append(stat=&stat,year=&year);
+		%else %do;	
+			%let counts = TOTUSE&yy. DVTOT&yy. RXTOT&yy. OBTOTV&yy. OBDRV&yy. OBOTHV&yy. 
+						  OPTOTV&yy. OPDRV&yy. OPOTHV&yy. ERTOT&yy.  IPDIS&yy. OMAEXP&yy.
+						  HHTOTD&yy. HHAGD&yy. HHINDD&yy. ; 
+
+			%let vars = TOTEXP&yy. DVTEXP&yy. RXEXP&yy.  OBVEXP&yy. OBDEXP&yy. OBOEXP&yy. 
+						OPTEXP&yy. OPYEXP&yy. OPZEXP&yy. ERTEXP&yy. IPTEXP&yy. OMAEXP&yy.
+					    HHTEXP&yy. HHAEXP&yy. HHNEXP&yy. ;
+
+			%survey(grp1=&grp1,grp2=ind,stat=&stat);
+			%stdize(grp1=&grp1,grp2=event,char2=$,type=&type);
+			%append(stat=&stat,year=&year);
 		%end;
 
-	%end;
+	%end; 
 
 /* Source of payment x event type */
-	%let grp1 = sop;
-	%let grp2 = event;
 
-	%do i = 1 %to &nsop;
-		%let sop = %scan(&sop_list, &i); 
-		%let sp = %scan(&sp_list,&i);
-		%let use = (&sp.&yy.X > 0);
+	%if type=EVNT %then %do;	
+		%let gt = > ;
+		%let uses = XP&yy.X SF&yy.X PR&yy.X MR&yy.X MD&yy.X OZ&yy.X;
+	
+		%survey(grp1=ind,grp2=event,stat=&stat,char2=$);
+		%stdize(grp1=sop,grp2=event,char1=$,char2=$,type=&type);
+		%append(stat=&stat,year=&year);
 
-		%if &stat in totEVT,meanEVT %then %do;				
-			%survey(grp1=sop,grp2=event,stat=&stat,char1=$,char2=$);
-			%append(stat=&stat,year=&year);
-
-			%survey(grp1=sop,grp2=event_v2X,stat=&stat,char1=$,char2=$);
-			%append(stat=&stat,year=&year);
-		%end;
-
-		%do j = 1 %to &nevent;
-			%let event = %scan(&event_list, &j); 
-			%let count = &event.&sop.&yy.;
-			
-			data MEPS; set MEPS; sop = "&sop"; event = "&event"; run;
-			%survey(grp1=&grp1,grp2=&grp2,stat=&stat,char1=$,char2=$);
-			%append(stat=&stat,year=&year);
-		%end;
+		%survey(grp1=ind,grp2=event_v2X,stat=&stat,char2=$);
+		%stdize(grp1=sop,grp2=event_v2X,char1=$,char2=$,type=&type);
+		%append(stat=&stat,year=&year);
 	%end;
+
+	%else %do;
+
+		%let counts = 
+				TOTEXP&yy. TOTSLF&yy. TOTPTR&yy. TOTMCR&yy. TOTMCD&yy. TOTOTZ&yy.
+				DVTEXP&yy. DVTSLF&yy. DVTPTR&yy. DVTMCR&yy. DVTMCD&yy. DVTOTZ&yy.
+				RXEXP&yy.  RXSLF&yy.  RXPTR&yy.  RXMCR&yy.  RXMCD&yy.  RXOTZ&yy.
+				OBVEXP&yy. OBVSLF&yy. OBVPTR&yy. OBVMCR&yy. OBVMCD&yy. OBVOTZ&yy.
+				OBDEXP&yy. OBDSLF&yy. OBDPTR&yy. OBDMCR&yy. OBDMCD&yy. OBDOTZ&yy.
+				OBOEXP&yy. OBOSLF&yy. OBOPTR&yy. OBOMCR&yy. OBOMCD&yy. OBOOTZ&yy.
+				OPTEXP&yy. OPTSLF&yy. OPTPTR&yy. OPTMCR&yy. OPTMCD&yy. OPTOTZ&yy.
+				OPYEXP&yy. OPYSLF&yy. OPYPTR&yy. OPYMCR&yy. OPYMCD&yy. OPYOTZ&yy.
+				OPZEXP&yy. OPZSLF&yy. OPZPTR&yy. OPZMCR&yy. OPZMCD&yy. OPZOTZ&yy.
+				ERTEXP&yy. ERTSLF&yy. ERTPTR&yy. ERTMCR&yy. ERTMCD&yy. ERTOTZ&yy.
+				IPTEXP&yy. IPTSLF&yy. IPTPTR&yy. IPTMCR&yy. IPTMCD&yy. IPTOTZ&yy.
+				HHTEXP&yy. HHTSLF&yy. HHTPTR&yy. HHTMCR&yy. HHTMCD&yy. HHTOTZ&yy.
+				HHAEXP&yy. HHASLF&yy. HHAPTR&yy. HHAMCR&yy. HHAMCD&yy. HHAOTZ&yy.
+				HHNEXP&yy. HHNSLF&yy. HHNPTR&yy. HHNMCR&yy. HHNMCD&yy. HHNOTZ&yy.
+				OMAEXP&yy. OMASLF&yy. OMAPTR&yy. OMAMCR&yy. OMAMCD&yy. OMAOTZ&yy.;
+
+		%let vars = &counts;
+		
+		%survey(grp1=ind,grp2=ind,stat=&stat);
+		%stdize(grp1=sop,grp2=event,char1=$,char2=$,type=&type);
+		%append(stat=&stat,year=&year);
+
+	%end; 
+
 
 %mend;
 
@@ -175,23 +188,20 @@ run;
 	options dlcreatedir;
 	libname newdir "&path\tables\&year\";
 
-	/* Population 
+	/* Population */
 	%run_stat(totPOP,year=&year);
 	%run_stat(pctEXP,year=&year);
 
-	/* Expenditures 
+	/* Expenditures */
 	%run_stat(totEXP,year=&year);
 	%run_stat(meanEXP0,year=&year);
 	%run_stat(meanEXP,year=&year);
 	%run_stat(medEXP,year=&year);
 
-	/* Utilization 
-	%run_stat(totEVT,year=&year); */
+	/* Utilization */
+	%run_stat(totEVT,year=&year); 
 	%run_stat(meanEVT,year=&year);
 
-	/* Sample size */
-	%run_stat(n,year=&year);
-	%run_stat(n_exp,year=&year);
 %mend;
 
 %macro run_sas(year_start,year_end);
@@ -207,6 +217,7 @@ run;
 * %run_sas(1996,2013);
 
 /*
+%let year = 2014;
 %let subgrps = ind agegrps;
 %let ngrps = 2;
 %let stat = totEVT;
