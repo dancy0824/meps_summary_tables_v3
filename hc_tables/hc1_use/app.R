@@ -5,40 +5,10 @@
 # options(shiny.reactlog=T)
 
 source("../shared/app_global.R", chdir=T, local=T)
-
-info <- source("app_info.R")$value
+source("app_info.R",chdir=T,local=T)
 load("USE_TABLES.Rdata")
 
 ###########################################################
-
-use_stats = list(
-  "Population" = c(
-    "Number of people" = "totPOP",
-    "Percent of population with an expense (%)" = "pctEXP"
-  ),
-  "Expenditures" = c(
-    "Total expenditures ($)"                        = "totEXP",
-    "Mean expenditure per person ($)"               = "meanEXP0",
-    "Mean expenditure per person with expense ($)"  = "meanEXP",
-    "Median expenditure per person with expense ($)"= "medEXP"
-  ),
-  "Utilization" = c(
-    "Number of events" = "totEVT",
-    "Mean expenditure per event ($)" = "meanEVT"
-  )
-)
-
-use_add <- list(
-  "Event Type"  = "event",
-  "Source of Payment"  = "sop")
-
-use_subgrps <- append(subgrps,use_add,after=1)
-
-stat_labels <- use_stats %>% invertList
-grp_labels <- use_subgrps %>% invertList 
-grp_labels$Year = "Year"
-
-############################################################
 
 form_elements <- tagList(
     selectInput508("stat",label="Select statistic:",choices=use_stats),

@@ -62,20 +62,3 @@ abbrev = function(s){
     gsub("medicines","meds",.) %>%
     gsub("events","",.,ignore.case=T)
 }
-
-# subgrp_totals <- list(
-#   "ind" = "Total",
-#   "event"         = "All Event Types",
-#   "sop"           = "All Sources",
-#   "agegrps"       = "All Age Groups",
-#   "region"        = "All Regions",
-#   "married"       = "All Marital Statuses",
-#   "race"          = "All Races/Ethnicities",
-#   "sex"           = "All Persons",
-#   "insurance"     = "All Coverage Statuses",
-#   "health"        = "All Health Statuses",
-#   "mental_health" = "All Mental Health Statuses",
-#   "education"     = "All Education Levels",
-#   "employed"      = "All Employment Statuses",
-#   "poverty"       = "All Poverty Levels"
-# )
