@@ -8,4 +8,9 @@ data MEPS; set MEPS;
 	OPYEXP&yy. = OPVEXP&yy. + OPSEXP&yy.; /* Physician only */
 	OPZEXP&yy. = OPOEXP&yy. + OPPEXP&yy.; /* non-physician only */
 	OMAEXP&yy. = VISEXP&yy. + OTHEXP&yy.;
+
+	total_use&yy. = (DVTOT&yy. + RXTOT&yy. + OBTOTV&yy. + OPTOTV&yy. + 
+                     ERTOT&yy. + IPDIS&yy. + HHTOTD&yy. + OMAEXP&yy.);
+
+    any_use&yy. = (total_use&yy. > 0)*1;
 run;

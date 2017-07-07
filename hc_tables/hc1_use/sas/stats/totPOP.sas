@@ -1,7 +1,5 @@
-* totPOP ;
-
 data MEPS; set MEPS;
-	count = (&countvar. > 0);
+	count = (&count. > 0);
 run; 
 
 proc surveymeans data = MEPS sum missing nobs;

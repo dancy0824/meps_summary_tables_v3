@@ -25,19 +25,20 @@
 %mend;
 
 %macro add_event_sops;	
-	%let sop_list = EXP SLF PTR MCR MCD OTZ;
-	%let event_list = 
+	%let sops = EXP SLF PTR MCR MCD OTZ;
+	%let events = 
 			TOT DVT RX  OBV OBD OBO 
 			OPF OPD OPV OPS OPO OPP 
-			ERF ERD IPF IPD HHA HHN OTH;
+			ERF ERD IPF IPD HHA HHN 
+			VIS OTH;
 
 	%local i;
 	%do i = 1 %to 20;
-		%add_sops(event = %scan(&event_list, &i));
+		%add_sops(event = %scan(&events, &i));
 	%end;
 
 	%do i = 1 %to 6;
-		%add_events(sop = %scan(&sop_list, &i));
+		%add_events(sop = %scan(&sops, &i));
 	%end;
 %mend;
 

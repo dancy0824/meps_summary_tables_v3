@@ -44,6 +44,9 @@
 			if year <= 1999 then TR&yy.X=&evnt.CH&yy.X;
 			else TR&yy.X=&evnt.TR&yy.X;
 		%end;
+
+		keep SF: MR: MD: PV: VA: OF: SL: WC: OR: OU: OT: XP: 
+			DUPERSID event ;
 	run;
 %mend;
 

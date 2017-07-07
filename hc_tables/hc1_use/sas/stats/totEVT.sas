@@ -1,8 +1,6 @@
-* totEVT ;
-
 data EVENTS; set EVENTS;
-	count = &countvar.;
-	count_event = (&sop.&yy.X >= 0);
+	count = &use.;
+	count_event = (&sp.&yy.X >= 0);
 run; 
 
 proc surveymeans data = EVENTS sum missing nobs;

@@ -15,6 +15,7 @@ data MEPS; set MEPS;
 		black  = (RACETHNX = 2);
 		native = (RACETHNX >= 3 and RACEX in (3,6));
 		asian  = (RACETHNX >= 3 and RACEX in (4,5));
+		white_oth = 0;
 	end;
 
 	else do;

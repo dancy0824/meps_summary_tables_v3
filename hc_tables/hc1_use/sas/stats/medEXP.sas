@@ -1,4 +1,3 @@
-* medEXP;
 data MEPS; set MEPS;
 	any_exp = (&event.&sop.&yy. > 0);
 run;

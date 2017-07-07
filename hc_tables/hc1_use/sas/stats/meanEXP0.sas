@@ -1,4 +1,3 @@
-* meanEXP0;
 proc surveymeans data = MEPS mean missing nobs; 
 	FORMAT &format.;
 	VAR &event.&sop.&yy.;
