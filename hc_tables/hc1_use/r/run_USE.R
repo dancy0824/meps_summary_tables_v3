@@ -1,8 +1,7 @@
+
 survey <- function(grp1,grp2,stat,...){
-  svyString <- r_svy(grp1=grp1,grp2=grp2,stat=stat,...)
-  
+  svyString <- svy_code(grps=c(grp1,grp2),stat=stat,...)  
   cat(stat,":",svyString %>% writeLines)
-  
   results <- run(svyString)
   results %>% standardize(grp1=grp1,grp2=grp2,stat=stat) 
 }
@@ -42,7 +41,7 @@ source("hc1_use/app_info.R",chdir=T)
 
   stat_list = c(fyc_stats,evnt_stats,"n","n_exp")
               
-  year_list = 2009:1996
+  year_list = 2007:1996
  
 ##################################################
 ###                   RUN                      ###
