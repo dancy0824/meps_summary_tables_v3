@@ -1,12 +1,10 @@
 #############################################
-###  Access to care and quality of care   ###
+###   Accessibility and quality of care   ###
 #############################################
 
 survey <- function(grp1,stat,yr,...){
   svyString <- r_svy(grps=grp1,stat=stat,...)
-  
   cat(stat,":",svyString %>% writeLines)
-  
   results <- run(svyString)
   results %>% standardize(grp1=grp1,stat=stat) 
 } 
@@ -25,34 +23,30 @@ standardize <- function(results,grp1,stat){
     select(grp1,grp2,levels1,levels2,pctPOP,pctPOP_se)
 }
 
-#####################################################################
+##################################################
+###                  LISTS                     ###
+##################################################
 
-dir = "C:/Users/emily.mitchell/Desktop/Programming/GitHub/meps_summary_tables/hc_tables"
-shared = paste0(dir,"/shared/r")
-path = paste0(dir,"/hc2_care/r")
-tables = paste0(path,"/tables")
-PUFdir = paste0(dir,"/shared/PUFS")
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-setwd(dir)
+app <- "hc2_care"
 
-source(paste0(shared,"/run_global.R"),chdir=T) # shared
-source("hc2_care/app_info.R",chdir=T)
+# Shared
+source("../../shared/global.R")
+source("../../shared/r/run_preamble.R",chdir=T)
 
-# Load packages
-  runSource('load_pkg.R',dir=shared)
+# Local
+source("../global.R",chdir=T)
 
-# Define lists (from shared/r/run_global and dictionaries.R)
-
-  caregrps = care_subgrps %>% unlist
-   
-  year_list = 2014:1996
-
+caregrps = care_subgrps %>% unlist
 
 ##################################################
 ###                   RUN                      ###
 ##################################################
-
-
+  
+# Load packages
+  runSource('load/load_pkg.R',dir=shared)
+  
 for(year in year_list){   print(year)
   
   dir.create(sprintf('%s/%s',tables,year), showWarnings = FALSE)
@@ -61,21 +55,18 @@ for(year in year_list){   print(year)
   ya <- substring(year+1,3,4)
   
 # Load data
-  runSource('load_fyc.R',dir=shared,
+  runSource('load/load_fyc.R',dir=shared,
             "year"=year,"yy"=yr,"PUFdir"=PUFdir,
              get_file_names(year))  
   
-  yr <- substring(year,3,4); 
-  
 # Add subgroups  
-  for(grp in subgrps) runSource(sprintf("grps/%s.R",grp),dir=shared,"yy"=yr)
-  for(grp in caregrps) runSource(sprintf("grps/%s.R",grp),dir=path,
-                                 "yy"=yr,"ya"=ya,"yb"=yb)
+  for(grp in subgrp_load) runSource(sprintf("subgrps/%s.R",grp),dir=shared,"yy"=yr)
+  for(grp in caregrps) runSource(sprintf("grps/%s.R",grp),dir=path,"yy"=yr,"ya"=ya,"yb"=yb)
   
 # Define design
-  runSource("design_fyc.R", dir=path,"yy"=yr)
-  runSource("design_diab.R",dir=path,"yy"=yr)
-  runSource("design_saq.R", dir=path,"yy"=yr)
+  runSource("svydesign/design_fyc.R", dir=shared,"yy"=yr)
+  runSource("svydesign/design_diab.R",dir=shared,"yy"=yr)
+  runSource("svydesign/design_saq.R", dir=shared,"yy"=yr)
     
 # Run for each statistic
   

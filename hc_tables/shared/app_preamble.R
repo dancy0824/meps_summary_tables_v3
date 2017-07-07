@@ -16,9 +16,11 @@ addResourcePath('www','../../www')
 meps_names = read.csv("https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_file_names.csv",
                       stringsAsFactors = F)
 
-source("notes.R",local=TRUE)
-source("functions.R",local=TRUE)
-source("functions508.R",local=TRUE)
+
+source("global.R",local=TRUE)
+source("app_notes.R",local=TRUE)
+source("app_functions.R",local=TRUE)
+source("app_functions508.R",local=TRUE)
 # 
 # source("code/r_code/snippets_load.R",local=TRUE)
 # source("code/r_code/snippets_subgrps.R",local=TRUE)
@@ -32,43 +34,6 @@ source("../../modules/tab1_table.R",local=TRUE)
 source("../../modules/tab2_plot.R",local=TRUE)
 source("../../modules/tab3_code.R",local=TRUE)
 
-########################################################
-
-subgrps <- list(
-  "(none)"             = "ind",
-  "Demographics" = c(
-    "Age Groups"         = "agegrps",
-    "Census Region"      = "region",
-    "Marital Status"     = "married",
-    "Race/Ethnicity"     = "race",
-    "Sex"                = "sex"
-  ),
-  "Health Variables" = c(
-    "Insurance Coverage" = "insurance",
-    "Perceived Health Status" = "health",
-    "Perceived Mental Health" = "mental_health"
-  ), 
-  "Socio-Economic Status" = c(
-    "Education"         = "education",
-    "Employment Status" = "employed",
-    "Poverty Status"    = "poverty"
-  )
-)  
-
-subgrp_code <- function(grps,lang="r"){
-  lang <- tolower(lang)
-  
-  subgrps <- subgrps[subgrps != 'ind']
-  subgrps <- grps[grps %in% subgrps] %>% unique
-  
-  # add agevar if needed
-  if(any(c("agegrps","employed","education","insurance") %in% subgrps))
-    subgrps <- c("agevar",subgrps)
-  
-  sapply(subgrps, function(x)
-    readCode(sprintf("../shared/%s/grps/%s.%s",lang,x,lang))) %>%
-    paste(collapse="\n")
-} 
 
 ########################################################
 ## UI builder

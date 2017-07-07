@@ -1,27 +1,28 @@
-library(foreign)
-library(survey)
-library(dplyr)
 library(tidyr)
+library(dplyr)
 
-source("../functions.R")
+dir = "C:/Users/emily.mitchell/Desktop/Programming/GitHub/meps_summary_tables/hc_tables"
+shared = paste0(dir,"/shared/r")
+PUFdir = sprintf("%s/shared/PUFS",dir) 
+path   = sprintf("%s/%s/r",dir,app)
+tables = sprintf("%s/tables",path) 
 
+meps_names <-
+  read.csv(sprintf("%s/shared/puf_expanded.csv",dir),
+           stringsAsFactors=F)
 
-meps_names = read.csv("../puf_expanded.csv",stringsAsFactors = F)
+no_miss = meps_names %>% filter(FYC != "") %>% arrange(-Year) 
+year_list = no_miss$Year
 
+subgrps <- unlist(subgrps)
+subgrp_load <- c("agevar",subgrps)
+subgrp_list  <- c(subgrps,"insurance_v2X","agegrps_v2X")
 
-subgrps = c("ind", "agevar",
-            "agegrps", "region", "married", "race", "sex", # Demographics
-            "insurance", "health", "mental_health",        # Health Variables
-            "education", "employed", "poverty")            # Socio-economic status
-
-subgrp_list = c(subgrps,"insurance_v2X","agegrps_v2X")
-subgrp_list = subgrp_list[subgrp_list!='agevar']
 sl = length(subgrp_list)
 
 #########################################################
 ##                      FUNCTIONS                      ##
 #########################################################
-
 
 get_file_names <- function(year){
  meps_names %>% 
@@ -68,6 +69,9 @@ done <- function(outfile,...,dir="/"){
 }
 
 
+
+
+
 # 
 # 
 # ########################################################
@@ -77,58 +81,6 @@ done <- function(outfile,...,dir="/"){
 # reverse <- function(df){
 #   df[nrow(df):1,]
 # }
-# 
-
-# 
-# switch_labels <- function(df){
-#   names(df)[names(df) %in% 
-#     c("grp1","grp2","levels1","levels2")] <- 
-#     c("grp2","grp1","levels2","levels1")
-#   df
-# }
-
-# is.done <- function(file,check){   
-#   file_exists = file %in% list.files(recursive=T)
-#   if(!file_exists | length(check)==0 ) return(FALSE)
-#   df <- read.csv(file,stringsAsFactors = F)
-#   
-#   for(i in 1:length(check)){
-#     name  = names(check)[i]
-#     value = check[i]
-#     df <- df %>% filter_( sprintf("%s=='%s'",name,value) )
-#   }
-#   return(nrow(df)>0)
-# }
-
-
-# 
-# run <- function(FUN,file,force=F,...){
-#   
-#   extras <- list(...)
-#   
-#   extras$levels1 <- extras[[extras$grp1]]
-#   extras$levels2 <- extras[[extras$grp2]]
-#   
-#   chk = extras[names(extras) %in% c("grp1","grp2","levels1","levels2")]
-#   
-#   if(force | !is.done(file,check=chk)){
-#     tab <- FUN(...)
-#     update.csv(tab,file_name=file)
-#     return(tab)
-#   }
-#   return("skipped")
-# }
-# 
-# std <- function(df,key,addSE=T){
-#   df <- df %>% select(-contains("FALSE"))
-#   cc <- length(names(df))
-#   
-#   if(addSE) key=c(key,paste0(key,"_se"))
-#   names(df)[(cc-1):cc] = key
-#   
-#   df
-# }
-# 
 # switch_labels <- function(df){
 #   names(df)[names(df) %in% 
 #     c("grp1","grp2","levels1","levels2")] <- 

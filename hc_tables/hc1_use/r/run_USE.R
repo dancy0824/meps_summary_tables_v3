@@ -1,6 +1,9 @@
+#############################################
+###     UTILIZATION AND EXPENDITURES      ###
+#############################################
 
 survey <- function(grp1,grp2,stat,...){
-  svyString <- svy_code(grps=c(grp1,grp2),stat=stat,...)  
+  svyString <- r_svy(grps=c(grp1,grp2),stat=stat,...)  
   cat(stat,":",svyString %>% writeLines)
   results <- run(svyString)
   results %>% standardize(grp1=grp1,grp2=grp2,stat=stat) 
@@ -22,52 +25,48 @@ standardize <- function(results,grp1,grp2,stat){
 ###                  LISTS                     ###
 ##################################################
 
-dir = "C:/Users/emily.mitchell/Desktop/Programming/GitHub/meps_summary_tables/hc_tables"
-shared = paste0(dir,"/shared/r")
-path = paste0(dir,"/hc1_use/r")
-tables = paste0(path,"/tables")
-PUFdir = paste0(dir,"/shared/PUFS")
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-setwd(dir) 
+app <- "hc1_use"
 
-source(paste0(shared,"/run_global.R"),chdir=T) # shared
-source("hc1_use/app_info.R",chdir=T)
+# Shared
+source("../../shared/global.R")
+source("../../shared/r/run_preamble.R",chdir=T)
 
-# Load packages
-  runSource('load_pkg.R',dir=shared)
+# Local
+source("../global.R",chdir=T)
 
-# Define lists (subgrp_list defined in shared/r/run_functions.R)
-  usegrps = c("sop", "event", "event_sop")
-
-  stat_list = c(fyc_stats,evnt_stats,"n","n_exp")
-              
-  year_list = 2007:1996
- 
+usegrps = c("sop", "event", "event_sop")
+stat_list = c(fyc_stats,evnt_stats,"n","n_exp")
+          
 ##################################################
 ###                   RUN                      ###
 ##################################################
 
+# Load packages
+  runSource('load/load_pkg.R',dir=shared)
+  
 for(year in year_list){  
   dir.create(sprintf('%s/%s',tables,year), showWarnings = FALSE)
   yr <- substring(year,3,4); 
 
 # Load data
-  runSource('load_fyc.R',dir=shared,
+  runSource('load/load_fyc.R', dir=shared,
             "year"=year,"yy"=yr,"PUFdir"=PUFdir,
             get_file_names(year))
 
 # Add subgroups  
-  for(grp in subgrps) runSource(sprintf("grps/%s.R",grp),dir=shared,"yy"=yr)
+  for(grp in subgrp_load) runSource(sprintf("subgrps/%s.R",grp),dir=shared,"yy"=yr)
   for(grp in usegrps) runSource(sprintf("grps/%s.R",grp),dir=path,"yy"=yr)
 
 # Load EVENTS and merge with FYC 
-  runSource('load_events.R',dir=shared,"yy"=yr,"PUFdir"=PUFdir,
+  runSource('load/load_events.R',dir=shared,"yy"=yr,"PUFdir"=PUFdir,
             "subgrps"=paste0(subgrp_list,",",collapse=""),
             get_file_names(year))
   
 # Define survey design  
-  runSource("design_fyc.R",dir=path,"yy"=yr)
-  runSource("design_evnt.R",dir=path,"yy"=yr)
+  runSource("svydesign/design_fyc.R",dir=shared,"yy"=yr)
+  runSource("svydesign/design_evnt.R",dir=shared,"yy"=yr)
   
 # Run for each statistic  
   for(stat in stat_list){

@@ -8,7 +8,6 @@ FYC <- FYC %>% mutate(
   OMAEXP.yy. = VISEXP.yy. + OTHEXP.yy.) # Other medical expenses
 
 FYC <- FYC %>% mutate(
-  total_use.yy. = (DVTOT.yy. + RXTOT.yy. + OBTOTV.yy. + OPTOTV.yy. + 
-                   ERTOT.yy. + IPDIS.yy. + HHTOTD.yy. + OMAEXP.yy.),
-  any_use.yy. = (total_use.yy. > 0)*1
+  TOTUSE.yy. = (DVTOT.yy. + RXTOT.yy. + OBTOTV.yy. + OPTOTV.yy. + 
+                ERTOT.yy. + IPDIS.yy. + HHTOTD.yy. + OMAEXP.yy.)
 )
