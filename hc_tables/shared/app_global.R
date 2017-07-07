@@ -55,6 +55,21 @@ subgrps <- list(
   )
 )  
 
+subgrp_code <- function(grps,lang="r"){
+  lang <- tolower(lang)
+  
+  subgrps <- subgrps[subgrps != 'ind']
+  subgrps <- grps[grps %in% subgrps] %>% unique
+  
+  # add agevar if needed
+  if(any(c("agegrps","employed","education","insurance") %in% subgrps))
+    subgrps <- c("agevar",subgrps)
+  
+  sapply(subgrps, function(x)
+    readCode(sprintf("../shared/%s/grps/%s.%s",lang,x,lang))) %>%
+    paste(collapse="\n")
+} 
+
 ########################################################
 ## UI builder
 
