@@ -1,16 +1,7 @@
-ods graphics off; 
-ods listing close; 
-ods exclude all; *ods exclude none;
-options minoperator;
+/******   RUN: UTILIZATION AND EXPENDITURES  ******/
 
-/*********************  Define Lists  *************************/
-%let dir = C:\Users\emily.mitchell\Desktop\Programming\GitHub\meps_summary_tables\hc_tables;
-%let shared = &dir\shared\sas;
-%let PUFdir = &dir\shared\PUFS;
-%let path = &dir\hc1_use\sas;
-
-%include "&shared\run_global.sas";
-
+%let app = hc1_use;
+%include "C:\Users\emily.mitchell\Desktop\Programming\GitHub\meps_summary_tables\hc_tables\shared\sas\run_preamble.sas";
 %let usegrps = sop event event_sop;
 
 proc format; /* Blank format for sop and event */
@@ -19,15 +10,7 @@ proc format; /* Blank format for sop and event */
 	value $ event_v2X;
 run;
 
-/*
-%let year = 2014; %put &year;
-%let stat = totEVT;
-%let i = 1;
-%let j = 2;
-*/
-
-/*********************  Define Macros  *************************/
-
+/********************  Define Macros  *******************/
 /* Reminder: only inline comments are allowed in macros */
 
 %macro survey(grp1,grp2,stat,char1=,char2=);
@@ -39,6 +22,35 @@ run;
 
 	ods output &ods_table. = sas_results; 
 	%include "&path\stats\&stat..sas" ;
+%mend;
+
+%macro stdize(grp1,grp2,char1=,char2=,type=FYC);
+	%put &grp1, &grp2, &stat;
+
+	data sas_results;
+		format levels1 &char1.&grp1.. levels2 &char2.&grp2..;
+		set sas_results;
+
+		%if &type = FYC %then %do;
+			event = substr(VarName,1,3);
+			sop = substr(VarName,4,3);
+			evnt = substr(VarName,1,2);
+
+			if evnt = "RX" then do; 
+				event = evnt; sop = substr(VarName,3,3);
+			end;
+		%end;
+		%else %if &type = EVNT %then %do;
+			sop = substr(VarName,1,2);
+		%end;
+
+		grp1 = "&grp1";
+		grp2 = "&grp2";
+		levels1 = &grp1;
+		levels2 = &grp2;
+		
+		keep grp1 grp2 levels1 levels2 Sum Mean Estimate StdDev StdErr n ;
+	run;
 %mend;
 
 %macro run_stat(stat,year) / mindelimiter = ',';
@@ -66,10 +78,10 @@ run;
 /* Demographic subgroups, crossed */
 
 	%do i=1 %to &ngrps;
-		%let grp1 = %scan(&subgrp_list, &i); 
+		%let grp1 = %scan(&subgrps, &i); 
 
 		%do j = &i+1 %to &ngrps;
-			%let grp2 = %scan(&subgrp_list, &j);
+			%let grp2 = %scan(&subgrps, &j);
 			%survey(grp1=&grp1,grp2=&grp2,stat=&stat);
 			%stdize(grp1=&grp1,grp2=&grp2,type=&type);
 			%append(stat=&stat,year=&year);
@@ -79,7 +91,7 @@ run;
 /* Demographic subgroups x source of payment */
 
 	%do i=1 %to &ngrps;
-		%let grp1 = %scan(&subgrp_list, &i); 
+		%let grp1 = %scan(&subgrps, &i); 
 
 		%let gt = > ;
 		%let uses   = XP&yy.X SF&yy.X PR&yy.X MR&yy.X MD&yy.X OZ&yy.X;
@@ -93,12 +105,14 @@ run;
 
 	%end;
 
+
+
 /* Demographic subgroups x event type */
 
 	%do i=1 %to &ngrps;
-		%let grp1 = %scan(&subgrp_list, &i); 
+		%let grp1 = %scan(&subgrps, &i); 
 
-		%if type=EVNT %then %do;
+		%if &type=EVNT %then %do;
 			%let gt = >= ;
 			%let uses = XP&yy.X;
 
@@ -129,7 +143,7 @@ run;
 
 /* Source of payment x event type */
 
-	%if type=EVNT %then %do;	
+	%if &type=EVNT %then %do;	
 		%let gt = > ;
 		%let uses = XP&yy.X SF&yy.X PR&yy.X MR&yy.X MD&yy.X OZ&yy.X;
 	
@@ -169,21 +183,20 @@ run;
 
 	%end; 
 
-
 %mend;
+
+proc print data = sas_results;
+run;
 
 %macro run_year(year);
 	%set_file_names(&year);
 
 	%let yy = %substr(&year,3,2);
-	%include "&shared\load_FYC.sas" / source2;
-	%create_subgrps;
+	%include "&shared\load\load_FYC.sas" / source2;
+	%create_subgrps(&subgrp_load,&shared\subgrps);
+	%create_subgrps(&usegrps,&path\grps);
 
-	%include "&path\grps\event.sas";
-	%include "&path\grps\sop.sas";
-	%include "&path\grps\event_sop.sas"; 
-
-	%include "&shared\load_events.sas" / source2;
+	%include "&shared\load\load_events.sas" / source2;
 
 	options dlcreatedir;
 	libname newdir "&path\tables\&year\";
@@ -212,13 +225,34 @@ run;
 
 /*********************************************************/
 
-%run_sas(1996,2014);
-
-* %run_sas(1996,2013);
-
-/*
-%let year = 2014;
 %let subgrps = ind agegrps;
 %let ngrps = 2;
+
+%run_sas(1996,2014);
+
+
+
+/*
+
+
+%let year = 2014;
+
+%let year = 2002;
+%let stat = totPOP;
+
+%let stat = meanEVT;
+
 %let stat = totEVT;
+
+%let i = 1;
+%let j = 1;
+
+%let char1 = ;
+%let char2 = ;
+
+%put &subgrps;
+
+proc print data = sas_results;
+run;
+
 */

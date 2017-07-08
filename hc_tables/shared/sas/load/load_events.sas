@@ -5,7 +5,7 @@
 	run;
 
 	data &evnt;
-		SET &file.;
+		SET &syslast; /* Most recent dataset loaded */
 		event = "&evnt.";
 		year = &year.;
 
@@ -49,7 +49,6 @@
 			DUPERSID event ;
 	run;
 %mend;
-
 
 %load_events(RX,&RX.);
 %load_events(DV,&DV.);
