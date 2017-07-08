@@ -11,11 +11,8 @@ library(scales)
 
 addResourcePath('www','../../www')
 
-#meps_names = read.csv("meps_names.csv",stringsAsFactors = F)
 
-meps_names = read.csv("https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_file_names.csv",
-                      stringsAsFactors = F)
-
+meps_names <- read.csv("puf_expanded.csv", stringsAsFactors=F)
 
 source("global.R",local=TRUE)
 source("app_notes.R",local=TRUE)
