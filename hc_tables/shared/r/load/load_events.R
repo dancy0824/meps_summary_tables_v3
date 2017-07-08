@@ -1,4 +1,3 @@
-
 rename_sops = function(df,evnt,year,hosp=F){
   sops = c("SF","MR","MD","PV","VA","TR","OF",
            "SL","WC","OT","OR","OU","XP")

@@ -77,9 +77,9 @@ r_svy <- function(grps,stat,yr,sop="EXP",event="TOT",display=F){
   use <- "(.sp..yy.X >= 0)"
   if('sop' %in% grps) use <- "(.sp..yy.X > 0)"
   
-  if(length(grps)==0) meps_code = meps_svy else meps_code = meps_svyby
+  if(length(gp)==0) meps_code = meps_svy else meps_code = meps_svyby
   
   meps_code[[stat]] %>% 
-    rsub(by = sprintf("~%s",paste0(grps,collapse="+")),
+    rsub(by = sprintf("~%s",paste0(gp,collapse="+")),
          grps=gp, stat=stat, count=count, use=use, event=event, sop=sop, sp=sp, yy=yr)
 }

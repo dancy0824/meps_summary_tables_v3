@@ -5,29 +5,38 @@
 
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-
-load_code <- function(grps,stat,yr,lang="r"){
+load_code <- function(grps,stat,year,lang="r"){
   type <- ifelse(stat %in% evnt_stats,"EVNT","FYC")
+  yr <- substring(year,3,4)
   
-  code <- readSource(sprintf("../shared/%s/load_fyc.%s",lang,lang)) # Load FYC
+  code <- readSource(sprintf("../shared/%s/load/load_fyc.%s",lang,lang)) # Load FYC
   code <- code %>% add(subgrp_code(grps=grps,lang=lang)) # Define subgroups
-  
+
   if(type == "FYC"){
     local_subgrps <- grps[grps %in% local_grps] %>% unique
     if(all(c("sop","event") %in% grps)) local_subgrps <- c("event_sop")
     
     code <- code %>% add(sapply(local_subgrps, function(x)
-      readCode(sprintf("%s/grps/%s.%s",lang,x,lang))) %>%
-        paste(collapse="\n"))
+      readSource(sprintf("%s/grps/%s.%s",lang,x,lang))) %>% paste(collapse="\n"))
+  
+  }else if(type == "EVNT"){
+    code <- code %>% 
+      add(readSource(sprintf("../shared/%s/load/load_events.%s",lang,lang)))
   }
-  code
-}
 
+  code %>% rsub(type=lang,
+                year=year,yy=yr,PUFdir = "C:/MEPS",
+                get_file_names(year))
+}
 
 #################################################################
 
+
+### !!! load design here !!!
+
 get_r_code <- function(grps,stat,yr){
   
+  code <- ""
   type <- ifelse(stat %in% evnt_stats,"EVNT","FYC")
   
   if('sop' %in% grps) sops = sop_list else sops = "EXP"
@@ -37,23 +46,20 @@ get_r_code <- function(grps,stat,yr){
   if(type=="FYC"){
     for(sop in sops){
       if('event'%in% grps) code <- code %>% add(sprintf("# Source of payment: %s",sop))
-      for(event in events) code <- code %>% add(r_code(grps,stat,yr,sop=sop,event=event,display=T))  
+      for(event in events) code <- code %>% add(r_svy(grps,stat,yr,sop=sop,event=event,display=T))  
     }
     
   }else if(type=="EVNT"){
-    for(sop in sops) code <- code %>% add(r_code(grps,stat,yr,sop=sop,display=T))  
+    for(sop in sops) code <- code %>% add(r_svy(grps,stat,yr,sop=sop,display=T))  
     if('event' %in% grps){
       grps_v2X <- grps %>% replace(grps=="event","event_v2X")
-      for(sop in sops) code <- code %>% add(r_code(grps_v2X,stat,yr,sop=sop,display=T))  
+      for(sop in sops) code <- code %>% add(r_svy(grps_v2X,stat,yr,sop=sop,display=T))  
     }
   }
   
   return(code)
 }
 
-
-
-get_r_code(c("sop","sex"),"totPOP","05") %>% writeLines  
 
 
 
@@ -101,7 +107,6 @@ get_sas_code <- function(grps,stat,yr,...){
 }
 
 
-test <- sas_code(grps = c("event","sop"),stat="totPOP",yr=14)
 
 ### ADD EVENT_V2X FOR evnt GROUPS -- maybe in DOMAIN statement??
 
