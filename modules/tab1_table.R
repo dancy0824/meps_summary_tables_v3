@@ -55,9 +55,8 @@ tableModule <- function(input, output, session, tbl, inputs, adj, labels){
 # Display table     
 
   display_tbl <- reactive({                                              print("display_tbl()...")
-     tab <- formatted_tbl() %>% 
+     formatted_tbl() %>% 
       spread_tbl(stat = ifelse(inputs()$showSEs,"coef_se","coef"), labels = labels()$labels) 
- 
   })
   
   output$meps_table <- renderUI({                                     cat("\n\nOUTPUT$MEPS_TABLE..\n")

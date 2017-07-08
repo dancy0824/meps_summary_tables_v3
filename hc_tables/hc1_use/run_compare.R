@@ -64,17 +64,15 @@ compareR <- function(year,stat="totPOP"){  print(paste0(year,":",stat));
   compare(r,old_r,stat=stat)
 }
 
-years <- 2014:2010
-stats <- c("totPOP","totEXP","pctEXP","meanEXP0","meanEXP","medEXP","n","n_exp",
+years <- 2014:1996
+stats <- c("totPOP","totEXP","pctEXP","meanEXP0","meanEXP","medEXP",
+           "n","n_exp",
            "totEVT","meanEVT")
 
 
 R_diffs <- compare_all(stats,years,compareR)
 R_diffs
 
-R_diffs$totEVT$Y2013 %>% filter(grp2!="sop",grp1!="sop")
-
-compareR(2014,stat="totEVT")
 
 
 
@@ -92,8 +90,8 @@ compareSAS = function(year,stat="totPOP"){  print(paste0(year,":",stat));
     "pctEXP" = "mean",
     "meanEXP" = "mean",
     "meanEXP0" = "mean",
-    "n" = "sum",
-    "n_exp"="sum")
+    "meanEVT" = "mean",
+    "totEVT" = "sum")
 
   sas_se = switch(sas_stat,
     "sum" = "stddev",
@@ -117,12 +115,28 @@ compareSAS = function(year,stat="totPOP"){  print(paste0(year,":",stat));
     filter( gsub("_v2X","",grp1)!=gsub("_v2X","",grp2) | grp1 == 'ind')
     #mutate_at(vars(levels1,levels2),trimws)
   
+  sas <- sas %>% mutate(
+    levels2=replace(levels2,levels2=="OBT","OBV"),
+    levels2=replace(levels2,levels2=="OPD","OPY"),
+    levels2=replace(levels2,levels2=="OPO","OPZ"),
+    levels2=replace(levels2,levels2=="IPD","IPT"),
+    levels2=replace(levels2,levels2=="HHI","HHN"))
+  
   compare(r,sas,stat=stat)
 }
 
 years <- 2014
-stats <- c("totPOP","totEXP","pctEXP","meanEXP0","meanEXP","medEXP","n")
+stats <- c("totPOP","totEXP","pctEXP","meanEXP0","meanEXP","medEXP",
+           "meanEVT","totEVT")
 
+stats = c("totPOP")
+
+SAS_diffs <- compare_all(stats,years,compareSAS)
+
+SAS_diffs$totPOP
+sas %>% filter(grp1=="ind",grp2=="event") #%>% head
+
+SAS_diffs$totPOP$Y2014 %>% print(n=200)
 
 
 ## !! SOP and EVENT stats are very wrong
@@ -139,7 +153,6 @@ stats <- c("totPOP","totEXP","pctEXP","meanEXP0","meanEXP","medEXP","n")
 # 
 
 
-SAS_diffs <- compare_all(stats,years,compareSAS)
 
 SAS_diffs$n$Y2014 %>% print(n=100)
 
