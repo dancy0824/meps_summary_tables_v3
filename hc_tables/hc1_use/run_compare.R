@@ -129,80 +129,10 @@ years <- 2014
 stats <- c("totPOP","totEXP","pctEXP","meanEXP0","meanEXP","medEXP",
            "meanEVT","totEVT")
 
-stats = c("totPOP")
+#stats = c("totPOP")
 
 SAS_diffs <- compare_all(stats,years,compareSAS)
 
-SAS_diffs$totPOP
-sas %>% filter(grp1=="ind",grp2=="event") #%>% head
-
-SAS_diffs$totPOP$Y2014 %>% print(n=200)
-
-
-## !! SOP and EVENT stats are very wrong
-# 
-# diffs <- compareSAS(2014,"totPOP") ; diffs;
-# 
-# diffs %>% filter(grp2 != 'event')
-# 
-# diffs %>% filter(is.na(stat1))
-# 
-# diffs %>% filter(grp2 == "sop",grp1=="ind")
-#   filter(!grp2 %in%  c('event','sop')) %>%
-#   print(n=100)
-# 
-
-
-
-SAS_diffs$n$Y2014 %>% print(n=100)
-
-
-for(stat in stats){
-  for(year in years){
-    print(stat)
-    print(year)
-    Y = paste0("Y",year)
-    out <- SAS_diffs[[stat]][[Y]]
-    # out <- out %>% 
-    #   filter(grp1 != 'race') %>%
-    #   filter(grp2 != 'race') 
-    # 
-    if(nrow(out) > 0 ) print(out)
-    
-  }
-}
-
-
-# Errors: 
-#  OTZ x OMA (sop, event) -- fixed
-#  PTR X OMA (2006,2005) -- fixed
-# n: sop -- fixed maybe?
-# race: < 2011 -- fixed probably
-
-
-SAS_diffs$n$Y2014 %>%
-  filter(grp2 != 'sop')
-
-SAS_diffs$totPOP$Y2010
-
-SAS_diffs$totPOP$Y2011 %>% filter(grp2 != 'race') %>%
-  filter(grp1 != 'race')
-
-################################
-
-
-
-year = 2014
-stat = "totPOP"
-
-compare(year=2014,stat="totPOP")
-compare(year=2014,stat="pctEXP")
-
-compare(year=2014,stat="totEXP")
-compare(year=2014,stat="meanEXP0")
-compare(year=2014,stat="meanEXP")
-compare(year=2014,stat="medEXP")
-
-
+SAS_diffs
 
 
