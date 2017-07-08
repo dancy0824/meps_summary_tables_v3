@@ -26,10 +26,12 @@ subgrps <- list(
   )
 )  
 
+subgrp_vec <- unlist(subgrps) 
+
 subgrp_code <- function(grps,lang="r"){
   lang <- tolower(lang)
   
-  subgrps <- subgrps[subgrps != 'ind']
+  subgrps <- subgrp_vec[subgrp_vec != 'ind']
   subgrps <- grps[grps %in% subgrps] %>% unique
   
   # add agevar if needed
@@ -37,14 +39,30 @@ subgrp_code <- function(grps,lang="r"){
     subgrps <- c("agevar",subgrps)
   
   sapply(subgrps, function(x)
-    readCode(sprintf("../shared/%s/grps/%s.%s",lang,x,lang))) %>%
+    readSource(sprintf("../shared/%s/subgrps/%s.%s",lang,x,lang))) %>%
     paste(collapse="\n")
 } 
 
 
 #####################################################
-###              FORMATTING FUNCTIONS             ###
+###                   FUNCTIONS                   ###
 #####################################################
+
+get_file_names <- function(year){
+  meps_names %>% 
+    filter(Year==year) %>%
+    select(-Year,-ends_with('Panel'))
+}
+
+
+readSource <- function(file,...,dir=".",verbose=T){
+  fileName <- sprintf("%s/%s",dir,file) %>% gsub("//","/",.)
+  codeString <- readChar(fileName,file.info(fileName)$size)
+  codeString <- codeString %>% rsub(...) %>% gsub("\r","",.)
+  
+  if(verbose) codeString %>% writeLines
+  codeString
+}
 
 rsub <- function(string,...,type='r'){
   repl = switch(type,
