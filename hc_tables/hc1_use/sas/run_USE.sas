@@ -121,7 +121,7 @@ run;
 			%append(stat=&stat,year=&year);
 
 			%survey(grp1=&grp1,grp2=event_v2X,stat=&stat,char1=,char2=$);
-			%stdize(grp1=&grp1,grp2=event,char2=$,type=&type);
+			%stdize(grp1=&grp1,grp2=event_v2X,char2=$,type=&type);
 			%append(stat=&stat,year=&year);
 		%end;
 
@@ -185,8 +185,6 @@ run;
 
 %mend;
 
-proc print data = sas_results;
-run;
 
 %macro run_year(year);
 	%set_file_names(&year);
@@ -201,11 +199,11 @@ run;
 	options dlcreatedir;
 	libname newdir "&path\tables\&year\";
 
-	/* Population */
+	/* Population 
 	%run_stat(totPOP,year=&year);
 	%run_stat(pctEXP,year=&year);
 
-	/* Expenditures */
+	/* Expenditures 
 	%run_stat(totEXP,year=&year);
 	%run_stat(meanEXP0,year=&year);
 	%run_stat(meanEXP,year=&year);
@@ -233,6 +231,7 @@ run;
 
 
 %let year = 2014;
+%let stat = totEVT;
 
 %let year = 2002;
 %let stat = totPOP;

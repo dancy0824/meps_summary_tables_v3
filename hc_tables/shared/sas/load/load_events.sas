@@ -46,7 +46,7 @@
 		%end;
 
 		keep SF: MR: MD: PV: TR: VA: OF: SL: WC: OR: OU: OT: XP: 
-			DUPERSID event ;
+			SEEDOC: MPCELIG: SELFAGEN: DUPERSID event ;
 	run;
 %mend;
 
