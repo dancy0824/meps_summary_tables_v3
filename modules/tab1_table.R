@@ -16,24 +16,28 @@ spread_tbl <- function(data,stat,labels=NULL){               print("spread_tbl")
 ###                      UI                         ###
 #######################################################
 
+# downloadUI <- function(id){
+#   ns <- NS(id)
+#   
+#   
+# }
+
+
 tableUI<- function(id){
   ns <- NS(id)
   
-  tabPanel(title="Table",icon=icon("table"), 
+  tabPanel(title="Table",icon=icon("table"),
+           downloadButton508( ns("csv"), 
+                              class = 'download-button',
+                              label = 'Download table', 
+                              icon = icon('download')),
+           
            uiOutput(ns('meps_table')),
            uiOutput(ns("table_footnotes"))
   )
   
 }
 
-downloadUI <- function(id){
-  ns <- NS(id)
-  
-  downloadButton508( ns("csv"), 
-    class = 'download-button',
-    label = 'Download table', 
-    icon=icon('download'))
-}
 
 
 #######################################################

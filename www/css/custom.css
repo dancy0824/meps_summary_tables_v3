@@ -50,23 +50,31 @@ caption, .caption{
 
 .nav-pills>li.active>a, 
 .nav-pills>li.active>a:focus, 
-.nav-pills>li.active>a:hover {
+.nav-pills>li.active>a:hover{
     color: #fff;
     background-color: #015289;
+    text-decoration: none;
 }
 
-.download-button{
-  background-color: #2e8540; /* green */
-  color: #fff !important;
-  float: right;
+.download-button, 
+.download-button:visited,
+.download-button:active,
+.download-button:hover,
+.download-button:focus{ /* copying usa-button-secondary */
+   background-color: #e31c3d;
+   text-decoration: none;
+   color: white;
 }
 
-.download-button:hover, .download-button:focus{
-  background-color: #276f36 !important; /* darker green not usa*/
+.download-button:hover, 
+.downlad-button:focus,
+.download-button:visited:hover{
+  background-color: #cd2026;
 }
 
-.right{
-  float: right !important;
+.download-button:visited:active,
+.download-button:active{
+  background-color: #981b1e;
 }
 
 [data-value="Table"] {

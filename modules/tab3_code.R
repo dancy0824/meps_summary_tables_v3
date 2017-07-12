@@ -7,6 +7,12 @@ codeUI <- function(id){
   
   tabPanel(title="Code",icon=icon("code"),
            
+           downloadButton508( ns("dl_code"), 
+                              class = 'download-button',
+                              label = 'Download Code', 
+                              icon=icon('download')),
+           
+           
            selectInput508(ns("code_language"),
                           label = "Select Programming Language:",
                           choices = c("R","SAS","Stata")),

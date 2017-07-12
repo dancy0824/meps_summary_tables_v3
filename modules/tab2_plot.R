@@ -38,8 +38,12 @@ plotUI<- function(id){
   
   tabPanel(title="Plot",icon=icon("bar-chart"), 
            
+           downloadButton508( ns("png"), 
+                              class = 'download-button',
+                              label = 'Download Plot', 
+                              icon=icon('download')),
+           
            uiOutput(ns("caption")),
-
 
            fluidRow(
              column(width = 9,
@@ -63,16 +67,6 @@ plotUI<- function(id){
   
 }
 
-
-
-downloadPlotUI <- function(id){
-  ns <- NS(id)
-  
-  downloadButton508( ns("png"), 
-                     class = 'download-button',
-                     label = 'Download Plot', 
-                     icon=icon('download'))
-}
 
 #######################################################
 ###                     SERVER                      ###

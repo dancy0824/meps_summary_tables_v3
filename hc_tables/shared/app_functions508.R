@@ -168,7 +168,7 @@ actionButton508 <- function (inputId, label, usaStyle = NULL, class="", icon = N
 downloadButton508 <- function (outputId, label = "Download", icon, class=""){
   if(missing(icon)) icon <- icon("download")
   aTag <- tags$a(id = outputId,
-                 class = paste("shiny-download-link ",class),
+                 class = paste("shiny-download-link usa-button",class),
                  href = "",
                  target = "_blank",
                  tags$span(icon,`aria-hidden`='true'),label)

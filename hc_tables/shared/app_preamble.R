@@ -53,11 +53,11 @@ mepsPage <- function(id,info,form_elements,tab_elements){
     fluidRow(class='full-screen',
         column(width=4, tags$form(class = "usa-form-large", form_elements)),
         column(width=8,
-               addLinks(
+              # addLinks(
                  tabsetPanel(type="pills",tableUI(id),plotUI(id),codeUI(id)),
-                 downloadUI(id), 
-                 downloadPlotUI(id),
-                 class="right"),
+                # downloadUI(id), 
+                # downloadPlotUI(id),
+               #  class="right"),
                
                hc_info(id)
                
