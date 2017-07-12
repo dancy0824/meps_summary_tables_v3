@@ -3,7 +3,7 @@
 .select-box{
   background-color: #015289; /* cool-blue */
   color: white;
-  padding: 1rem 4rem;
+  /*padding: 1rem 4rem;*/
 }
 
 .em-fieldset{
@@ -67,7 +67,7 @@ fieldset .dropdown{
   border: 1px solid #5b616b !important;
   height: 4.4rem;
   padding: 0;
-  margin: 0.2em;
+  margin: 0.2em 0 0 0.2em;
   width: 4.4rem;
   background-position: 8px center;
 }
