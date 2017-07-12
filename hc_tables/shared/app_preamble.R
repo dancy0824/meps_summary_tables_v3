@@ -39,18 +39,20 @@ mepsPage <- function(id,info,form_elements,tab_elements){
  
   bootstrapPage(
     
-    div(class='select-box',
-        h1(info$title), p(info$description), p(info$instructions)
+    div(class = 'full-screen',
+      div(class='select-box',
+          h1(info$title), p(info$description), p(info$instructions)
         
         # fluidRow508(
         #   col508(width="one-half",  ),
         #   col508(width="one-half", tags$form(class = "usa-form-large", form_elements))
         # )
+      )
     ),
     
-    div(class='usa-grid full-screen',
-        col508(width="one-third", tags$form(class = "usa-form-large", form_elements)),
-        col508(width="two-thirds",
+    fluidRow(class='full-screen',
+        column(width=4, tags$form(class = "usa-form-large", form_elements)),
+        column(width=8,
                addLinks(
                  tabsetPanel(type="pills",tableUI(id),plotUI(id),codeUI(id)),
                  downloadUI(id), 
