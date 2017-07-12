@@ -38,7 +38,22 @@ caption, .caption{
 }
 
 
-/* Nav-tabs */
+/*****  Nav-tabs  *****/
+
+.nav-pills{
+  max-width: 800px;
+}
+
+.nav-pills> li{
+  text-align:center;
+  width: 100%;
+}
+
+@media screen and (min-width: 481px){
+  .nav-pills> li{
+    width: 30%;
+  }
+}
 
 .nav-pills> li> a {
   text-decoration: none;
@@ -55,6 +70,9 @@ caption, .caption{
     background-color: #015289;
     text-decoration: none;
 }
+
+
+/*****  Download Button  *****/
 
 .download-button, 
 .download-button:visited,
