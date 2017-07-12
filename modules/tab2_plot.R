@@ -43,7 +43,7 @@ plotUI<- function(id){
                               label = 'Download Plot', 
                               icon=icon('download')),
            
-           uiOutput(ns("caption")),
+           uiOutput(ns("plot_caption"),inline=T),
 
            fluidRow(
              column(width = 9,
@@ -76,8 +76,8 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   
   is_trend <- reactive(input$tabs == "trend")
   
-  output$plot_footnote   <- renderText(labels()$footnotes$suppress %>% gsub(" -- Estimates","<em>Note:</em> Some estimates",.))
-  output$caption  <- renderUI(tags$div(class='caption',labels()$caption))
+  output$plot_footnote <- renderText(labels()$footnotes$suppress %>% gsub(" -- Estimates","<em>Note:</em> Some estimates",.))
+  output$plot_caption  <- renderUI(tags$caption(labels()$caption))
   
   rows  <- reactive(inputs()$rows)
   rowsX <- reactive(inputs()$rowsX)

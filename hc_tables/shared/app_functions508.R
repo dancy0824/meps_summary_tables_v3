@@ -21,11 +21,9 @@ HTML508table <- function(body,caption="",cnames=colnames(body) ){
   body_string <- cbind(" <tr> ",body," </tr> ")  %>% t %>% paste(collapse="")
   
   myHtable <- sprintf("<table border=0>
-                      <caption> %s </caption>
                       <thead> %s </thead>
                       <tbody> %s </tbody>
                       </table>",
-                      caption,
                       columnROW,
                       body_string)
   
@@ -165,13 +163,18 @@ actionButton508 <- function (inputId, label, usaStyle = NULL, class="", icon = N
     list(shiny:::validateIcon(icon), label), ...)
 }
 
-downloadButton508 <- function (outputId, label = "Download", icon, class=""){
+downloadButton508 <- function (outputId, label = "Download", icon, class="",hideLabel=T){
   if(missing(icon)) icon <- icon("download")
+  
+  title <- ifelse(hideLabel,label,'')
+  labelClass <- ifelse(hideLabel,'usa-sr-only','')
   aTag <- tags$a(id = outputId,
-                 class = paste("shiny-download-link usa-button",class),
+                 title = title,
+                 class = paste("em-tooltip shiny-download-link usa-button",class),
                  href = "",
                  target = "_blank",
-                 tags$span(icon,`aria-hidden`='true'),label)
+                 tags$span(icon,`aria-hidden`='true'),
+                 tags$span(class=labelClass,label))
 }
 
 

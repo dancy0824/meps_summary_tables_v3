@@ -11,6 +11,7 @@ h2{font-size: 2rem;}
 caption, .caption{
   color: #5b616b; /* gray */
   font-size: 2.2rem;
+  display: inline;
 }
 
 .em-legend{
@@ -74,6 +75,11 @@ caption, .caption{
 
 /*****  Download Button  *****/
 
+.download-button{
+  display: inline;
+  padding: 0.2rem 1rem;
+}
+
 .download-button, 
 .download-button:visited,
 .download-button:active,
@@ -95,10 +101,16 @@ caption, .caption{
   background-color: #981b1e;
 }
 
+
+/*****  Table  *****/
+
 [data-value="Table"] {
   overflow-x: auto;
 }
 
+table caption{
+  visibility:hidden;
+}
 
 
 

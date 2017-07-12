@@ -32,6 +32,7 @@ tableUI<- function(id){
                               label = 'Download table', 
                               icon = icon('download')),
            
+           uiOutput(ns("table_caption"),inline=T),
            uiOutput(ns('meps_table')),
            uiOutput(ns("table_footnotes"))
   )
@@ -45,6 +46,8 @@ tableUI<- function(id){
 #######################################################
 
 tableModule <- function(input, output, session, tbl, inputs, adj, labels){
+  
+  output$table_caption <- renderUI(tags$caption(labels()$caption))
   
   formatted_tbl <- reactive({
     denom = adj()$D; digits = adj()$d;
