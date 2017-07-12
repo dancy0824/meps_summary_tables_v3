@@ -94,7 +94,6 @@ fieldset .dropdown{
 
 .flex-parent{
   display: flex;
-  align-items: center;
 }
 
 .flex-child-fill{
