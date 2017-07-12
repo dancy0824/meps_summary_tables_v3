@@ -45,22 +45,6 @@ compare_all <- function(statlist,yearlist,FUN=compareR){
 compareR <- function(year,stat="totPOP"){  print(paste0(year,":",stat));
   r <- read.csv(sprintf("r/tables/%s/%s.csv",year,stat),stringsAsFactors = F)
   old_r <-  read.csv(sprintf("r/tables_baseline/%s/%s.csv",year,stat),stringsAsFactors = F)
-  
-  old_r <- old_r %>% mutate(
-    levels1=replace(levels1,levels1=="XP","EXP"),
-    levels1=replace(levels1,levels1=="SF","SLF"),
-    levels1=replace(levels1,levels1=="PR","PTR"),
-    levels1=replace(levels1,levels1=="MR","MCR"),
-    levels1=replace(levels1,levels1=="MD","MCD"),
-    levels1=replace(levels1,levels1=="OZ","OTZ"),
-    
-    levels2=replace(levels2,levels2=="XP","EXP"),
-    levels2=replace(levels2,levels2=="SF","SLF"),
-    levels2=replace(levels2,levels2=="PR","PTR"),
-    levels2=replace(levels2,levels2=="MR","MCR"),
-    levels2=replace(levels2,levels2=="MD","MCD"),
-    levels2=replace(levels2,levels2=="OZ","OTZ"))
-  
   compare(r,old_r,stat=stat)
 }
 
@@ -72,9 +56,6 @@ stats <- c("totPOP","totEXP","pctEXP","meanEXP0","meanEXP","medEXP",
 
 R_diffs <- compare_all(stats,years,compareR)
 R_diffs
-
-
-
 
 
 #############################################
@@ -111,9 +92,10 @@ compareSAS = function(year,stat="totPOP"){  print(paste0(year,":",stat));
   D = ifelse(stat == "totEXP",1E6,1)
   
   r <- r %>% mutate_if(is.numeric, function(x) round(x/D,digits=d))
-  sas <- sas %>% mutate_if(is.numeric, function(x) round(x/D,digits=d)) %>%
-    filter( gsub("_v2X","",grp1)!=gsub("_v2X","",grp2) | grp1 == 'ind')
-    #mutate_at(vars(levels1,levels2),trimws)
+  sas <- sas %>% mutate_if(is.numeric, function(x) round(x/D,digits=d))
+    
+  # Remove agegrps x agegrps_v2X and insurance x insurance_v2X (they are in sas for easier syntax)
+  sas <- sas %>% filter( gsub("_v2X","",grp1)!=gsub("_v2X","",grp2) | grp1 == 'ind')
   
   sas <- sas %>% mutate(
     levels2=replace(levels2,levels2=="OBT","OBV"),
@@ -122,17 +104,62 @@ compareSAS = function(year,stat="totPOP"){  print(paste0(year,":",stat));
     levels2=replace(levels2,levels2=="IPD","IPT"),
     levels2=replace(levels2,levels2=="HHI","HHN"))
   
-  compare(r,sas,stat=stat)
+  sas <- sas %>% mutate(
+    levels1=replace(levels1,levels1=="XP","EXP"),
+    levels1=replace(levels1,levels1=="SF","SLF"),
+    levels1=replace(levels1,levels1=="PR","PTR"),
+    levels1=replace(levels1,levels1=="MR","MCR"),
+    levels1=replace(levels1,levels1=="MD","MCD"),
+    levels1=replace(levels1,levels1=="OZ","OTZ"),
+    
+    levels2=replace(levels2,levels2=="XP","EXP"),
+    levels2=replace(levels2,levels2=="SF","SLF"),
+    levels2=replace(levels2,levels2=="PR","PTR"),
+    levels2=replace(levels2,levels2=="MR","MCR"),
+    levels2=replace(levels2,levels2=="MD","MCD"),
+    levels2=replace(levels2,levels2=="OZ","OTZ"))
+
+  out <- compare(r,sas,stat=stat) 
+  
+  if(is.null(out)) return(out)
+  
+  out %>%
+    filter(!(grp2=="event_v2X"&levels2=="Missing")) %>%
+    filter(!(is.na(stat1) & is.na(stat2))) %>%
+    filter(!(is.na(stat1) & stat2==0)) %>%
+    filter(levels2 != "") # These are SAS group totals
 }
 
 years <- 2014
 stats <- c("totPOP","totEXP","pctEXP","meanEXP0","meanEXP","medEXP",
            "meanEVT","totEVT")
 
+
+year = 2014
+stat = "totEVT"
 #stats = c("totPOP")
 
 SAS_diffs <- compare_all(stats,years,compareSAS)
 
-SAS_diffs
+test <- SAS_diffs$meanEXP$Y2014
+
+test %>% filter(se2 > se1)
+
+test %>% print(n=300)
+
+test %>% filter(grp2=="event_v2X") %>% print(n=300)
+test %>% filter(grp2!="event_v2X") %>% print(n=500)
+
+View(SAS_diffs$meanEVT$Y2014)
+
+sas %>% filter(grp1=="ind",grp2=="ind")
+sas %>% filter(grp1=="ind",grp2=="event_v2X")
+
+# TOTEVT
+# Sas is missing event_V2X 
+# SAS: event is missing levels -- needs a format?
+# 0 vs NA for missing categories -- which is correct? relevant?
+# some blanks for SAS -- means total i think?
+
 
 
