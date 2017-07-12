@@ -23,7 +23,7 @@ form_elements <- tagList(
     tags$fieldset(
       rcInput("use",type="cols",choices=use_subgrps),
       div(class = 'hide-if-trend slide',
-          rcInput("use",type="rows",choices=use_subgrps, selected = "event",hide_label=T),
+          rcInput("use",type="rows",choices=use_subgrps, hide_label=T),
           switchUI("use")
       )
     )

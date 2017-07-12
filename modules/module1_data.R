@@ -48,8 +48,8 @@ yearInput <- function(id,min,max){
   tags$fieldset(
     div(class = "flex-parent",
       div(class="flex-child fill year-start", 
-          selectInput508(ns("year_start"),label="Year:",choices=min:max,selected=min)),
-      div(class="flex-child fill year-main", selectInput508(ns("year"),label= "to:",choices=min:max,selected=max)) 
+          selectInput508(ns("year_start"),label="Year:",choices=max:min,selected=min)),
+      div(class="flex-child fill year-main", selectInput508(ns("year"),label= "to:",choices=max:min,selected=max)) 
     )
   )
 }
