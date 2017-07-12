@@ -31,14 +31,19 @@ fieldset .dropdown{
   display: inline-block;
 }
 
-/* Show/hide based on trend or cross-sectional selection */
-.hide-if-trend{
-  visibility:hidden;
+.year-start, .year-main{
+  width: 49%;
+  display: inline-block;
+  overflow: hidden;
 }
 
-.show-if-trend{
- /* overflow: hidden;*/
+/* Show/hide based on trend or cross-sectional selection */
+
+.hide-if-trend{
+  /*visibility:hidden;*/
+  display:none;
 }
+
 
 
 /* Group select dropdown */
@@ -94,11 +99,14 @@ fieldset .dropdown{
 
 .flex-parent{
   display: flex;
+ 
 }
 
+
 .flex-child-fill{
-  width:100% ;
+  width: 100% ;
 }
+
 
 /*
 .rc-switch {

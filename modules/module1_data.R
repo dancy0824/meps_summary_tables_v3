@@ -46,8 +46,11 @@ standardErrorInput <- function(id){
 yearInput <- function(id,min,max){
   ns <- NS(id)
   tags$fieldset(
-    div(class="half", selectInput508(ns("year"),label="Year:",choices=max:min,selected=max)),
-    div(class="half show-if-trend", selectInput508(ns("year_end"), label= "to:",choices=max:min,selected=min)) 
+    div(class = "flex-parent",
+      div(class="flex-child-fill year-start", 
+          selectInput508(ns("year_start"),label="Year:",choices=min:max,selected=min)),
+      div(class="flex-child-fill year-main", selectInput508(ns("year"),label= "to:",choices=min:max,selected=max)) 
+    )
   )
 }
 
@@ -83,7 +86,7 @@ dataModule <- function(input, output, session, df, stat, exclude_initial,...){
   
   years <- reactive({
     if(!is_trend()) return(input$year)
-    return(input$year:input$year_end)
+    return(input$year_start:input$year)
   })
   
   cols = reactive({

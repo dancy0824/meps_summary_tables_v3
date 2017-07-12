@@ -39,8 +39,8 @@ mepsPage <- function(id,info,form_elements,tab_elements){
  
   bootstrapPage(
     
-    div(class = 'full-screen',
-      div(class='select-box',
+    div(class = 'select-box ',
+      div(class='full-screen',
           h1(info$title), p(info$description), p(info$instructions)
         
         # fluidRow508(
