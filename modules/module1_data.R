@@ -58,8 +58,8 @@ rcInput <- function(id, type="cols", choices=NULL, selected=choices[1], label="G
   
   tags$fieldset(class = class,
                 tags$label(label, `for` = ns(type), class=labelClass),
-                div(class="btn-group rc-group", role="group",
-                    div(class="btn-group rc-select", role="group", selectInput508(ns(type),choices=choices,selected)),
+                div(class="btn-group flex-parent", role="group",
+                    div(class="btn-group flex-child-fill", role="group", selectInput508(ns(type),choices=choices,selected)),
                     div(class="btn-group rc-drop", grpInput( ns(type), choices=choices))
                 )
   )
@@ -67,7 +67,9 @@ rcInput <- function(id, type="cols", choices=NULL, selected=choices[1], label="G
 
 switchUI <- function(id,class=""){
   ns <- NS(id)
-  actionButton508(ns("rc_switch"),label = "",class = sprintf("rc-switch %s", class))
+  actionButton508(ns("rc_switch"),
+        label = "Switch rows/columns",
+        class = "usa-button")
 }
 
 

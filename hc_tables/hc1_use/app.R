@@ -21,16 +21,17 @@ form_elements <- tagList(
     yearInput("use",min=min(use_tables$Year),max=max(use_tables$Year)),
     
     tags$fieldset(
-      div(class = "flex-parent",
+      #div(class = "flex-parent",
           
-          div(class = "col1",
+          div(#class = "col1",
               rcInput("use",type="cols",choices=use_subgrps),
               rcInput("use",type="rows",choices=use_subgrps, 
                       class = "hide-if-trend",selected = "event",hide_label=T)
           ),
-          
-          div(class = "col2 hide-if-trend", switchUI("use"))
-      )
+          #
+          #div(class = "col2 hide-if-trend", switchUI("use"))
+     # ),
+      div(class = "hide-if-trend",switchUI("use"))
     )
 )
 

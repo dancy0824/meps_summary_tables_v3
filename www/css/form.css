@@ -91,14 +91,17 @@ fieldset .dropdown{
 
 /* Do better programming and detect these using child elemnts instead*/
 
-.rc-group{
+
+.flex-parent{
   display: flex;
+  align-items: center;
 }
 
-.rc-select{
-  width: 100%;
+.flex-child-fill{
+  width:100% ;
 }
 
+/*
 .rc-switch {
     height: 7rem;
     width: 5rem;
@@ -106,24 +109,17 @@ fieldset .dropdown{
     background-image: url(../img/reverse_icon_gray.png);
     background-repeat: no-repeat;
     background-size: 4rem;
-   /* border: solid 2px white;*/
     border: solid 2px gray ;
     border-radius: 1rem;
     background-color: transparent;
 }
 
 .rc-switch:hover, .rc-switch:focus{
- /* box-shadow: inset 0 0 0 2px #d6d7d9;*/
   background-color: transparent;
   border: solid 2px white;
   border: solid 2px lightgray ;
 }
 
-
-.flex-parent{
-  display: flex;
-  align-items: center;
-}
 
 .col1{
   width: 100%;
@@ -134,3 +130,12 @@ fieldset .dropdown{
   margin-top: 2em;
   margin-left: 0.5em;
 }
+
+.rc-group{
+  display: flex;
+}
+
+.rc-select{
+  width: 100%;
+}
+*/
