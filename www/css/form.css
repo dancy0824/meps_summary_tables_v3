@@ -94,16 +94,11 @@ fieldset .dropdown{
 
 /* SWITCH ROWS/COLUMNS BUTTON */
 
-/* Do better programming and detect these using child elemnts instead*/
-
-
 .flex-parent{
   display: flex;
- 
 }
 
-
-.flex-child-fill{
+.flex-child.fill{
   width: 100% ;
 }
 
