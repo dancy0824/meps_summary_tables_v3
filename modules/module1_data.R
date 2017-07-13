@@ -47,9 +47,9 @@ yearInput <- function(id,min,max){
   ns <- NS(id)
   tags$fieldset(
     div(class = "flex-parent",
-      div(class="flex-child fill year-start", 
+      div(class="flex-child-fill year-start", 
           selectInput508(ns("year_start"),label="Year:",choices=max:min,selected=min)),
-      div(class="flex-child fill year-main", selectInput508(ns("year"),label= "to:",choices=max:min,selected=max)) 
+      div(class="flex-child-fill year-main", selectInput508(ns("year"),label= "to:",choices=max:min,selected=max)) 
     )
   )
 }
@@ -62,7 +62,7 @@ rcInput <- function(id, type="cols", choices=NULL, selected=choices[1], label="G
   tags$fieldset(class = class,
                 tags$label(label, `for` = ns(type), class=labelClass),
                 div(class="btn-group flex-parent", role="group",
-                    div(class="btn-group flex-child fill", role="group", selectInput508(ns(type),choices=choices,selected)),
+                    div(class="btn-group flex-child-fill", role="group", selectInput508(ns(type),choices=choices,selected)),
                     div(class="btn-group flex-child", grpInput( ns(type), choices=choices))
                 )
   )

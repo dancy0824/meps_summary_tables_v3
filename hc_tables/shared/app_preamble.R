@@ -35,36 +35,29 @@ source("../../modules/tab3_code.R",local=TRUE)
 ########################################################
 ## UI builder
 
+flex <- function(...,width=1){
+  tags$div(style=paste0('flex: ',width),...)
+}
+
 mepsPage <- function(id,info,form_elements,tab_elements){
  
   bootstrapPage(
-    
+  
     div(class = 'select-box ',
       div(class='full-screen',
           h1(info$title), p(info$description), p(info$instructions)
-        
-        # fluidRow508(
-        #   col508(width="one-half",  ),
-        #   col508(width="one-half", tags$form(class = "usa-form-large", form_elements))
-        # )
       )
     ),
-    
-    fluidRow(class='full-screen',
-        column(width=4, tags$form(class = "usa-form-large", form_elements)),
-        column(width=8,
-              # addLinks(
-                 tabsetPanel(type="pills",tableUI(id),plotUI(id),codeUI(id)),
-                # downloadUI(id), 
-                # downloadPlotUI(id),
-               #  class="right"),
-               
-               hc_info(id)
-               
-      )
-       
-    )
 
+   fluidRow(class = "padded",
+     column(width=12,class="col-md-3",
+            tags$form(class = "usa-form-large", form_elements)),
+     column(width=12,class="col-md-9",
+            tabsetPanel(type="pills",tableUI(id),plotUI(id),codeUI(id)),
+            hc_info(id)
+            )
+   )
+   
   )
 
 }

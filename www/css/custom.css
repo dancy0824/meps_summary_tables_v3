@@ -8,11 +8,42 @@ body{font-family: Source Sans Pro,Helvetica Neue,Helvetica,Roboto,Arial,sans-ser
 h1{font-size: 3rem;}
 h2{font-size: 2rem;}
 
+/*****  Flex box  *****/
+
+.flex-parent{
+  display: -webkit-flex;
+  display: flex;
+}
+
+.flex-child-fill{
+  width: 100% ;
+}
+
+/*****  Table  *****/
+
+table caption{
+  visibility:hidden;
+}
+
+table{
+  margin: 0;
+}
+
+.meps-table{
+  overflow-x: auto;
+}
+
 caption, .caption{
   color: #5b616b; /* gray */
   font-size: 2.2rem;
   display: inline;
 }
+
+.padded{
+  padding: 15px;
+}
+
+
 
 .em-legend{
   font-weight: 700;
@@ -100,19 +131,6 @@ caption, .caption{
 .download-button:active{
   background-color: #981b1e;
 }
-
-
-/*****  Table  *****/
-
-[data-value="Table"] {
-  overflow-x: auto;
-}
-
-table caption{
-  visibility:hidden;
-}
-
-
 
 
 

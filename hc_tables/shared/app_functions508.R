@@ -20,10 +20,12 @@ HTML508table <- function(body,caption="",cnames=colnames(body) ){
   
   body_string <- cbind(" <tr> ",body," </tr> ")  %>% t %>% paste(collapse="")
   
-  myHtable <- sprintf("<table border=0>
+  myHtable <- sprintf("<div class = 'meps-table'>
+                      <table border=0>
                       <thead> %s </thead>
                       <tbody> %s </tbody>
-                      </table>",
+                      </table>
+                      </div>",
                       columnROW,
                       body_string)
   

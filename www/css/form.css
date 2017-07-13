@@ -1,4 +1,25 @@
 
+.meps-container{
+  flex-wrap: wrap;  
+}
+
+.meps-form, .meps-results{
+  width: 100%;
+}
+
+
+
+@media screen and (min-width: 768px){
+  .meps-container{
+    flex-wrap: nowrap;
+  }
+  
+  .meps-form{
+    width: 300px;
+  }
+}
+
+
 
 .select-box{
   background-color: #015289; /* cool-blue */
@@ -32,8 +53,8 @@ fieldset .dropdown{
 }
 
 .year-start, .year-main{
-  width: 49%;
-  display: inline-block;
+  width: 100%;
+ /* display: inline-block;*/
   overflow: hidden;
 }
 
@@ -94,13 +115,6 @@ fieldset .dropdown{
 
 /* SWITCH ROWS/COLUMNS BUTTON */
 
-.flex-parent{
-  display: flex;
-}
-
-.flex-child.fill{
-  width: 100% ;
-}
 
 
 /*
