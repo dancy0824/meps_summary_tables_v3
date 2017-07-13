@@ -9,7 +9,7 @@ MEPS  <- "Medical Expenditure Panel Survey"
 controlTotals_message <- "(Standard errors are approximately zero for control totals)"
 
 suppressed_message <- " -- Estimates suppressed due to inadequate precision (see <a  target='_blank_'
-href = 'https://meps.ahrq.gov/mepsweb/about_meps/faq_results.jsp?ChooseTopic=All+Categories&keyword=&Submit2=Search'>
+href = 'https://meps.ahrq.gov/survey_comp/precision_guidelines.shtml'>
 FAQs</a> for details).<br>"
 
 rse_message <- " * Relative standard error is greater than 30%.<br>"
