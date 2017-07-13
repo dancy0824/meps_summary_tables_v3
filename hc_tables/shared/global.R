@@ -14,15 +14,15 @@ subgrps <- list(
     "Race/Ethnicity"     = "race",
     "Sex"                = "sex"
   ),
-  "Health Variables" = c(
-    "Insurance Coverage" = "insurance",
-    "Perceived Health Status" = "health",
-    "Perceived Mental Health" = "mental_health"
-  ), 
   "Socio-Economic Status" = c(
     "Education"         = "education",
     "Employment Status" = "employed",
+    "Insurance Coverage" = "insurance",
     "Poverty Status"    = "poverty"
+  ),
+  "Health Variables" = c(
+    "Perceived Health Status" = "health",
+    "Perceived Mental Health" = "mental_health"
   )
 )  
 
