@@ -15,7 +15,8 @@ codeUI <- function(id){
            
            selectInput508(ns("code_language"),
                           label = "Select Programming Language:",
-                          choices = c("R","SAS","Stata")),
+                          #choices = c("R","SAS","Stata")),
+                          choices = c("R","SAS")),
            
            uiOutput(ns("code"))
       )
