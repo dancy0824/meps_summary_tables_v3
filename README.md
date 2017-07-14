@@ -2,14 +2,14 @@ This repository contains preliminary steps for building the MEPS summary tables 
 
 ## Quick Start
 
-To run the app for the **Use, Expenditures, and Population** table, run this code in R:
+To run the app for the **Use, Expenditures, and Population** table, run this code in R (you may need to install the 'shiny' package with `install.packages('shiny')`):
 
 ```r
 library(shiny)
 shiny:::runGitHub("meps_summary_tables_v3","e-mitchell",subdir="hc_tables/hc1_use")
 ```
 
-> **Note**: you may need to install the 'shiny' package if you have not done so: `install.packages('shiny')`
+> **Note**: Relative links to MEPS summary tables home will not work
 
 ## Components
 
