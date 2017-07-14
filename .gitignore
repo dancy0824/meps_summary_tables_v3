@@ -1,17 +1,21 @@
 archive/*
 ic_tables/*
 
+hc_tables/*/*/tables*
+
+hc_tables/shared/PUFS/*
+
+hc_tables/hc3_pmed/*
+
 *.Rhistory
 *.history
 *.ssp
-*.csv
 *.Rdata
 
 .Rproj.user
 .Rprofile
 
 
-hc_tables/t3_pmed/*
 hc_tables/code/SSS/*
 
 packrat/*
