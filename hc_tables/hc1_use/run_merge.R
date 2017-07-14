@@ -1,20 +1,56 @@
 
 library(dplyr)
 
+evnt_keys <-
+  list("DV"="DVT","ER"="ERT","HH"="HHT","IP"="IPT",
+       "OB"="OBV","OM"="OMA","OP"="OPT") %>% stack
+
+event_dictionary <- 
+  list("TOT"="All event types",
+       "DVT"="Dental visits",
+       "RX" ="Prescription medicines",
+       "OBV"="Office-based events",
+       "OBD"="Physician Office visits",
+       "OBO"="Non-physician office visits",
+       "OPT"="Outpatient events",
+       "OPY"="Physician hosp. visits",
+       "OPZ"="Non-physician hosp. visits",
+       "ERT"="Emergency room visits",
+       "IPT"="Inpatient stays",
+       "HHT"="Home health events",
+       "OMA"="Other medical expenses") %>% stack
+
+sop_dictionary <- 
+  list("EXP"="All sources",
+       "SLF"="Out of pocket",
+       "PTR"="Private",
+       "MCR"="Medicare",
+       "MCD"="Medicaid",
+       "OTZ"="Other") %>% stack
+
+# total_dictionary <- list(
+#   "event"         = "All event types",
+#   "agegrps"       = "All age groups",
+#   "region"        = "All regions",
+#   "married"       = "All marital statuses",
+#   "race"          = "All races/ethnicities",
+#   "sex"           = "All persons",
+#   "insurance"     = "All coverage statuses",
+#   "health"        = "All health statuses",
+#   "mental_health" = "All mental health statuses",
+#   "education"     = "All education levels",
+#   "employed"      = "All employment statuses",
+#   "poverty"       = "All poverty levels"
+# ) %>% stack # framify(ncol=2,names=c("total","label"))
+# 
+# total_grps <- total_dictionary$ind
+
+#####################################################################################
+
 join_all <- function(df_list,...){
   out <- df_list[[1]]
   for(df in df_list[-1]) out <- suppressWarnings(full_join(out,df,...))
   out
-}
-
-# Converting key values to labels based on dictionaries
-add_labels <- function(df,dictionary, key="value",var="levels1"){
-    df <- df %>%
-      mutate_(temp=var) %>%
-      left_join(dictionary,by=c("temp"=key)) %>%
-      mutate(temp = coalesce(label,temp))
-    df[,var] = df$temp
-    df %>% select(-temp,-one_of(names(dictionary)))
 }
 
 reverse <- function(df) df[nrow(df):1,]
@@ -31,7 +67,33 @@ rm_v2 <- function(df){
                grp2 = grp2 %>% gsub("_v2X","",.))
 }
 
-#######################################################
+
+# Add event and SOP labels
+add_labels <- function(df,dictionary, key="ind",vars=c("levels1","levels2")){
+  for(var in vars){
+    df <- df %>%
+      mutate_(temp=var) %>%
+      left_join(dictionary,by=c("temp"=key)) %>%
+      mutate(temp = coalesce(values,temp))
+    df[,var] = df$temp
+    df <- df %>% select(-temp,-values)
+  }
+  return(df)
+}
+
+switch_labels <- function(df){
+  df %>% 
+    mutate(g1=grp1,g2=grp2,l1=levels1,l2=levels2) %>%
+    mutate(grp1=g2,grp2=g1,levels1=l2,levels2=l1) %>%
+    select(-g1,-g2,-l1,-l2)
+}
+
+get_totals <- function(grp,df,label="All persons"){
+  totals <- df %>% filter(grp1=="ind",grp2!=grp)
+  totals %>%
+    mutate(grp1=grp,levels1=label) %>%
+    switch_labels
+}
 
 ##################################################################
 
@@ -39,14 +101,10 @@ rm_v2 <- function(df){
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-source("../shared/r/run_global.R",chdir=T) # loads functions.R too
+source("../shared/global.R",chdir=T)
+source("global.R",chdir=T) 
 
 years = 2014:1996
-
-evt_stats = c("totEVT","meanEVT")
-fyc_stats = c("totPOP","pctEXP","totEXP",
-              "meanEXP0","meanEXP","medEXP",
-              "n","n_exp")
 
 load_stats <- function(stat,year){
   file = sprintf("r/tables/%s/%s.csv",year,stat)
@@ -58,23 +116,22 @@ load_stats <- function(stat,year){
   fyc <- list()
   for(year in years){ cat(year,"..")
     fyc[[as.character(year)]] <- 
-      lapply(fyc_stats,load_stats,year=year) %>%
+      lapply(c(fyc_stats,"n","n_exp"),load_stats,year=year) %>%
       join_all(by=c("grp1","grp2","levels1","levels2")) %>%
       mutate(Year = year)
   }
 
   all_fyc <- bind_rows(fyc) %>% rm_v2 %>% dedup
+
   all_fyc <- all_fyc %>% 
-    add_labels(event_dictionary,key="event",var="levels1") %>%
-    add_labels(event_dictionary,key="event",var="levels2") %>%
-    add_labels(sop_dictionary, key="sop",var="levels1") %>%
-    add_labels(sop_dictionary, key="sop",var="levels2")
-  
+    add_labels(event_dictionary) %>%
+    add_labels(sop_dictionary)
+
 ### EVENT FILES ###
   evnt <- list()
   for(year in years){ cat(year,"..")
     evnt[[as.character(year)]] <- 
-      lapply(evt_stats,load_stats,year=year) %>%
+      lapply(evnt_stats,load_stats,year=year) %>%
       join_all(by=c("grp1","grp2","levels1","levels2")) %>%
       mutate(Year = year)
   }
@@ -83,49 +140,28 @@ load_stats <- function(stat,year){
   
   all_evnt <- all_evnt %>%
     filter(!(levels2=="Missing" & grp2=="event")) %>%  # for event_v2, 'missing' is all events with no sub-types
-    add_labels(event_dictionary,key="evnt",var="levels1") %>%
-    add_labels(event_dictionary,key="evnt",var="levels2") %>%
-    add_labels(sop_dictionary, key="sp",var="levels1") %>%
-    add_labels(sop_dictionary, key="sp",var="levels2")
+    add_labels(evnt_keys) %>%
+    add_labels(event_dictionary) %>%
+    add_labels(sop_dictionary) 
   
+  # Add 'all event types' to match FYC
+  all_evnt <- get_totals("event",label="All event types",df=all_evnt) %>% 
+    bind_rows(all_evnt)
+  
+ 
 
 ## Merge FYC and Event stats    
-  use_tables <- full_join(all_fyc,all_evnt)
-  save(use_tables , file="USE_TABLES.Rdata")
-   
+   use_tables <- full_join(all_fyc,all_evnt,by=c("grp1","grp2","levels1","levels2", "Year"))
 
-#   
-#   
-# ### Maybe don't do this....  
-#   
-#   total_dictionary <- c(
-#     "ind"           ,"Total",
-#     "event"         , "All Event Types",
-#     "sop"           , "All Sources",
-#     "agegrps"       , "All Age Groups",
-#     "region"        , "All Regions",
-#     "married"       , "All Marital Statuses",
-#     "race"          , "All Races/Ethnicities",
-#     "sex"           , "All Persons",
-#     "insurance"     , "All Coverage Statuses",
-#     "health"        , "All Health Statuses",
-#     "mental_health" , "All Mental Health Statuses",
-#     "education"     , "All Education Levels",
-#     "employed"      , "All Employment Statuses",
-#     "poverty"       , "All Poverty Levels"
-#   ) %>% framify(ncol=2,names=c("total","label"))
-#   ### Add 'all people' for groups 
-#   
-#   get_totals <- function(grp,df){
-#     totals <- df %>% filter(grp1=="ind") 
-#     totals %>% 
-#       mutate(grp1=grp) %>% 
-#       left_join(total_dictionary,by=c("grp1"="total")) %>%
-#       mutate(levels1 = coalesce(label,levels1)) 
-#   }
-#   
-#   tot_grps <- subgrps[!subgrps%in%c("ind","agevar")]
-#   totals_df <- lapply(tot_grps,get_totals,df=use_tables) %>% bind_rows
-#   
-#   use_tables <- use_tables %>% bind_rows(totals_df)
-  
+   # use_tables %>% filter(is.na(totPOP))
+   # use_tables %>% filter(is.na(totEVT))
+   # use_tables %>% filter(is.na(totEVT)&!is.na(meanEXP))
+   
+   save(use_tables, file="USE_TABLES.Rdata")
+   
+#load("USE_TABLES_backup.Rdata")
+
+   
+   
+   
+   

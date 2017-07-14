@@ -22,6 +22,19 @@ decorate_tbl <- function(tbl,var_name, se_name=paste0(var_name,"_se"),n_name=NUL
   return(out)
 }
 
+adjust_totals <- function(df,var){
+  lv <- df[,var]
+  if(any(startsWith(lv,"All"))){
+    df <- df %>% filter_(sprintf('%s!="Total"',var))
+  }
+  
+  lv <- df[,var]
+  if(var != 'ind'){
+    df[,var] = replace(lv,lv=="Total","All persons")
+  }
+  
+  df
+}
 
 #######################################################
 ###                       UI                        ###
@@ -157,24 +170,28 @@ dataModule <- function(input, output, session, df, stat, exclude_initial,...){
     cols <- cols()
     
     tbl <- select_years()
-
-    tab <- tbl %>% filter(grp1 == rows, grp2 == cols)
+    
+    ## Add marginal totals ##
+    rows_tot = c(rows,"ind")
+    cols_tot = c(cols,"ind")
+    
+    tab <- tbl %>% filter(grp1 %in% rows_tot, grp2 %in% cols_tot)
     tab[,rows] = tab$levels1
     tab[,cols] = tab$levels2
-    
     tab <- tab %>% select(-grp1,-grp2,-levels1,-levels2)
 
-    rev <- tbl %>% filter(grp1 == cols, grp2 == rows)
+    rev <- tbl %>% filter(grp1 %in% cols_tot, grp2 %in% rows_tot)
     rev[,rows] = rev$levels2
     rev[,cols] = rev$levels1
-
     rev <- rev %>% select(-grp1,-grp2,-levels1,-levels2)
-      
-    bind_rows(tab,rev) %>% distinct
-    
+
+    all <- bind_rows(tab,rev) %>% distinct
+
+    all %>% adjust_totals(rows) %>% adjust_totals(cols)
   })
   
   select_levels <- reactive({                               print("select_levels()")
+    
     subgrp_tbl() %>%
       mutate_(cols = input$cols, rows=rows()) %>% # for trend, rows() = 'ind'
       filter(cols %in% col_levels(), rows %in% row_levels()) %>%

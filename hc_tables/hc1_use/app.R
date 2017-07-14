@@ -53,8 +53,7 @@ ui <- htmlTemplate("../../template.html", body = body_ui)
   
 # Exclude 'Missing' entirely (can comment out for debugging)
   exclude_choices <- c(
-    grep("missing",all_levels,value=T,ignore.case=T),
-    grep("All",all_levels,value=T)
+    grep("missing",all_levels,value=T,ignore.case=T)
   )
   
 #################################
