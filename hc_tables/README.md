@@ -1,6 +1,6 @@
 This folder contains individual apps (folders starting with 'hc') as well as components shared by all apps ([shared](shared))
 
-[Update.R](Update.R) Reads in the [meps_file_names.csv](https://github.com/HHS-AHRQ/MEPS/blob/master/Quick_Reference_Guides/meps_file_names.csv) from the [HHS-AHRQ/MEPS](https://github.com/HHS-AHRQ/MEPS) repository, then outputs [puf_names.csv](shared/puf_names.csv) and [puf_expanded.csv](shared/puf_expanded.csv) in the [shared](shared) folder.
+[UPDATE.R](UPDATE.R) Reads in the [meps_file_names.csv](https://github.com/HHS-AHRQ/MEPS/blob/master/Quick_Reference_Guides/meps_file_names.csv) from the [HHS-AHRQ/MEPS](https://github.com/HHS-AHRQ/MEPS) repository, then outputs [puf_names.csv](shared/puf_names.csv) and [puf_expanded.csv](shared/puf_expanded.csv) in the [shared](shared) folder.
 
 The following apps are in progress:
 * **Use, Expenditures, and Population**: [hc1_use](hc1_use)
@@ -21,7 +21,7 @@ The [shared](shared) folder contains the following components used by all the ap
 * **r/sas/stata**: R/SAS/Stata code for loading FYC files, loading and combining Event files, defining demographic subgroups (e.g. age, race, sex,...), and defining survey design (if applicable). Also contains shared functions.
 * **app_functions.R**: formatting functions shared across all apps
 * **app_functions508.R**: Shiny functions, built specifically web accessibility and compatibility with the [18F U.S. Web Design Standards](https://standards.usa.gov/)
-* **app_notes.R**: Abbreivations and dictionaries used in the 'Notes' section of the app (e.g. description of insurance categories)
+* **app_notes.R**: Abbreviations and dictionaries used in the 'Notes' section of the app (e.g. description of insurance categories)
 * **app_preamble.R**: Loads libraries and codes needed for each app, plus a bootstrapPage builder function
 * **global.R**: Dictionaries and functions shared across all apps, used to run app and generate estimates
 * **puf_transfer.R**: Downloads MEPS Public Use Files (PUFs) from the web and stores them as SAS transfer files (.ssp) (not shown on GitHub)
