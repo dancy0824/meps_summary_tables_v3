@@ -47,7 +47,13 @@ tableUI<- function(id){
 
 tableModule <- function(input, output, session, tbl, inputs, adj, labels){
   
-  output$table_caption <- renderUI(tags$caption(labels()$caption))
+  caption <- reactive(labels()$caption)
+  footnotes <- reactive(labels()$footnotes)
+  controlTotals <- reactive(labels()$controlTotals)
+  
+  
+  output$table_caption <- renderUI(tags$caption(caption()))
+  
   
   formatted_tbl <- reactive({
     denom = adj()$D; digits = adj()$d;
@@ -67,10 +73,10 @@ tableModule <- function(input, output, session, tbl, inputs, adj, labels){
   })
   
   output$meps_table <- renderUI({                                     cat("\n\nOUTPUT$MEPS_TABLE..\n")
-    HTML508table(body = display_tbl(), caption = labels()$caption)
+    HTML508table(body = display_tbl(), caption = caption())
   })
   
-  output$table_footnotes <- renderText(paste0(labels()$footnotes,collapse=""))
+  output$table_footnotes <- renderText(paste0(footnotes(),collapse=""))
   
   
 # Download table

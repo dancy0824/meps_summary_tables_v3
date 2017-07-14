@@ -36,6 +36,7 @@ notesModule <- function(input, output, session, tbl, inputs, adj){ #showSEs?
   rows  <- reactive(inputs()$rows)
   rowsX <- reactive(inputs()$rowsX) #ind -> year
   stat  <- reactive(inputs()$stat)
+  controlTotals <- reactive(inputs()$controlTotals)
   
   #################
   
@@ -104,6 +105,9 @@ notesModule <- function(input, output, session, tbl, inputs, adj){ #showSEs?
   
   #################
   
-  return(reactive(list(labels = labels(), caption = caption(), footnotes=footnotes())))
+  return(reactive(list(labels = labels(), 
+                       caption = caption(), 
+                       footnotes = footnotes(),
+                       controlTotals = controlTotals())))
   
 }
