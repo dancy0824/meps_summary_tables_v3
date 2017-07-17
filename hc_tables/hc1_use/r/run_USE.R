@@ -38,6 +38,9 @@ source("../global.R",chdir=T)
 
 usegrps = c("sop", "event", "event_sop")
 stat_list = c(fyc_stats,evnt_stats,"n","n_exp")
+
+
+stat_list = c("nEVT","avgEVT")
           
 ##################################################
 ###                   RUN                      ###
@@ -45,6 +48,19 @@ stat_list = c(fyc_stats,evnt_stats,"n","n_exp")
 
 # Load packages
   runSource('load/load_pkg.R',dir=shared)
+
+  args = commandArgs(trailingOnly = TRUE)
+  
+  if(length(args) > 0){
+    year_start = as.numeric(args[1])
+    year_end = as.numeric(args[2])
+  }else{
+    year_start = min(meps_names$Year)
+    year_end = max(meps_names$Year)
+  }
+  
+  year_list = year_start:year_end
+  
   
 for(year in year_list){  
   dir.create(sprintf('%s/%s',tables,year), showWarnings = FALSE)
