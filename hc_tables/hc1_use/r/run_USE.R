@@ -2,18 +2,18 @@
 ###     UTILIZATION AND EXPENDITURES      ###
 #############################################
 
-survey <- function(grp1,grp2,stat,...){
-  svyString <- r_svy(grps=c(grp1,grp2),stat=stat,...)  
-  cat(stat,":",svyString %>% writeLines)
-  results <- run(svyString)
-  results %>% standardize(grp1=grp1,grp2=grp2,stat=stat) 
-}
+# survey <- function(grp1,grp2,stat,...){
+#   svyString <- r_svy(grps=c(grp1,grp2),stat=stat,...)  
+#   cat(stat,":",svyString %>% writeLines)
+#   results <- run(svyString)
+#   results %>% standardize(grp1=grp1,grp2=grp2,stat=stat) 
+# }
 
 standardize <- function(results,grp1,grp2,stat){
   out <- results %>% select(-contains("FALSE")) 
-  cc <- length(names(out))
+  
   key = c(stat,paste0(stat,"_se"))
-  names(out)[(cc-1):cc] = key
+  names(out)[!names(out) %in% c(grp1,grp2)] = key
   
   out %>%
     mutate(grp1=grp1,grp2=grp2) %>%
@@ -40,7 +40,7 @@ usegrps = c("sop", "event", "event_sop")
 stat_list = c(fyc_stats,evnt_stats,"n","n_exp")
 
 
-stat_list = c("nEVT","avgEVT")
+#stat_list = c("avgEVT")
           
 ##################################################
 ###                   RUN                      ###
@@ -88,10 +88,12 @@ for(year in year_list){
   for(stat in stat_list){
     
     outfile <- sprintf("%s/%s.csv",year,stat)
+  
+  # Demographic subgroups, crossed 
+  #  Dear future Emily: don't try to change i and j back to all_subgrps.
+  #  You will end up with many redundancies. Bad juju.
     
-    # Demographic subgroups, crossed 
-    #  Dear future Emily: don't try to change i and j back to all_subgrps.
-    #  You will end up with many redundancies. Bad juju.
+    runSource("stats/avgEVT.R",yy=yr)
     
     for(i in 1:sl){   
       for(j in i:sl){ 
@@ -99,67 +101,109 @@ for(year in year_list){
         grp2 = subgrp_list[j]; strp2 <- gsub("_v2X","",grp2);
         if(strp1==strp2 & grp1!="ind") next   # skip if grp1 = grp2 (but run for ind, ind)
         if(done(outfile,dir=tables,grp1=grp1,grp2=grp2)) next
-        
-        results <- survey(grp1=grp1,grp2=grp2,stat=stat,yr=yr)
+
+        results <- r_svy(c(grp1,grp2),stat,yr) %>% run %>% standardize(grp1,grp2,stat)
         update.csv(results,file=outfile,dir=tables)
       }
     }
     
-    # Demographic subgroups x source of payment 
+  # Demographic subgroups x source of payment 
+    
+    runSource("stats/avgEVT_sop.R",yy=yr)
+    
     for(grp1 in subgrp_list){   
       for(SOP in sop_list){ 
         if(done(outfile,dir=tables,grp1=grp1,levels2=SOP)) next
         
+        nEVTdsgn <- update(nEVTdsgn,sop=SOP)
         EVNTdsgn <- update(EVNTdsgn,sop=SOP)
         FYCdsgn <- update(FYCdsgn,sop=SOP)
-        results <- survey(grp1=grp1,grp2='sop',sop=SOP,stat=stat,yr=yr)
+        
+        results <- r_svy(c(grp1,'sop'),stat,yr,sop=SOP) %>% run %>% standardize(grp1,'sop',stat)
         update.csv(results,file=outfile,dir=tables)
       }
     }
 
-    # Demographic subgroups x event type
+  # Demographic subgroups x event type
+
     for(grp1 in subgrp_list){  
       
+      ## EVENT STATS: totEVT, meanEVT ##
       if(stat %in% evnt_stats){
         if(done(outfile,dir=tables,grp1=grp1,grp2='event_v2X')) next
         
-        results <- survey(grp1=grp1,grp2='event',stat=stat,yr=yr)
+        results <- r_svy(c(grp1,'event'),stat,yr) %>% run %>% standardize(grp1,'event',stat)
         update.csv(results,file=outfile,dir=tables)
         
-        results_v2 <- survey(grp1=grp1,grp2='event_v2X',stat=stat,yr=yr)
+        results_v2 <- r_svy(c(grp1,'event_v2X'),stat,yr) %>% run %>% standardize(grp1,'event_v2X',stat)
         update.csv(results_v2,file=outfile,dir=tables)
         
-      }else{
+      ## FYC STATS: totPOP, totEXP,... ##  
+      }else if(stat %in% fyc_stats){
         for(EVNT in event_list){ 
           if(done(outfile,dir=tables,grp1=grp1,levels2=EVNT)) next
           FYCdsgn <- update(FYCdsgn,event=EVNT)
-          results <- survey(grp1=grp1,grp2='event',event=EVNT,stat=stat,yr=yr)
+          results <- r_svy(c(grp1,'event'),stat,yr,event=EVNT) %>% run %>% standardize(grp1,'event',stat)
+          update.csv(results,file=outfile,dir=tables)
+        }
+      
+      ## avgEVT (skip 'TOT')##
+      }else{ 
+        
+        runSource("stats/avgEVT_event.R",yy=yr,by=sprintf("~%s",grp1))
+        
+        for(EV in event_list[-1]){
+          if(done(outfile,dir=tables,grp1=grp1,levels2=EV)) next
+          
+          results <- r_svy(c(grp1,'event'),stat,yr,event=EV) %>% run %>% 
+            mutate(event = EV) %>%standardize(grp1,'event',stat)
+          
           update.csv(results,file=outfile,dir=tables)
         }
       }
       
     }  
     
-    # Source of payment x event type
+  # Source of payment x event type
+
     for(SOP in sop_list){
       
+      ## EVENT STATS: totEVT, meanEVT ##
       if(stat %in% evnt_stats){
         EVNTdsgn <- update(EVNTdsgn,sop=SOP)
-        results <- survey(grp1='sop',grp2='event',sop=SOP,stat=stat,yr=yr)
+        results <- r_svy(c('sop','event'),stat,yr,sop=SOP) %>% run %>% standardize('sop','event',stat)
         update.csv(results,file=outfile,dir=tables)
         
-        results_v2 <- survey(grp1='sop',grp2='event_v2X',sop=SOP,stat=stat,yr=yr)
+        results_v2 <- r_svy(c('sop','event_v2X'),stat,yr,sop=SOP) %>% run %>% standardize('sop','event_v2X',stat)
         update.csv(results_v2,file=outfile,dir=tables)
-        
-      }else{
+      
+      ## FYC STATS: totPOP, totEXP,... ## 
+      }else if(stat %in% fyc_stats){
+
         for(EVNT in event_list){ 
           if(done(outfile,dir=tables,levels1=SOP,levels2=EVNT)) next
           
           FYCdsgn <- update(FYCdsgn,event=EVNT,sop=SOP)
-          results <- survey(grp1='sop',grp2='event',sop=SOP,event=EVNT,stat=stat,yr=yr)
+          results <- r_svy(c('sop','event'),stat,yr,sop=SOP,event=EVNT) %>% run %>% standardize('sop','event',stat)
+          update.csv(results,file=outfile,dir=tables)
+        }
+        
+      ## avgEVT (skip 'TOT')##
+      }else{ 
+        
+        runSource("stats/avgEVT_event_sop.R",yy=yr,sop=SOP)
+        
+        for(EV in event_list[-1]){
+          if(done(outfile,dir=tables,levels1=SOP,levels2=EV)) next
+          
+          FYCsub$sop = SOP
+          results <- r_svy(c('sop','event'),stat,yr,sop=SOP,event=EV) %>% run %>%
+            select(-ind) %>% mutate(event = EV, sop=SOP) %>% standardize('sop','event',stat)
+          
           update.csv(results,file=outfile,dir=tables)
         }
       }
+    
     }  
     
   }# end of stat_list loop

@@ -43,7 +43,7 @@ use_list = list(
   'OBV'='OBTOTV', 'OBD'='OBDRV', 'OBO'='OBOTHV',
   'OPT'='OPTOTV', 'OPY'='OPDRV', 'OPZ'='OPOTHV',
   'ERT'='ERTOT',  'IPT'='IPDIS',
-  'HHT'='HHTOTD', 'HHA'='HHAGD', 'HHN'='HHINDD',
+  'HHT'='HHTOTD', #'HHA'='HHAGD', 'HHN'='HHINDD',
   'OMA'='OMAEXP')
 
 sp_list = c("EXP"="XP","SLF"="SF","PTR"="PR",
@@ -53,34 +53,56 @@ event_list = names(use_list)
 sop_list = names(sp_list)
 
 
+
 ###############################################################
 ###                      FUNCTIONS                          ###
 ###############################################################
 
-source("r/stats.R")
+source("r/stats/stats.R")
 
-r_svy <- function(grps,stat,yr,sop="EXP",event="TOT",display=F){
+r_svy <- function(grps,stat,yr,sop="EXP",event="TOT",display=F,verbose=T){
   
   # Remove filler subgroups if using display
-  gp <- grps  
-  type <- ifelse(stat %in% evnt_stats,"EVNT","FYC")
-  if(display){
-    if(type == "FYC") gp <- grps[!grps %in% c("ind","event","sop")]
-    if(type == "EVNT") gp <- grps[!grps %in% c("ind","sop")]
-  }
+    gp <- grps  
+    type <- ifelse(stat %in% evnt_stats,"EVNT","FYC")
+    if(display){
+      if(type == "FYC") gp <- grps[!grps %in% c("ind","event","sop")]
+      if(type == "EVNT") gp <- grps[!grps %in% c("ind","sop")]
+    }
+  
+  # Set pre-code if stat == 'avgEVT'
+    precode <- ""
+    if(stat == 'avgEVT'){
+      extension = grps[grps %in% c("sop","event")] %>% sort
+      codeName = paste(c("avgEVT",extension),collapse="_")
+      if(display) precode <- readSource(sprintf("stats/%s.R",codeName),verbose=F)
+      if('event' %in% grps){
+        stat = "avgEVT_event"
+        gp = gp[gp!="event"]
+      }
+    }
   
   # Set count and use variables if event or sop in grps
-  count <- "PERWT.yy.F"
-  if('event' %in% grps) count <- paste0(use_list[[event]],yr)
-  if('sop' %in% grps) count <- paste0(event,sop,yr)
-  
-  sp <- sp_list[[sop]]
-  use <- "(.sp..yy.X >= 0)"
-  if('sop' %in% grps) use <- "(.sp..yy.X > 0)"
+    count <- "PERWT.yy.F"
+    if('event' %in% grps) count <- paste0(use_list[[event]],yr)
+    if('sop' %in% grps) count <- paste0(event,sop,yr)
+    
+    sp <- sp_list[[sop]]
+    use <- "(.sp..yy.X >= 0)"
+    if('sop' %in% grps) use <- "(.sp..yy.X > 0)"
   
   if(length(gp)==0) meps_code = meps_svy else meps_code = meps_svyby
   
-  meps_code[[stat]] %>% 
+  code <- meps_code[[stat]] 
+  
+  out <- paste(precode,code) %>% 
     rsub(by = sprintf("~%s",paste0(gp,collapse="+")),
-         grps=gp, stat=stat, count=count, use=use, event=event, sop=sop, sp=sp, yy=yr)
+         subgrps = paste(paste0(gp,collapse=", "),","),
+         grps=gp, stat=stat, count=count, use=use, 
+         event=event, sop=sop, sp=sp, yy=yr) 
+  
+  if(verbose) out %>% writeLines
+  return(out)
 }
+
+

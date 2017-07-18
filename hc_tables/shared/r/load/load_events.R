@@ -17,44 +17,35 @@ rename_sops = function(df,evnt,year,hosp=F){
   
   if(year <= 1999) df <- df %>% rename(TR.yy.X = CH.yy.X)
 
-  df %>% mutate(event = evnt)
+  df %>% 
+    mutate(event = evnt,
+           PR.yy.X = PV.yy.X+TR.yy.X, 
+           OZ.yy.X = OF.yy.X+SL.yy.X+OT.yy.X+OR.yy.X+OU.yy.X+WC.yy.X+VA.yy.X) %>%
+    select(one_of("DUPERSID","event","SEEDOC",
+                  "XP.yy.X","SF.yy.X","MR.yy.X","MD.yy.X","PR.yy.X","OZ.yy.X"))
 }
 
 RX <- read.xport('.PUFdir./.RX..ssp')%>% rename_sops('RX',year,hosp=F)
-DV <- read.xport('.PUFdir./.DV..ssp')%>% rename_sops('DV',year,hosp=F)
-OM <- read.xport('.PUFdir./.OM..ssp')%>% rename_sops('OM',year,hosp=F)
-IP <- read.xport('.PUFdir./.IP..ssp')%>% rename_sops('IP',year,hosp=T)
-ER <- read.xport('.PUFdir./.ER..ssp')%>% rename_sops('ER',year,hosp=T)
-OP <- read.xport('.PUFdir./.OP..ssp')%>% rename_sops('OP',year,hosp=T)
-OB <- read.xport('.PUFdir./.OB..ssp')%>% rename_sops('OB',year,hosp=F)
-HH <- read.xport('.PUFdir./.HH..ssp')%>% rename_sops('HH',year,hosp=F)
+DVT <- read.xport('.PUFdir./.DV..ssp')%>% rename_sops('DV',year,hosp=F)
+OMA <- read.xport('.PUFdir./.OM..ssp')%>% rename_sops('OM',year,hosp=F)
+IPT <- read.xport('.PUFdir./.IP..ssp')%>% rename_sops('IP',year,hosp=T)
+ERT <- read.xport('.PUFdir./.ER..ssp')%>% rename_sops('ER',year,hosp=T)
+OPT <- read.xport('.PUFdir./.OP..ssp')%>% rename_sops('OP',year,hosp=T)
+OBV <- read.xport('.PUFdir./.OB..ssp')%>% rename_sops('OB',year,hosp=F)
+HHT <- read.xport('.PUFdir./.HH..ssp')%>% rename_sops('HH',year,hosp=F)
 
 # Define sub-levels for office-based, outpatient, and home health
-if(year == 1996){
-  HH <- HH %>% mutate(MPCELIG = SELFAGEN)
-  OP <- OP %>% select(-EVENTRN)
-}
-
-HH <- HH %>% mutate(
-  event_v2X = recode_factor(MPCELIG,
-    .default='Missing','1'='HHA','2'='HHN'))
-
-OB <- OB %>% mutate(
+OBV <- OBV %>% mutate(
   event_v2X = recode_factor(SEEDOC,
     .default='Missing','1'='OBD','2'='OBO'))
 
-OP <- OP %>% mutate(
+OPT <- OPT %>% mutate(
   event_v2X = recode_factor(SEEDOC,
     .default='Missing','1'='OPY','2'='OPZ'))
 
 # Stack events into single dataset
-stacked_events <- bind_rows(RX,DV,OM,IP,ER,OP,OB,HH) %>%
-  mutate(PR.yy.X = PV.yy.X+TR.yy.X, 
-         OZ.yy.X = OF.yy.X+SL.yy.X+OT.yy.X+OR.yy.X+OU.yy.X+WC.yy.X+VA.yy.X) %>%
-  select(DUPERSID,event,event_v2X,
-         XP.yy.X,SF.yy.X,PR.yy.X,MR.yy.X,MD.yy.X,OZ.yy.X)
-
+stacked_events <- bind_rows(RX,DVT,OMA,IPT,ERT,OPT,OBV,HHT)
 
 # Merge EVENTS data onto FYC file
 FYCsub <- FYC %>% select(.subgrps.DUPERSID,PERWT.yy.F,VARSTR,VARPSU)
-EVENTS <- stacked_events %>% full_join(FYCsub, by = c('DUPERSID'))
+EVENTS <- stacked_events %>% full_join(FYCsub, by='DUPERSID')
