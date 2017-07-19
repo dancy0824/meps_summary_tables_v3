@@ -17,7 +17,7 @@ avgEVT <- function(df){
   nEVTdsgn <- svydesign(
     id = ~VARPSU,
     strata = ~VARSTR,
-    weights = ~PERWT14F,           
+    weights = ~PERWT.yy.F,           
     data = n_events,
     nest = TRUE)
   
