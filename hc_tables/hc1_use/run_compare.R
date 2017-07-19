@@ -4,6 +4,8 @@
 ##################################################
 ## Compare SAS and R estimates
 
+source("run_global.R")
+
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 library(dplyr)
 
@@ -48,8 +50,8 @@ compare_all <- function(statlist,yearlist,FUN=compareR){
 
 compareR <- function(year,stat="totPOP"){  print(paste0(year,":",stat));
   r <- read.csv(sprintf("r/tables/%s/%s.csv",year,stat),stringsAsFactors = F)
-  old_r <-  read.csv(sprintf("r/tables_baseline/%s/%s.csv",year,stat),stringsAsFactors = F)
-  
+  #old_r <-  read.csv(sprintf("r/tables_baseline/%s/%s.csv",year,stat),stringsAsFactors = F)
+  old_r <-  read.csv(sprintf("r/tables/%s_copy/%s.csv",year,stat),stringsAsFactors = F)
   old_r <- old_r %>% filter(!levels2 %in% c("HHA","HHN"),
                             !levels1 %in% c("HHA","HHN"))
   
@@ -62,13 +64,15 @@ compareR <- function(year,stat="totPOP"){  print(paste0(year,":",stat));
 years <- 2014:1996
 stats <- c("totPOP","totEXP","pctEXP","meanEXP0","meanEXP","medEXP",
            "n","n_exp",
-           "totEVT","meanEVT")
+           "avgEVT","totEVT","meanEVT")
 
 years = 2014
 #stats <- c("totPOP","totEXP","pctEXP","meanEXP0","meanEXP")
 
 R_diffs <- compare_all(stats,years,compareR)
 R_diffs 
+
+R_diffs$n$Y2014 %>% filter(grp2!='event')
 
 
 #############################################

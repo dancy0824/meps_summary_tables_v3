@@ -51,7 +51,6 @@ stat_list = c(fyc_stats,evnt_stats,"n","n_exp")
   
   year_list = year_start:year_end
   
-  year_list = 2014
   
 for(year in year_list){  
   dir.create(sprintf('%s/%s',tables,year), showWarnings = FALSE)
@@ -143,7 +142,7 @@ for(year in year_list){
         update.csv(results_v2,file=outfile,dir=tables)
         
       ## FYC STATS: totPOP, totEXP,... ##  
-      }else if(stat %in% fyc_stats){
+      }else if(stat %in% c(fyc_stats,"n","n_exp")){
         for(EVNT in event_list){ 
           if(done(outfile,dir=tables,grp1=grp1,levels2=EVNT)) next
           FYCdsgn <- update(FYCdsgn,event=EVNT)
@@ -172,6 +171,8 @@ for(year in year_list){
 
       ## EVENT STATS: totEVT, meanEVT ##
       }else if(stat %in% evnt_stats){
+        if(done(outfile,dir=tables,levels1=SOP,grp2='event_v2X')) next
+        
         EVNTdsgn <- update(EVNTdsgn,sop=SOP)
         results <- r_svy(c('sop','event'),stat,yr,sop=SOP) %>% run %>% standardize('sop','event',stat)
         update.csv(results,file=outfile,dir=tables)
@@ -180,7 +181,7 @@ for(year in year_list){
         update.csv(results_v2,file=outfile,dir=tables)
       
       ## FYC STATS: totPOP, totEXP,... ## 
-      }else if(stat %in% fyc_stats){
+      }else if(stat %in% c(fyc_stats,"n","n_exp")){
 
         for(EVNT in event_list){ 
           if(done(outfile,dir=tables,levels1=SOP,levels2=EVNT)) next
