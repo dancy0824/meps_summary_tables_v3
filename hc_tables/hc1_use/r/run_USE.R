@@ -2,13 +2,6 @@
 ###     UTILIZATION AND EXPENDITURES      ###
 #############################################
 
-# survey <- function(grp1,grp2,stat,...){
-#   svyString <- r_svy(grps=c(grp1,grp2),stat=stat,...)  
-#   cat(stat,":",svyString %>% writeLines)
-#   results <- run(svyString)
-#   results %>% standardize(grp1=grp1,grp2=grp2,stat=stat) 
-# }
-
 standardize <- function(results,grp1,grp2,stat){
   out <- results %>% select(-contains("FALSE")) 
   
@@ -39,9 +32,6 @@ source("../global.R",chdir=T)
 usegrps = c("sop", "event", "event_sop")
 stat_list = c(fyc_stats,evnt_stats,"n","n_exp")
 
-
-#stat_list = c("avgEVT")
-          
 ##################################################
 ###                   RUN                      ###
 ##################################################
@@ -61,6 +51,7 @@ stat_list = c(fyc_stats,evnt_stats,"n","n_exp")
   
   year_list = year_start:year_end
   
+  year_list = 2014
   
 for(year in year_list){  
   dir.create(sprintf('%s/%s',tables,year), showWarnings = FALSE)
@@ -128,8 +119,21 @@ for(year in year_list){
 
     for(grp1 in subgrp_list){  
       
+      ## avgEVT: (check first since avgEVT in evnt_stats) ##
+      if(stat == "avgEVT"){
+        runSource("stats/avgEVT_event.R",yy=yr,by=sprintf("~%s",grp1))
+        
+        for(EV in event_list[-1]){
+          if(done(outfile,dir=tables,grp1=grp1,levels2=EV)) next
+          
+          results <- r_svy(c(grp1,'event'),stat,yr,event=EV) %>% run %>% 
+            mutate(event = EV) %>%standardize(grp1,'event',stat)
+          
+          update.csv(results,file=outfile,dir=tables)
+        }
+      
       ## EVENT STATS: totEVT, meanEVT ##
-      if(stat %in% evnt_stats){
+      }else if(stat %in% evnt_stats){
         if(done(outfile,dir=tables,grp1=grp1,grp2='event_v2X')) next
         
         results <- r_svy(c(grp1,'event'),stat,yr) %>% run %>% standardize(grp1,'event',stat)
@@ -146,30 +150,28 @@ for(year in year_list){
           results <- r_svy(c(grp1,'event'),stat,yr,event=EVNT) %>% run %>% standardize(grp1,'event',stat)
           update.csv(results,file=outfile,dir=tables)
         }
-      
-      ## avgEVT (skip 'TOT')##
-      }else{ 
-        
-        runSource("stats/avgEVT_event.R",yy=yr,by=sprintf("~%s",grp1))
-        
-        for(EV in event_list[-1]){
-          if(done(outfile,dir=tables,grp1=grp1,levels2=EV)) next
-          
-          results <- r_svy(c(grp1,'event'),stat,yr,event=EV) %>% run %>% 
-            mutate(event = EV) %>%standardize(grp1,'event',stat)
-          
-          update.csv(results,file=outfile,dir=tables)
-        }
       }
-      
     }  
     
   # Source of payment x event type
 
     for(SOP in sop_list){
       
+      if(stat == "avgEVT"){
+        runSource("stats/avgEVT_event_sop.R",yy=yr,sop=SOP)
+        
+        for(EV in event_list[-1]){
+          if(done(outfile,dir=tables,levels1=SOP,levels2=EV)) next
+          
+          FYCsub$sop = SOP
+          results <- r_svy(c('sop','event'),stat,yr,sop=SOP,event=EV) %>% run %>%
+            select(-ind) %>% mutate(event = EV, sop=SOP) %>% standardize('sop','event',stat)
+          
+          update.csv(results,file=outfile,dir=tables)
+        }
+
       ## EVENT STATS: totEVT, meanEVT ##
-      if(stat %in% evnt_stats){
+      }else if(stat %in% evnt_stats){
         EVNTdsgn <- update(EVNTdsgn,sop=SOP)
         results <- r_svy(c('sop','event'),stat,yr,sop=SOP) %>% run %>% standardize('sop','event',stat)
         update.csv(results,file=outfile,dir=tables)
@@ -187,23 +189,7 @@ for(year in year_list){
           results <- r_svy(c('sop','event'),stat,yr,sop=SOP,event=EVNT) %>% run %>% standardize('sop','event',stat)
           update.csv(results,file=outfile,dir=tables)
         }
-        
-      ## avgEVT (skip 'TOT')##
-      }else{ 
-        
-        runSource("stats/avgEVT_event_sop.R",yy=yr,sop=SOP)
-        
-        for(EV in event_list[-1]){
-          if(done(outfile,dir=tables,levels1=SOP,levels2=EV)) next
-          
-          FYCsub$sop = SOP
-          results <- r_svy(c('sop','event'),stat,yr,sop=SOP,event=EV) %>% run %>%
-            select(-ind) %>% mutate(event = EV, sop=SOP) %>% standardize('sop','event',stat)
-          
-          update.csv(results,file=outfile,dir=tables)
-        }
       }
-    
     }  
     
   }# end of stat_list loop

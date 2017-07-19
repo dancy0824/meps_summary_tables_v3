@@ -11,7 +11,7 @@ years = 2014:1996
 load_stats <- function(stat,year){
   file = sprintf("r/tables/%s/%s.csv",year,stat)
   df <- read.csv(file,stringsAsFactors = F) 
-  df %>% rm_v2 %>% reorder_cols
+  df %>% rm_v2 %>% reorder_cols %>% add_labels(evnt_keys) 
 }
 
 load_years <- function(stats,years){
@@ -38,7 +38,7 @@ load_years <- function(stats,years){
   EVNTS <- load_years(evnt_stats,years=years)
   all_evnt <- EVNTS %>%
     filter(!(levels2=="Missing" & grp2=="event")) %>%  # for event_v2, 'missing' is all events with no sub-types
-    add_labels(evnt_keys) %>%
+    #add_labels(evnt_keys) %>%
     add_labels(event_dictionary) %>%
     add_labels(sop_dictionary) 
   
@@ -46,24 +46,10 @@ load_years <- function(stats,years){
   all_evnt <- 
     get_totals("event",label="All event types",df=all_evnt) %>% 
     bind_rows(all_evnt)
-  
-### avgEVT: Average event per person ###
-  
-  AVGEVNTS <- load_years("avgEVT",years=years)
-  
-  avg_evnt <- AVGEVNTS  %>%
-    add_labels(event_dictionary) %>%
-    add_labels(sop_dictionary)
- 
-  avg_evnt <- 
-    get_totals("event",label="All event types",df=avg_evnt) %>% 
-    bind_rows(avg_evnt)
-  
+
   
 ## Merge FYC and Event stats    
-   use_tables <- 
-     join_all(list(all_fyc,all_evnt,avg_evnt),
-              by=c("grp1","grp2","levels1","levels2", "Year")) %>%
+   use_tables <- full_join(all_fyc,all_evnt,by=c("grp1","grp2","levels1","levels2", "Year")) %>%
      as.data.frame
 
    use_tables <- use_tables %>% 
@@ -78,12 +64,3 @@ load_years <- function(stats,years){
    save(use_tables, file="USE_TABLES.Rdata")
    
 #load("USE_TABLES_backup.Rdata")
-
-   #new = use_tables
-   
-   #old = use_tables
-   
-   
-   head(new)
-   head(old)
-   
