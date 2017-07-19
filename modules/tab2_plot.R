@@ -100,7 +100,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
           x = factor(x, levels = unique(x)))
     }
     
-    df %>%  na.omit
+    df #%>%  na.omit
   })
   
   colors <- reactive({
@@ -108,11 +108,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
     b_colors <- colorRampPalette(brewer.pal(ncolors,"Dark2"))
     b_colors(ncolors)
   })
-  
-  
-  
-  
-  
+
   #######################################
   # GGPLOT
  
@@ -121,20 +117,15 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
       mutate(grp = factor(grp, levels = rev(unique(grp))))
     
     if(!is_trend()){
-      out <- out %>%
-        mutate(x = factor(x, levels = rev(unique(x))))
+      out <- out %>% mutate(x = factor(x, levels = rev(unique(x))))
     }
-    
+   
     out
   })    
   
-  plot_obj2 <- reactive({
-    ggplot(ggplot_data(),aes(x = x, y = y, fill=grp)) +
-      scale_fill_manual(values=colors())
-  })
-  
   line2 <- reactive({ print("line_graph()...")
-    p <- plot_obj2() 
+    p <- ggplot(ggplot_data(),aes(x = x, y = y, fill=grp)) +
+      scale_fill_manual(values=colors())
 
     if(inputs()$showSEs){
       p <- p +
@@ -149,8 +140,12 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   })
   
   bar2 <- reactive({  
-    p <- plot_obj2() +
-      geom_bar(stat = "identity", position = "dodge", colour="white") + 
+    
+    gp <-  ggplot(ggplot_data(),aes(x = x, y = y, fill=grp)) +
+      scale_fill_manual(values=colors(),drop=FALSE)
+    
+    p <- gp +
+      geom_bar(stat = "identity", position = "dodge", colour="white") #+ 
       scale_x_discrete(drop=FALSE) 
     
     if(inputs()$showSEs){
@@ -170,15 +165,19 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   })
   
   gv <- function(){
-    
     xlabel = grp_labels[[rowsX()]]
     
     if(is_trend()) gp <- line2() else gp <- bar2()
-    gp + theme_minimal(base_size=16) +
-      xlab(xlabel) + 
-      ylab("") +
-    theme(legend.title=element_blank()) +
-    scale_y_continuous(labels = format_type())
+    gp <- gp + theme_minimal(base_size=16) +
+        xlab(xlabel) + 
+        ylab("") +
+      theme(legend.title=element_blank()) +
+      scale_y_continuous(labels = format_type()) 
+    
+    if(is_trend()){
+      gp <- gp + expand_limits(y=0)
+    }
+    gp
   }
   
   output$plot <- renderPlotly({
@@ -187,7 +186,8 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
     ggplotly(pp) %>%
       config(collaborate=F,displaylogo=F,
         modeBarButtonsToRemove=c("toImage","lasso2d","pan2d","select2d","zoomIn2d","zoomOut2d","resetScale2d")) %>%
-      layout(font=list(family="Arial"))
+      layout(font=list(family="Arial"),
+             margin=list(r=30,t=0))
   })
   
   output$legend <- renderUI({
