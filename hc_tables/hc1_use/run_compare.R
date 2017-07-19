@@ -10,6 +10,10 @@ library(dplyr)
 ##################################################
 
 compare <- function(df1,df2,stat){
+  
+  df1 <- df1 %>% reorder_cols
+  df2 <- df2 %>% reorder_cols
+
   both <- full_join(df1,df2,by=c("grp1","grp2","levels1","levels2"))
   
   diff = both %>% 
@@ -45,6 +49,13 @@ compare_all <- function(statlist,yearlist,FUN=compareR){
 compareR <- function(year,stat="totPOP"){  print(paste0(year,":",stat));
   r <- read.csv(sprintf("r/tables/%s/%s.csv",year,stat),stringsAsFactors = F)
   old_r <-  read.csv(sprintf("r/tables_baseline/%s/%s.csv",year,stat),stringsAsFactors = F)
+  
+  old_r <- old_r %>% filter(!levels2 %in% c("HHA","HHN"),
+                            !levels1 %in% c("HHA","HHN"))
+  
+  r <- r %>% filter(!levels2 %in% c("HHA","HHN"),
+                    !levels1 %in% c("HHA","HHN")) 
+  
   compare(r,old_r,stat=stat)
 }
 
@@ -53,9 +64,11 @@ stats <- c("totPOP","totEXP","pctEXP","meanEXP0","meanEXP","medEXP",
            "n","n_exp",
            "totEVT","meanEVT")
 
+years = 2014
+#stats <- c("totPOP","totEXP","pctEXP","meanEXP0","meanEXP")
 
 R_diffs <- compare_all(stats,years,compareR)
-R_diffs
+R_diffs 
 
 
 #############################################

@@ -15,7 +15,8 @@ use_stats = list(
     "Median expenditure per person with expense ($)"= "medEXP"
   ),
   "Utilization" = c(
-    "Number of events" = "totEVT",
+    "Total number of events" = "totEVT",
+    "Average events per person" = "avgEVT",
     "Mean expenditure per event ($)" = "meanEVT"
   )
 )

@@ -71,6 +71,8 @@ server <- function(input, output,session) {
            ifelse(D==1E9, " (in billions)","")))
     
     d <- ifelse(D==1,0,1)
+    if(stat() == "avgEVT") d = 1
+    
     return(list(D=D,d=d,label=lab))
   })
 
