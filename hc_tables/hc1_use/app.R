@@ -29,13 +29,10 @@ form_elements <- tagList(
     )
 )
 
+ui <- mepsPage("use",info=info,form_elements=form_elements)
 
-body_ui <- mepsPage("use",info=info,form_elements=form_elements)
-  
+##############################################################
 
-##################################
-
-ui <- htmlTemplate("../../template.html", body = body_ui)
 
 # Exclude levels from initial select
   all_levels <- c(use_tables$levels1, use_tables$levels2) %>% unique
@@ -58,7 +55,7 @@ ui <- htmlTemplate("../../template.html", body = body_ui)
   
 #################################
 
-server <- function(input, output,session) {
+server <- function(input,output,session) {
 
   stat <- reactive(input$stat)
   

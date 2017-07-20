@@ -8,13 +8,26 @@ body{font-family: Source Sans Pro,Helvetica Neue,Helvetica,Roboto,Arial,sans-ser
 h1{font-size: 3rem;}
 h2{font-size: 2rem;}
 
+select{
+  max-width: none;
+}
+
 .usa-form-large{
   max-width: 600px;
 }
 
-select{
+.full-screen{
+  padding: 3rem;
   max-width: none;
 }
+
+/*****  Footer  *****/
+
+.feedback-buttons{
+  float:right;
+}
+
+
 
 /*****  Flex box  *****/
 
@@ -47,9 +60,7 @@ caption, .caption{
   display: inline;
 }
 
-.padded{
-  padding: 15px;
-}
+
 
 
 
@@ -72,10 +83,7 @@ caption, .caption{
   width: 4em;
 }
 
-.full-screen{
-  padding: 2rem;
-  max-width: none;
-}
+
 
 
 /*****  Nav-tabs  *****/
@@ -140,9 +148,13 @@ caption, .caption{
   background-color: #981b1e;
 }
 
-
-
-
+.download-button, 
+.download-button:visited,
+.download-button:active,
+.download-button:hover,
+.download-button:focus{
+  text-decoration:none;
+}
 
 
 
