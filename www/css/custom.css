@@ -12,14 +12,29 @@ select{
   max-width: none;
 }
 
-.usa-form-large{
-  max-width: 600px;
+.info-box{
+  background-color: #015289; /* cool-blue */
+  color: white;
 }
 
 .full-screen{
-  padding: 3rem;
+  padding: 1rem 3rem;
   max-width: none;
 }
+
+.em-caution-banner{
+  font-size: 1.8rem;
+  background-color: #fdb81e; /* gold */
+  font-weight: 600;
+  text-align: center;
+}
+
+
+
+/*****  Header  *****/
+
+
+
 
 /*****  Footer  *****/
 

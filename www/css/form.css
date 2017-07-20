@@ -7,6 +7,9 @@
   width: 100%;
 }
 
+.usa-form-large{
+  max-width: 600px;
+}
 
 
 @media screen and (min-width: 768px){
@@ -21,11 +24,7 @@
 
 
 
-.select-box{
-  background-color: #015289; /* cool-blue */
-  color: white;
-  /*padding: 1rem 4rem;*/
-}
+
 
 .em-fieldset{
   margin-top:2rem !important;

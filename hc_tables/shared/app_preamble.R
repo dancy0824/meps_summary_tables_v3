@@ -44,7 +44,7 @@ mepsPage <- function(id,info,form_elements,tab_elements){
 
   meps_body <- bootstrapPage(
   
-    div(class = 'select-box ',
+    div(class = 'info-box ',
       div(class='full-screen',
           h1(info$title), p(info$description), p(info$instructions))),
 
