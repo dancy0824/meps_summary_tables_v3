@@ -78,7 +78,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   is_trend <- reactive(input$tabs == "trend")
   
   sub_caption <- reactive({
-    if(!grepl("<SE>",labels()$caption)) return("")
+    if(!is_trend() | !grepl("<SE>",labels()$caption)) return("")
     return("Shading indicates 95% confidence interval")
   })
   
