@@ -123,13 +123,12 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
     out
   })    
   
-  line2 <- reactive({ print("line_graph()...")
+  line2 <- reactive({ 
     p <- ggplot(ggplot_data(),aes(x = x, y = y, fill=grp)) +
       scale_fill_manual(values=colors())
 
     if(inputs()$showSEs){
       p <- p +
-       # geom_errorbar(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),width = 0) +
         geom_ribbon(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),alpha=0.3) 
     }
     

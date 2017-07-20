@@ -164,7 +164,7 @@ dataModule <- function(input, output, session, df, stat, exclude_initial,...){
     df %>% filter(Year %in% years())
   })
   
-  subgrp_tbl <- reactive({                                 print("subgrp_tbl()")
+  subgrp_tbl <- reactive({                                 
     
     rows <- rows()
     cols <- cols()
@@ -190,7 +190,7 @@ dataModule <- function(input, output, session, df, stat, exclude_initial,...){
     all %>% adjust_totals(rows) %>% adjust_totals(cols)
   })
   
-  select_levels <- reactive({                               print("select_levels()")
+  select_levels <- reactive({                               
     
     subgrp_tbl() %>%
       mutate_(cols = input$cols, rows=rows()) %>% # for trend, rows() = 'ind'

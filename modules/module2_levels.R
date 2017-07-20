@@ -49,7 +49,6 @@ grpInput <- function(id,choices){
 
 groupBy <- function(input, output, session, df, var, values, exclude_choices=NULL, initial_values=NULL){
 
-  
 # Available choices based on data table, filtered by subgroup (and year)
 #  - need to convert spaces to underscores for html accessibility
   
@@ -58,23 +57,13 @@ groupBy <- function(input, output, session, df, var, values, exclude_choices=NUL
     options <- options[!options %in% exclude_choices]
     options %>% gsub(" ","_",.) %>% setNames(options) 
   })
-  
-  # initial <- reactive({
-  #   ch <- choices()
-  #   ch[!names(ch) %in% exclude_initial]
-  # })
-  
-  
+
 # Selected values based on cached selections if available, otherwise initial choices
   
   select <- reactive({  
     selected <- values[[var()]]
     selected <- selected[selected %in% choices()]
-   # ch <- initial() # need this here so reactive gets triggered
-    # print(selected)
-    # 
-    # if(length(selected)!=0) return(selected)
-    # return(ch)
+    selected
   })
 
   
@@ -108,17 +97,7 @@ groupBy <- function(input, output, session, df, var, values, exclude_choices=NUL
       current  <- values[[var()]]
       shown    <- choices()
       preserve <- current[!current%in%shown]
-      
-      print(current)
-      print(shown)
-      print(preserve)
-      
       cache <- c(preserve,input$levels)
-
-      # new_selections <- input$levels[]
-      
-      #values[[var()]] = input$levels
-      
       values[[var()]] <- cache
     }
   })

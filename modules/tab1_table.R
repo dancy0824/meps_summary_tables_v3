@@ -2,7 +2,7 @@
 ###                   FUNCTIONS                     ###
 #######################################################
 
-spread_tbl <- function(data,stat,labels=NULL){               print("spread_tbl")
+spread_tbl <- function(data,stat,labels=NULL){              
   data %>%
     mutate(cols = factor(cols, levels = unique(cols)),
            rows = factor(rows, levels = unique(rows))) %>%
@@ -15,13 +15,6 @@ spread_tbl <- function(data,stat,labels=NULL){               print("spread_tbl")
 #######################################################
 ###                      UI                         ###
 #######################################################
-
-# downloadUI <- function(id){
-#   ns <- NS(id)
-#   
-#   
-# }
-
 
 tableUI<- function(id){
   ns <- NS(id)
@@ -67,12 +60,12 @@ tableModule <- function(input, output, session, tbl, inputs, adj, labels){
 
 # Display table     
 
-  display_tbl <- reactive({                                              print("display_tbl()...")
+  display_tbl <- reactive({                                              
      formatted_tbl() %>% 
       spread_tbl(stat = ifelse(inputs()$showSEs,"coef_se","coef"), labels = labels()$labels) 
   })
   
-  output$meps_table <- renderUI({                                     cat("\n\nOUTPUT$MEPS_TABLE..\n")
+  output$meps_table <- renderUI({                                     
     HTML508table(body = display_tbl(), caption = caption())
   })
   
