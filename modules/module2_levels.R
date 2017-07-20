@@ -12,7 +12,6 @@ isOpen <- function(input,output){
   sprintf("$('#%s').on('shown.bs.dropdown', function() {
           var is_open = 'true';
           Shiny.onInputChange('%s', is_open);
-          console.log('Dropdown menu open');
 });",input,output)
 }
 
@@ -20,7 +19,6 @@ isClosed <- function(input,output){
   sprintf("$('#%s').on('hidden.bs.dropdown', function() {
           var is_open = 'false';
           Shiny.onInputChange('%s', is_open);
-          console.log('Dropdown menu cloased');
 });",input,output)
 }
 
