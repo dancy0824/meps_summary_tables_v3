@@ -29,7 +29,7 @@ hc_info <- function(id){
 ###                     SERVER                      ###
 #######################################################
 
-notesModule <- function(input, output, session, tbl, inputs, adj){ #showSEs?
+notesModule <- function(input, output, session, tbl, inputs, adj){ 
   
   years <- reactive(inputs()$years)
   cols  <- reactive(inputs()$cols)
@@ -60,13 +60,18 @@ notesModule <- function(input, output, session, tbl, inputs, adj){ #showSEs?
     return(sprintf(" by %s",paste0(glabels,collapse=" and ")))
   })
   
+  se_caption <- reactive({
+    if(!inputs()$showSEs) return("")
+    return(" <SE>")
+  })
+  
   caption <- reactive({
     add_caption <- ""
     if(grepl("number of people",tolower(stat_label()))){
       if(grepl('event',tolower(subgrp_caption()))) add_caption <- " with an event," 
       if(grepl('source of payment',tolower(subgrp_caption()))) add_caption <- " with an expenditure" 
     }
-    sprintf("%s%s%s, United States, %s",stat_label(),add_caption,subgrp_caption(),year_caption())
+    sprintf("%s%s%s%s, United States, %s",stat_label(),add_caption,se_caption(),subgrp_caption(),year_caption())
   })
   
   #################

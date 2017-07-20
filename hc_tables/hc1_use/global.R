@@ -31,7 +31,8 @@ use_subgrps <- append(subgrps,use_add,after=1)
 shared_grps <- subgrps %>% unlist
 local_grps <- use_add %>% unlist
 
-stat_labels <- use_stats %>% invertList
+stat_labels <- use_stats %>% invertList %>% gsub(" \\(.*?\\)","",.)
+
 grp_labels <- use_subgrps %>% invertList %>% as.list
 grp_labels$Year = "Year"
 

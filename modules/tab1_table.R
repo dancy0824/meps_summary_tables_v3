@@ -40,12 +40,14 @@ tableUI<- function(id){
 
 tableModule <- function(input, output, session, tbl, inputs, adj, labels){
   
-  caption <- reactive(labels()$caption)
+  table_caption <- reactive(labels()$caption %>% gsub("<SE>","(standard errors)",.))
+  dl_caption <- reactive(labels()$caption %>% gsub(" <SE>","",.))
+  
   footnotes <- reactive(labels()$footnotes)
   controlTotals <- reactive(labels()$controlTotals)
   
   
-  output$table_caption <- renderUI(tags$caption(caption()))
+  output$table_caption <- renderUI(tags$caption(table_caption()))
   
   
   formatted_tbl <- reactive({
@@ -66,7 +68,7 @@ tableModule <- function(input, output, session, tbl, inputs, adj, labels){
   })
   
   output$meps_table <- renderUI({                                     
-    HTML508table(body = display_tbl(), caption = caption())
+    HTML508table(body = display_tbl(), caption = table_caption())
   })
   
   output$table_footnotes <- renderText(paste0(footnotes(),collapse=""))
@@ -81,11 +83,11 @@ tableModule <- function(input, output, session, tbl, inputs, adj, labels){
     filename = function(){ paste('meps-hc-accessed-',Sys.Date(),'.csv',sep='') },
     content = function(file){
       
-      write.table(caption(),file,sep=",",row.names=F,col.names=F)
+      write.table(dl_caption(),file,sep=",",row.names=F,col.names=F)
       add.table(coef_tab(),file)
       
       if(!controlTotals()){
-        cap <- caption() %>% str_replace(.,word(.,1),word(.,1)%>%tolower)
+        cap <- dl_caption() %>% str_replace(.,word(.,1),word(.,1)%>%tolower)
         se_caption <- paste("Standard errors for",cap)
         add.table(se_caption,file,col.names="")
         add.table(se_tab(),file)

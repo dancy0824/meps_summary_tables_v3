@@ -63,9 +63,9 @@ server <- function(input,output,session) {
     D <- switch(stat(),"totPOP"=1E3, "totEXP"=1E9,"totEVT"=1E6,1)
     if(stat() %>% startsWith("pct")) D = 1E-2
     
-    lab <- ifelse(D==1E3, " (in thousands)",
-           ifelse(D==1E6, " (in millions)",
-           ifelse(D==1E9, " (in billions)","")))
+    lab <- ifelse(D==1E3, " in thousands",
+           ifelse(D==1E6, " in millions",
+           ifelse(D==1E9, " in billions","")))
     
     d <- ifelse(D==1,0,1)
     if(stat() == "avgEVT") d = 1
