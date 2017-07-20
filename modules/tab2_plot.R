@@ -44,6 +44,7 @@ plotUI<- function(id){
                               icon=icon('download')),
            
            uiOutput(ns("plot_caption"),inline=T),
+           uiOutput(ns("sub_caption")),
 
            fluidRow(
              column(width = 9,
@@ -76,8 +77,16 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   
   is_trend <- reactive(input$tabs == "trend")
   
+  sub_caption <- reactive({
+    if(!grepl("<SE>",labels()$caption)) return("")
+    return("Shading indicates 95% confidence interval")
+  })
+  
+  caption <- reactive(labels()$caption %>% gsub(" <SE>","",.))
+  
   output$plot_footnote <- renderText(labels()$footnotes$suppress %>% gsub(" -- Estimates","<em>Note:</em> Some estimates",.))
-  output$plot_caption  <- renderUI(tags$caption(labels()$caption))
+  output$plot_caption  <- renderUI(tags$caption(caption()))
+  output$sub_caption <- renderUI(tags$div(class="sub-caption",sub_caption()))
   
   rows  <- reactive(inputs()$rows)
   rowsX <- reactive(inputs()$rowsX)
@@ -158,8 +167,8 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   })
 
   format_type <- reactive({
-    if(grepl('percent',labels()$caption)) return(percent)
-    if(grepl('expend',labels()$caption)) return(dollar)
+    if(grepl('percent',caption())) return(percent)
+    if(grepl('expend',caption())) return(dollar)
     return(comma)
   })
   
@@ -202,7 +211,9 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   ####################################
   
   outgg <- function(){
-    gv() + ggtitle(str_wrap(labels()$caption,60))
+    #gv() + ggtitle(str_wrap(caption(),60))
+    gv() + labs(title = str_wrap(caption(),60),
+                subtitle = str_wrap(sub_caption(),60))
   }
   
   output$png <- downloadHandler(
