@@ -195,7 +195,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
       config(collaborate=F,displaylogo=F,
         modeBarButtonsToRemove=c("toImage","lasso2d","pan2d","select2d","zoomIn2d","zoomOut2d","resetScale2d")) %>%
       layout(font=list(family="Arial"),
-             margin=list(r=30,t=0))
+             margin=list(r=30,t=20))
   })
   
   output$legend <- renderUI({
