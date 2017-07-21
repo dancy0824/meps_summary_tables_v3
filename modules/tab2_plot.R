@@ -76,7 +76,11 @@ plotUI<- function(id){
 plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   
   rowsX <- reactive(inputs()$rowsX)
+ 
   is_trend <- reactive(input$tabs == "trend")
+  
+  legend_label <- reactive(grp_labels[[inputs()$cols]])
+  
   
   sub_caption <- reactive({
     if(!is_trend() | !grepl("<SE>",labels()$caption)) return("")
@@ -122,7 +126,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
  
   line <- reactive({ 
     p <- ggplot(plot_data(),aes(x = x, y = y, fill=grp)) +
-      scale_fill_manual(values=colors())
+      scale_fill_manual(name=legend_label(),values=colors())
 
     if(inputs()$showSEs){
       p <- p + geom_ribbon(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),alpha=0.3) 
@@ -130,7 +134,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
     
     p + geom_line(aes(col=grp),size = 1) +
       geom_point(aes(col=grp),size = 2) +
-      scale_color_manual(values=colors()) + 
+      scale_color_manual(name=legend_label(),values=colors()) + 
       expand_limits(y=0)
   })
   
@@ -144,7 +148,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
         x = factor(x, levels = rev(unique(x))))
     
     p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
-      scale_fill_manual(values=colors(),drop=FALSE) +
+      scale_fill_manual(name=legend_label(), values=colors(),drop=FALSE) +
       geom_bar(stat = "identity", position = "dodge", colour="white") + 
       scale_x_discrete(drop=FALSE) 
     
@@ -166,11 +170,10 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   
   gv <- function(){
     xlabel = grp_labels[[rowsX()]]
-    
+     
     if(is_trend()) gp <- line() else gp <- bar()
     
     gp + theme_minimal(base_size=16) + xlab(xlabel) + ylab("") +
-      theme(legend.title=element_blank()) +
       scale_y_continuous(labels = format_type()) 
   }
   
@@ -187,10 +190,13 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   output$legend <- renderUI({
     if(is_trend()) type = "line" else type = "bar"
     
-    tags$ul(class = "test-legend",
+    tagList(
+      tags$label(legend_label()),
+      tags$ul(class = "test-legend",
             build_legend(unique(plot_data()$grp), colors = rev(colors()), type=type, showSEs=inputs()$showSEs)
             # tags$li(tags$span(class = "block", style='background-color: purple'),"thing one prpl"),
             # tags$li(tags$span(class = "block", style='background-color: red'),"thing two red")
+      )
     )
   })
   
