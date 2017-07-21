@@ -107,7 +107,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   
   colors <- reactive({
     ncolors = length(unique(plot_data()$grp))
-    b_colors <- colorRampPalette(brewer.pal(ncolors,"Dark2"))
+    b_colors <- colorRampPalette(brewer.pal(max(ncolors,3),"Dark2"))
     b_colors(ncolors)
   })
   
