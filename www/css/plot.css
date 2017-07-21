@@ -35,12 +35,14 @@
 .legend-CI {
   display: inline-block;
   width: 36px;
-  height: 4px;
-  top: -4px;
-  background-color: gray;
+  height: 3px;
+  top: -3px;
+  background-color: black;
   position: relative;
   margin-right: 4px;
 }
+
+/*
 .legend-CI:after{
   height: 12px;
   width: 4px;
@@ -58,7 +60,7 @@
   background: inherit;
   top: -4px;
 }
-
+*/
 
 
 /* This is a trick to get plot to maintain ratio on resize */

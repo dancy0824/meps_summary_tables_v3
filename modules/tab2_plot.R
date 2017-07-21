@@ -15,7 +15,7 @@ build_legend <- function(names,colors,type="bar",showSEs=F){
       )
   }
   
-  if(showSEs){
+  if(showSEs & type == "bar"){
     listy[[i+1]] <- 
       tags$li(
         tags$div(class = "legend-CI"), 
@@ -79,9 +79,8 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   is_trend <- reactive(input$tabs == "trend")
   
   sub_caption <- reactive({
-    if(!grepl("<SE>",labels()$caption)) return("")
-    if(is_trend()) return("Shading indicates 95% confidence interval")
-    return("Lines indicate 95% confidence intervals")
+    if(!is_trend() | !grepl("<SE>",labels()$caption)) return("")
+    return("Shading indicates 95% confidence interval")
   })
   
   caption <- reactive(labels()$caption %>% gsub(" <SE>","",.))
