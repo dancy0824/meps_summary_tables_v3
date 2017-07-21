@@ -151,7 +151,11 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
     p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
       scale_fill_manual(name=legend_label(), values=colors(),drop=FALSE) +
       geom_bar(stat = "identity", position = "dodge", colour="white") + 
-      scale_x_discrete(drop=FALSE) 
+      scale_x_discrete(drop=FALSE) + 
+      theme_minimal(base_size=16) + 
+      coord_flip() +
+      guides(fill = guide_legend(reverse=T,order=1),
+             color = guide_legend(order=2)) + 
     
     if(inputs()$showSEs){
       p <- p +
@@ -161,13 +165,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
         scale_color_manual(values=c("95% Confidence Interval" = 'black'))
     }
 
-    p <- p + coord_flip() +
-      guides(fill = guide_legend(reverse=T,order=1),
-             color = guide_legend(order=2)) + 
-      theme_minimal(base_size=16) 
-
-    if(rowsX()=="Year"){ # Remove xaxis label 
-      print("removeing labels?")
+    if(rowsX()=="Year"){
       p <- p + 
         theme(axis.title.y = element_blank(),
               axis.text.y = element_blank(),
