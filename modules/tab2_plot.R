@@ -88,6 +88,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   })
   
   caption <- reactive(labels()$caption %>% gsub(" <SE>","",.))
+  meps_source <- reactive(labels()$source %>% gsub("<.*?>","",.))
   
   output$plot_footnote <- renderText(labels()$footnotes$suppress %>% gsub(" -- Estimates","<em>Note:</em> Some estimates",.))
   output$plot_caption  <- renderUI(tags$caption(caption()))
@@ -176,22 +177,18 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   })
 
   gv <- function(){
-    xlabel = grp_labels[[rowsX()]]
-    
     if(is_trend()) gp <- line() else gp <- bar()
+    if(cols() == "ind") gp <- gp + theme(legend.position = "none")
 
-    if(cols() == "ind"){
-      gp <- gp + theme(legend.position = "none")
-    }
-    
-    gp + ylab("") + xlab(xlabel) + scale_y_continuous(labels = format_type()) 
+    gp + ylab("") + xlab(grp_labels[[rowsX()]]) + 
+      scale_y_continuous(labels = format_type()) 
   }
   
   ############# Dispay (PLOTLY) ############# 
 
   output$plot <- renderPlotly({
     pp <- gv() + theme(legend.position = "none")
-
+ 
     ggplotly(pp) %>%
       config(collaborate=F,displaylogo=F,
         modeBarButtonsToRemove=c("toImage","lasso2d","pan2d","select2d","zoomIn2d","zoomOut2d","resetScale2d")) %>%
@@ -217,8 +214,11 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   ############# Download (GGPLOT) ############# 
   
   outgg <- function(){
-    gv() + labs(title = str_wrap(caption(),60),
-                subtitle = str_wrap(sub_caption(),60))
+    gv() + 
+      labs(title = str_wrap(caption(),60),
+           subtitle = str_wrap(sub_caption(),60),
+           caption = str_wrap(meps_source(),100)) +
+      theme(plot.caption = element_text(size = 10))
   }
   
   output$png <- downloadHandler(

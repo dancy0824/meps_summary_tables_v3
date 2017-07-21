@@ -80,9 +80,9 @@ notesModule <- function(input, output, session, tbl, inputs, adj){
     paste("<b>Source:</b>",sprintf("%s, %s, %s, %s.",CFACT,AHRQ,MEPS,year_caption()))
   ) 
   
-  output$source  <- renderText(source_text())
+  output$source <- renderText(source_text())
   
-  output$notes    <- renderUI({
+  output$notes <- renderUI({
     stat_notes <- notes[[stat()]] 
     subgrp_notes <- notes[names(notes) %in% c(rows(),cols())] %>% unlist 
     all_notes <- c(stat_notes,subgrp_notes)
@@ -111,6 +111,7 @@ notesModule <- function(input, output, session, tbl, inputs, adj){
   #################
   
   return(reactive(list(labels = labels(), 
+                       source = source_text(),
                        caption = caption(), 
                        footnotes = footnotes(),
                        controlTotals = controlTotals())))
