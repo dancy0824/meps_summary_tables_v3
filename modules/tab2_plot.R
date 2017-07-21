@@ -75,13 +75,13 @@ plotUI<- function(id){
 
 plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   
+  cols <- reactive(inputs()$cols)
   rowsX <- reactive(inputs()$rowsX)
  
-  is_trend <- reactive(input$tabs == "trend")
-  
   legend_label <- reactive(grp_labels[[inputs()$cols]])
   
-  
+  is_trend <- reactive(input$tabs == "trend")
+
   sub_caption <- reactive({
     if(!is_trend() | !grepl("<SE>",labels()$caption)) return("")
     return("Shading indicates 95% confidence interval")
@@ -135,7 +135,8 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
     p + geom_line(aes(col=grp),size = 1) +
       geom_point(aes(col=grp),size = 2) +
       scale_color_manual(name=legend_label(),values=colors()) + 
-      expand_limits(y=0)
+      expand_limits(y=0) + 
+      theme_minimal(base_size=16) 
   })
   
   bar <- reactive({  
@@ -159,24 +160,37 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
         geom_line(aes(x=one,y=one,color="95% Confidence Interval"))+
         scale_color_manual(values=c("95% Confidence Interval" = 'black'))
     }
-    
-    p + coord_flip() +
+
+    p <- p + coord_flip() +
       guides(fill = guide_legend(reverse=T,order=1),
-             color = guide_legend(order=2))
+             color = guide_legend(order=2)) + 
+      theme_minimal(base_size=16) 
+
+    if(rowsX()=="Year"){ # Remove xaxis label 
+      print("removeing labels?")
+      p <- p + 
+        theme(axis.title.y = element_blank(),
+              axis.text.y = element_blank(),
+              axis.ticks.y = element_blank())
+    }
+    
+    p
   })
 
-  
-  ############# Dispay (PLOTLY) ############# 
-  
   gv <- function(){
     xlabel = grp_labels[[rowsX()]]
-     
-    if(is_trend()) gp <- line() else gp <- bar()
     
-    gp + theme_minimal(base_size=16) + xlab(xlabel) + ylab("") +
-      scale_y_continuous(labels = format_type()) 
+    if(is_trend()) gp <- line() else gp <- bar()
+
+    if(cols() == "ind"){
+      gp <- gp + theme(legend.position = "none")
+    }
+    
+    gp + ylab("") + xlab(xlabel) + scale_y_continuous(labels = format_type()) 
   }
   
+  ############# Dispay (PLOTLY) ############# 
+
   output$plot <- renderPlotly({
     pp <- gv() + theme(legend.position = "none")
 
@@ -189,6 +203,8 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   
   output$legend <- renderUI({
     if(is_trend()) type = "line" else type = "bar"
+    
+    if(cols()=="ind") return("")
     
     tagList(
       tags$label(legend_label()),
