@@ -217,7 +217,8 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
       labs(title = str_wrap(caption(),60),
            subtitle = str_wrap(sub_caption(),60),
            caption = str_wrap(meps_source(),100)) +
-      theme(plot.caption = element_text(size = 10))
+      theme(plot.caption = element_text(size = 10),
+            plot.margin = margin(t=10,r=30,l=10,b=10))
   }
   
   output$png <- downloadHandler(
