@@ -78,8 +78,9 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   is_trend <- reactive(input$tabs == "trend")
   
   sub_caption <- reactive({
-    if(!is_trend() | !grepl("<SE>",labels()$caption)) return("")
-    return("Shading indicates 95% confidence interval")
+    if(!grepl("<SE>",labels()$caption)) return("")
+    if(is_trend()) return("Shading indicates 95% confidence interval")
+    return("Lines indicate 95% confidence intervals")
   })
   
   caption <- reactive(labels()$caption %>% gsub(" <SE>","",.))
@@ -149,7 +150,10 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   
   bar2 <- reactive({  
     
-    gp <-  ggplot(ggplot_data(),aes(x = x, y = y, fill=grp)) +
+    dat <- ggplot_data()
+    dat$one = 1
+    
+    gp <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
       scale_fill_manual(values=colors(),drop=FALSE)
     
     p <- gp +
@@ -159,11 +163,15 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
     if(inputs()$showSEs){
       p <- p +
         geom_errorbar(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),
-                      width = 0, position = position_dodge(width = 0.9))
+                      width = 0, position = position_dodge(width = 0.9)) + 
+        geom_line(aes(x=one,y=one,color="95% Confidence Interval"))+
+        scale_color_manual(values=c("95% Confidence Interval" = 'black'))
+
     }
     
     p + coord_flip() +
-      guides(fill = guide_legend(reverse=T))
+      guides(fill = guide_legend(reverse=T,order=1),
+             color = guide_legend(order=2))
   })
 
   format_type <- reactive({
