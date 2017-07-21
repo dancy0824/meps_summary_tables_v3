@@ -153,10 +153,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
       scale_fill_manual(name=legend_label(), values=colors(),drop=FALSE) +
       geom_bar(stat = "identity", position = "dodge", colour="white") + 
       scale_x_discrete(drop=FALSE) + 
-      theme_minimal(base_size=16) + 
-      coord_flip() +
-      guides(fill = guide_legend(reverse=T,order=1),
-             color = guide_legend(order=2)) + 
+      theme_minimal(base_size=16)
     
     if(inputs()$showSEs){
       p <- p +
@@ -173,7 +170,9 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
               axis.ticks.y = element_blank())
     }
     
-    p
+    p + coord_flip() +
+        guides(fill = guide_legend(reverse=T,order=1),
+               color = guide_legend(order=2))  
   })
 
   gv <- function(){
