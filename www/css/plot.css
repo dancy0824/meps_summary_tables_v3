@@ -13,6 +13,13 @@
   border: 1px solid;
 }
 
+.legend-point {
+  display: inline-block;
+  width:10px;
+  height: 10px;
+  border-radius: 100%;
+}
+
 
 .legend-line {
   display: inline-block;

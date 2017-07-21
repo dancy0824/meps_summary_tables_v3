@@ -15,7 +15,7 @@ build_legend <- function(names,colors,type="bar",showSEs=F){
       )
   }
   
-  if(showSEs & type == "bar"){
+  if(showSEs & type != "line"){
     listy[[i+1]] <- 
       tags$li(
         tags$div(class = "legend-CI"), 
@@ -76,15 +76,26 @@ plotUI<- function(id){
 plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   
   cols <- reactive(inputs()$cols)
+  rows <- reactive(inputs()$rows)
   rowsX <- reactive(inputs()$rowsX)
  
   legend_label <- reactive(grp_labels[[inputs()$cols]])
   
   is_trend <- reactive(input$tabs == "trend")
+  
+  graph_type <- reactive({
+    if(input$tabs == "trend"){
+      if( length(unique(tbl()$Year))==1) return("point")
+      return("line")
+    }
+    if(rows() == 'ind' & cols() == 'ind') return("point")
+    return("bar")
+  })
 
   sub_caption <- reactive({
-    if(!is_trend() | !grepl("<SE>",labels()$caption)) return("")
-    return("Shading indicates 95% confidence interval")
+    if(graph_type()=="line" & grepl("<SE>",labels()$caption)) 
+      return("Shading indicates 95% confidence interval")
+    return("")
   })
   
   caption <- reactive(labels()$caption %>% gsub(" <SE>","",.))
@@ -177,12 +188,38 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   
 ### <<<<<<<<<<<<<<<<<
   
+  point_graph <- function(dat,showSEs,legend_title,colors){
+    
+    dat$one = 1
+    n = length(dat$x)
+    jitter = 1:n*(1/n)
+    jitter = jitter - mean(jitter)
+    
+    dat$x = dat$x + jitter   
+  
+    p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
+      scale_fill_manual(name=legend_title,values=colors)
+    
+    if(showSEs){
+      p <- p +
+        geom_errorbar(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),width = 0) #+ 
+        #  geom_line(aes(x=one,y=one,color="95% Confidence Interval"))+
+        #  scale_color_manual(values=c("95% Confidence Interval" = 'black'))
+    }
+    
+    p + geom_point(aes(col=grp),size = 2) +
+        scale_color_manual(name=legend_title,values=colors) + 
+        expand_limits(y=0,x=c(min(dat$x)-1,max(dat$x)+1)) + 
+        theme_minimal(base_size=16) 
+  }
+  
+  
   line_graph <- function(dat,showSEs,legend_title,colors){
     p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
       scale_fill_manual(name=legend_title,values=colors)
     
-    if(inputs()$showSEs){
-      p <- p + geom_ribbon(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),alpha=0.3) 
+    if(showSEs){
+      p <- p + geom_ribbon(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),alpha=0.3)
     }
     
     p + geom_line(aes(col=grp),size = 1) +
@@ -243,10 +280,22 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
                legend_title=legend_label(),colors=colors())
   })
   
+  point <- reactive({
+    point_graph(plot_data(),showSEs=inputs()$showSEs,
+               legend_title=legend_label(),colors=colors())
+  })
+  
 ### >>>>>>>>>>>>>>>>>>>>>>>
   
   gv <- function(){
-    if(is_trend()) gp <- line() else gp <- bar()
+    if(graph_type() =="line"){
+      gp <- line()
+    }else  if(graph_type()=="bar"){
+      gp <- bar()
+    }else{
+      gp <- point()
+    }
+    
     if(cols() == "ind") gp <- gp + theme(legend.position = "none")
 
     gp + ylab("") + xlab(grp_labels[[rowsX()]]) + 
@@ -267,14 +316,14 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   })
   
   output$legend <- renderUI({
-    if(is_trend()) type = "line" else type = "bar"
-    
+  
     if(cols()=="ind") return("")
     
     tagList(
       tags$label(legend_label()),
       tags$ul(class = "test-legend",
-            build_legend(unique(plot_data()$grp), colors = rev(colors()), type=type, showSEs=inputs()$showSEs)
+            build_legend(unique(plot_data()$grp), colors = rev(colors()), 
+                         type=graph_type(), showSEs=inputs()$showSEs)
             # tags$li(tags$span(class = "block", style='background-color: purple'),"thing one prpl"),
             # tags$li(tags$span(class = "block", style='background-color: red'),"thing two red")
       )
