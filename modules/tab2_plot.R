@@ -124,57 +124,127 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
 
   
   ############# Plots ############# 
- 
-  line <- reactive({ 
-    p <- ggplot(plot_data(),aes(x = x, y = y, fill=grp)) +
-      scale_fill_manual(name=legend_label(),values=colors())
 
+  # line <- reactive({ 
+  #   p <- ggplot(plot_data(),aes(x = x, y = y, fill=grp)) +
+  #     scale_fill_manual(name=legend_label(),values=colors())
+  # 
+  #   if(inputs()$showSEs){
+  #     p <- p + geom_ribbon(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),alpha=0.3) 
+  #   }
+  #   
+  #   p + geom_line(aes(col=grp),size = 1) +
+  #     geom_point(aes(col=grp),size = 2) +
+  #     scale_color_manual(name=legend_label(),values=colors()) + 
+  #     expand_limits(y=0) + 
+  #     theme_minimal(base_size=16) 
+  # })
+  # 
+  # bar <- reactive({  
+  #   dat <- plot_data() %>%
+  #     mutate(
+  #       one = 1,
+  #       x = abbrev(x),
+  #       x = str_wrap(x,20),
+  #       x = factor(x, levels = unique(x)),
+  #       x = factor(x, levels = rev(unique(x))))
+  #   
+  #   p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
+  #     scale_fill_manual(name=legend_label(), values=colors(),drop=FALSE) +
+  #     geom_bar(stat = "identity", position = "dodge", colour="white") + 
+  #     scale_x_discrete(drop=FALSE) + 
+  #     theme_minimal(base_size=16)
+  #   
+  #   if(inputs()$showSEs){
+  #     p <- p +
+  #       geom_errorbar(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),
+  #                     width = 0, position = position_dodge(width = 0.9)) + 
+  #       geom_line(aes(x=one,y=one,color="95% Confidence Interval"))+
+  #       scale_color_manual(values=c("95% Confidence Interval" = 'black'))
+  #   }
+  # 
+  #   if(rowsX()=="Year"){
+  #     p <- p + 
+  #       theme(axis.title.y = element_blank(),
+  #             axis.text.y  = element_blank(),
+  #             axis.ticks.y = element_blank())
+  #   }
+  #   
+  #   p + coord_flip() +
+  #       guides(fill = guide_legend(reverse=T,order=1),
+  #              color = guide_legend(order=2))  
+  # })
+  
+### <<<<<<<<<<<<<<<<<
+  
+  line_graph <- function(dat,showSEs,legend_title,colors){
+    p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
+      scale_fill_manual(name=legend_title,values=colors)
+    
     if(inputs()$showSEs){
       p <- p + geom_ribbon(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),alpha=0.3) 
     }
     
     p + geom_line(aes(col=grp),size = 1) +
       geom_point(aes(col=grp),size = 2) +
-      scale_color_manual(name=legend_label(),values=colors()) + 
+      scale_color_manual(name=legend_title,values=colors) + 
       expand_limits(y=0) + 
       theme_minimal(base_size=16) 
-  })
+  }
   
-  bar <- reactive({  
-    dat <- plot_data() %>%
-      mutate(
-        one = 1,
-        x = abbrev(x),
-        x = str_wrap(x,20),
-        x = factor(x, levels = unique(x)),
-        x = factor(x, levels = rev(unique(x))))
+  bar_graph <- function(dat,showSEs,legend_title,colors,type="dl"){
     
-    p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
-      scale_fill_manual(name=legend_label(), values=colors(),drop=FALSE) +
-      geom_bar(stat = "identity", position = "dodge", colour="white") + 
-      scale_x_discrete(drop=FALSE) + 
-      theme_minimal(base_size=16)
+      if(type == "html") wrap_fun = wrap_html else wrap_fun = str_wrap
     
-    if(inputs()$showSEs){
-      p <- p +
-        geom_errorbar(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),
-                      width = 0, position = position_dodge(width = 0.9)) + 
-        geom_line(aes(x=one,y=one,color="95% Confidence Interval"))+
-        scale_color_manual(values=c("95% Confidence Interval" = 'black'))
-    }
-
-    if(rowsX()=="Year"){
-      p <- p + 
-        theme(axis.title.y = element_blank(),
-              axis.text.y = element_blank(),
-              axis.ticks.y = element_blank())
-    }
-    
-    p + coord_flip() +
+      dat <- dat %>%
+        mutate(
+          one = 1,
+          x = abbrev(x),
+          x = wrap_fun(x,20),
+          #x = gsub("\n","\n<br>",x),
+          x = factor(x, levels = unique(x)),
+          x = factor(x, levels = rev(unique(x))))
+      
+      p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
+        scale_fill_manual(name=legend_title, values=colors,drop=FALSE) +
+        geom_bar(stat = "identity", position = "dodge", colour="white") + 
+        scale_x_discrete(drop=FALSE) + 
+        theme_minimal(base_size=16)
+      
+      if(showSEs){
+        p <- p +
+          geom_errorbar(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),
+                        width = 0, position = position_dodge(width = 0.9)) + 
+          geom_line(aes(x=one,y=one,color="95% Confidence Interval"))+
+          scale_color_manual(values=c("95% Confidence Interval" = 'black'))
+      }
+      
+      nlevels = length(unique(dat$x))
+      
+      if(nlevels==1){
+        p <- p + 
+          theme(axis.title.y = element_blank(),
+                axis.text.y  = element_blank(),
+                axis.ticks.y = element_blank())
+      }
+      
+      p + coord_flip() +
         guides(fill = guide_legend(reverse=T,order=1),
                color = guide_legend(order=2))  
-  })
+    }
 
+  bar <- reactive({
+    bar_graph(plot_data(),showSEs=inputs()$showSEs,
+              legend_title=legend_label(),colors=colors())
+  })
+  
+  line <- reactive({
+    line_graph(plot_data(),showSEs=inputs()$showSEs,
+               legend_title=legend_label(),colors=colors())
+  })
+  
+### >>>>>>>>>>>>>>>>>>>>>>>
+  
   gv <- function(){
     if(is_trend()) gp <- line() else gp <- bar()
     if(cols() == "ind") gp <- gp + theme(legend.position = "none")
@@ -186,6 +256,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   ############# Dispay (PLOTLY) ############# 
 
   output$plot <- renderPlotly({
+
     pp <- gv() + theme(legend.position = "none")
  
     ggplotly(pp) %>%
