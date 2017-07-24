@@ -66,7 +66,9 @@ line_graph <- function(dat,showSEs,legend_title,colors,showLeg=TRUE){
     geom_point(aes(col=grp),size = 2,show.legend = showLeg) +
     scale_color_manual(name=legend_title,values=colors) + 
     expand_limits(y=0) + 
-    theme_minimal(base_size=16) 
+    theme_minimal(base_size=16) +
+    guides(colour = guide_legend(reverse=T),
+           fill = guide_legend(reverse=T))
 }
 
 bar_graph <- function(dat,showSEs,legend_title,colors,showLeg=TRUE,hide.y.axis=FALSE,br="\n"){
