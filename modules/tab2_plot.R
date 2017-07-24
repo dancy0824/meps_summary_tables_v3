@@ -69,14 +69,13 @@ line_graph <- function(dat,showSEs,legend_title,colors){
     theme_minimal(base_size=16) 
 }
 
-bar_graph <- function(dat,showSEs,legend_title,colors,type="dl"){
-  if(type == "html") wrap_fun = wrap_html else wrap_fun = str_wrap
+bar_graph <- function(dat,showSEs,legend_title,colors,br="\n"){
+
   dat <- dat %>%
     mutate(
       one = 1,
       x = abbrev(x),
-      x = wrap_fun(x,16),
-      #x = factor(x, levels = unique(x)),
+      x = meps_wrap(x,br),
       x = factor(x, levels = rev(unique(x))))
   
   p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
@@ -104,9 +103,9 @@ bar_graph <- function(dat,showSEs,legend_title,colors,type="dl"){
            color = guide_legend(order=2))  
 }
 
-meps_graph <- function(graph_type,...,type=""){
+meps_graph <- function(graph_type,...,br="\n"){
   if(graph_type=="line") return(line_graph(...))
-  if(graph_type=="bar") return(bar_graph(type=type,...))
+  if(graph_type=="bar") return(bar_graph(br=br,...))
   return(point_graph(...))
 }
 
@@ -199,7 +198,11 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
     df %>%
       mutate(y = coef/D, y_se = se/D) %>%
       select(grp, x, y, y_se)  %>% 
-      mutate(grp = factor(grp, levels = rev(unique(grp))))
+      mutate(
+        grp = abbrev(grp),
+        grp = meps_wrap(grp),
+        #grp = str_wrap(grp,16),
+        grp = factor(grp, levels = rev(unique(grp))))
   })
   
   ############# Formats ############# 
@@ -218,14 +221,14 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   
   # This function needs to be inside server, so it can capture reactives
   # (also, reactive won't work with ggplot/ggplotly(?) so need a function)
-  gv <- function(type){
+  gv <- function(br){
     
     gp <- meps_graph(
       graph_type(),
       dat = plot_data(),
       showSEs=inputs()$showSEs,
       legend_title=legend_label(),
-      colors=colors(),type=type)
+      colors=colors(),br=br)
     
     if(cols() == "ind") gp <- gp + theme(legend.position = "none")
     
@@ -237,15 +240,13 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
 
   output$plot <- renderPlotly({
     
-    gp <- gv(type="html")
+    gp <- gv(br="<br>")
 
     side_labels <- gp$data$x %>% as.character
-    
     max_length <- side_labels %>% nchar %>% max
     br_length <- str_split(side_labels,"<br>") %>% lapply(nchar) %>% unlist %>% max
-
     marg = 7*(max_length-br_length)
-    
+
     pp <- gp + theme(legend.position = "none",
                        plot.margin = margin(l = -marg))
  
@@ -274,12 +275,14 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   ############# Download (GGPLOT) ############# 
 
   outgg <- function(){
-    gv(type="dl") + 
+    gv(br="\n") + 
       labs(title = str_wrap(caption(),60),
            subtitle = str_wrap(sub_caption(),60),
            caption = str_wrap(meps_source(),100)) +
       theme(plot.caption = element_text(size = 10),
-            plot.margin = margin(t=10,r=30,l=10,b=10))
+            plot.margin = margin(t=10,r=20,l=10,b=10),
+            legend.key.size = unit(2.2,'lines'),
+            legend.text = element_text(size=11))
   }
   
   output$png <- downloadHandler(

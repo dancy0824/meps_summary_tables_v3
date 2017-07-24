@@ -39,3 +39,12 @@ abbrev = function(s){
     gsub("medicines","meds",.) %>%
     gsub("events","",.,ignore.case=T)
 }
+
+
+meps_wrap = function(s,br = "\n"){
+  s %>% 
+    gsub("Indian, Alaska Native, or",sprintf("Indian,%sAlaska Native,%sor",br,br),.) %>%
+    gsub("Hawaiian, or",sprintf("Hawaiian,%sor",br),.) %>%
+    gsub("Inapplicable \\(age",sprintf("Inapplicable%s\\(age",br),.)
+}
+
