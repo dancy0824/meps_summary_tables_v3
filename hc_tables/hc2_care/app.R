@@ -6,9 +6,12 @@
 # options(shiny.reactlog=T)
 
 source("../shared/app_preamble.R", chdir=T, local=T)
+source("global.R",chdir=T,local=T)
 source("app_info.R",chdir=T,local=T)
+source("app_code.R",chdir=T,local=T)
 source("global.R",chdir=T,local=T)
 load("CARE_TABLES.Rdata")
+
 
 ###########################################################
 
@@ -19,14 +22,12 @@ form_elements <- tagList(
   dataViewInput("care"),
   yearInput("care",min=min(care_tables$Year),max=max(care_tables$Year)),
   
-  rcInput("care",type="rows",choices=subgrps,class="hide-if-trend")
+  rcInput("care",type="rows",choices=subgrps,class="hide-if-trend slide")
 )
 
-body_ui <- mepsPage("care",info=info,form_elements=form_elements)
+ui <- mepsPage("care",info=info,form_elements=form_elements)
 
-##################################
-
-ui <- htmlTemplate("../../template.html", body = body_ui)
+###########################################################
 
 server <- function(input, output,session) {
   
