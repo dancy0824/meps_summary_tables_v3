@@ -33,8 +33,18 @@ select{
 
 /*****  Header  *****/
 
+.usa-banner-inner, 
+.usa-header-extended .usa-navbar,
+.usa-header-extended .usa-nav-inner{
+  max-width: none;
+}
 
-
+@media screen and (min-width: 951px){
+  .usa-header-extended .usa-navbar,
+  .usa-header-extended .usa-nav-inner{
+    max-width: none;
+  }
+}
 
 /*****  Footer  *****/
 
