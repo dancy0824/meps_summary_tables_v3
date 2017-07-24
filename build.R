@@ -20,11 +20,14 @@
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
+source("hc_tables/shared/app_functions.R")
+source("hc_tables/shared/app_functions508.R")
+
 library(htmltools)
 library(shiny)
 
-build_preview <- function(info,folder,path,col_width=12){
-  column(width = col_width,
+build_preview <- function(info,folder,path,col_width="one-half"){
+  col508(width = col_width,
          tags$a(href = paste0(path,folder,"/"),class = "preview-box",
                 h1(info$title),
                 p(info$description))
@@ -33,31 +36,29 @@ build_preview <- function(info,folder,path,col_width=12){
 
 #############################################################################
 
-hc_apps = "hc_tables/apps/"
+hc_apps = "hc_tables/"
+
+applist = c("hc1_use","hc2_care")
 
 apps = list()
-for(dir in list.files(hc_apps)){
-  apps[[dir]] = source(paste0(hc_apps,dir,"/info.R"))$value
+for(dir in applist){
+  apps[[dir]] = source(paste0(hc_apps,dir,"/app_info.R"))$value
 }
 
-hide = c("hc2_care","hc3_pmed")
-apps = apps[!names(apps) %in% hide]
-
-col_width = 12 / length(apps)
-
 app_list <- mapply(build_preview, apps, names(apps),
-                   path = hc_apps, col_width = col_width, SIMPLIFY=F)
+                   path = hc_apps, col_width = "one-half", SIMPLIFY=F)
 
-body_ui <- bootstrapPage(
-  
+index_body <- bootstrapPage(
   div(class = "container",
-    fluidRow(
+    fluidRow508(
       tagList(app_list)
     )
   )
 )
 
-ui <- htmltools::htmlTemplate("template.html", body = body_ui)
+index_header <- build_header(dir="hc_tables")
+
+ui <- htmltools::htmlTemplate("template.html", body = index_body, header = index_header)
 
 write(as.character(ui),file = 'index.html')
 

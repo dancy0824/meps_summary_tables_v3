@@ -56,36 +56,10 @@ mepsPage <- function(id,info,form_elements,tab_elements){
             hc_info(id))
    )
   )
-  # 
-  # meps_footer <- tagList(
-  #   div(class="usa-footer-primary-section",
-  #       div(class = "usa-grid-full",
-  #           actionButton508(ns("feedback"),label="Send Feedback"))),
-  #   
-  #   div(class="usa-footer-secondary_section",
-  #       div(class = 'usa-grid',
-  #           div(class = 'usa-footer-log usa-width-one-half',
-  #               tags$a(href = "https://www.ahrq.gov/",
-  #                      tags$img(class = "usa-footer-logo-img",
-  #                               src = "www/img/ahrq_logo.png",
-  #                               alt = "AHRQ logo")),
-  #               tags$h3(class = 'usa-footer-logo-heading',AHRQ)),
-  #           
-  #           div(class = 'usa-footer-contact-links usa-width-one-half',
-  #               tags$a(href = "https://meps.ahrq.gov/mepsweb/",
-  #                      tags$img(class = "usa-footer-logo-img",
-  #                               src = "www/img/oc_meps_logo_blue.png",
-  #                               alt = "MEPS logo")),
-  #               tags$address(
-  #                 tags$p(MEPS,br(),AHRQ,br(),
-  #                   "5600 Fishers Lane",br(),
-  #                   "Rockville, MD 20857", br(),
-  #                   tags$a(href = "mailto:mepsprojectdirector@ahrq.hhs.gov",
-  #                          "mepsprojectdirector@ahrq.hhs.gov"),br(),
-  #                   "(301) 427-1406")))
-  # )))
+  
+ meps_header <- build_header(dir="..")
 
   #htmlTemplate("../../template.html", body = meps_body, footer = meps_footer)
-  htmlTemplate("../../template.html", body = meps_body)
+  htmlTemplate("../../template.html", body = meps_body, header = meps_header)
 }
 
