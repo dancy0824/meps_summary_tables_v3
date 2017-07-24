@@ -51,7 +51,7 @@ point_graph <- function(dat,showSEs,legend_title,colors){
 }
 
 
-line_graph <- function(dat,showSEs,legend_title,colors){
+line_graph <- function(dat,showSEs,legend_title,colors,showLeg=TRUE){
   brks = waiver()
   yrs <- min(dat$x):max(dat$x)
   if(length(yrs) <= 3) brks = yrs
@@ -62,14 +62,14 @@ line_graph <- function(dat,showSEs,legend_title,colors){
   
   if(showSEs){p <- p + geom_ribbon(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),alpha=0.3)}
   
-  p + geom_line(aes(col=grp),size = 1) +
-    geom_point(aes(col=grp),size = 2) +
+  p + geom_line(aes(col=grp),size = 1,show.legend = showLeg) +
+    geom_point(aes(col=grp),size = 2,show.legend = showLeg) +
     scale_color_manual(name=legend_title,values=colors) + 
     expand_limits(y=0) + 
     theme_minimal(base_size=16) 
 }
 
-bar_graph <- function(dat,showSEs,legend_title,colors,hide.y.axis=FALSE,br="\n"){
+bar_graph <- function(dat,showSEs,legend_title,colors,showLeg=TRUE,hide.y.axis=FALSE,br="\n"){
 
   dat <- dat %>%
     mutate(
@@ -82,7 +82,7 @@ bar_graph <- function(dat,showSEs,legend_title,colors,hide.y.axis=FALSE,br="\n")
   
   p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
     scale_fill_manual(name=legend_title, values=colors,drop=FALSE) +
-    geom_bar(stat = "identity", position = "dodge", colour="white") + 
+    geom_bar(stat = "identity", position = "dodge", colour="white",show.legend = showLeg) + 
     scale_x_discrete(drop=FALSE) + 
     theme_minimal(base_size=16)
   
@@ -106,9 +106,9 @@ bar_graph <- function(dat,showSEs,legend_title,colors,hide.y.axis=FALSE,br="\n")
            color = guide_legend(order=2))  
 }
 
-meps_graph <- function(graph_type,...,hide.y.axis=FALSE,br="\n"){
-  if(graph_type=="line") return(line_graph(...))
-  if(graph_type=="bar") return(bar_graph(br=br,hide.y.axis=hide.y.axis,...))
+meps_graph <- function(graph_type,...,showLeg=TRUE,hide.y.axis=FALSE,br="\n"){
+  if(graph_type=="line") return(line_graph(showLeg=showLeg,...))
+  if(graph_type=="bar") return(bar_graph(br=br,showLeg=showLeg, hide.y.axis=hide.y.axis,...))
   return(point_graph(...))
 }
 
@@ -235,9 +235,9 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
       dat = plot_data(),
       showSEs=inputs()$showSEs,
       legend_title=legend_label(),
+      showLeg = (cols()!='ind'),
       hide.y.axis = (rows()=='ind'),colors=colors(),br=br)
     
-    if(cols() == "ind") gp <- gp + theme(legend.position = "none")
     
     gp + ylab("") + xlab(grp_labels[[rowsX()]]) + 
       scale_y_continuous(labels = format_type()) 
@@ -252,9 +252,9 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
     side_labels <- gp$data$x %>% as.character
     max_length <- side_labels %>% nchar %>% max
     br_length <- str_split(side_labels,"<br>") %>% lapply(nchar) %>% unlist %>% max
-    marg = 7*(max_length-br_length)
+    marg = -12 + 7*(max_length-br_length)
 
-    pp <- gp + theme(legend.position = "none",
+    pp <- gp + theme( legend.position = "none",
                        plot.margin = margin(l = -marg))
  
     ggplotly(pp) %>%
