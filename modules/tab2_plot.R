@@ -26,15 +26,18 @@ build_legend <- function(names,colors,type="bar",showSEs=F){
 }
 
 point_graph <- function(dat,showSEs,legend_title,colors){
+  brk = dat$x[1]
+  
   dat$one = 1
   n = length(dat$x)
-  jitter = 1:n*(1/n)
+  jitter = 1:n*(1/(2*n))
   jitter = jitter - mean(jitter)
   
   dat$x = dat$x + jitter   
   
   p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
-    scale_fill_manual(name=legend_title,values=colors)
+    scale_fill_manual(name=legend_title,values=colors)+
+    scale_x_continuous(breaks=brk)
   
   if(showSEs){p <- p + geom_errorbar(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),width = 0) #+ 
     #  geom_line(aes(x=one,y=one,color="95% Confidence Interval"))+
@@ -49,9 +52,16 @@ point_graph <- function(dat,showSEs,legend_title,colors){
 
 
 line_graph <- function(dat,showSEs,legend_title,colors){
+  brks = waiver()
+  yrs <- min(dat$x):max(dat$x)
+  if(length(yrs) <= 3) brks = yrs
+  
   p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
-    scale_fill_manual(name=legend_title,values=colors)
+    scale_fill_manual(name=legend_title,values=colors)+
+    scale_x_continuous(breaks=brks)
+  
   if(showSEs){p <- p + geom_ribbon(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),alpha=0.3)}
+  
   p + geom_line(aes(col=grp),size = 1) +
     geom_point(aes(col=grp),size = 2) +
     scale_color_manual(name=legend_title,values=colors) + 
