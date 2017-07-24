@@ -275,14 +275,19 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   ############# Download (GGPLOT) ############# 
 
   outgg <- function(){
-    gv(br="\n") + 
+    gp <- gv(br="\n") + 
       labs(title = str_wrap(caption(),60),
            subtitle = str_wrap(sub_caption(),60),
            caption = str_wrap(meps_source(),100)) +
       theme(plot.caption = element_text(size = 10),
             plot.margin = margin(t=10,r=20,l=10,b=10),
-            legend.key.size = unit(2.2,'lines'),
             legend.text = element_text(size=11))
+    
+    nlevels = unique(gp$data$grp) %>% length
+    
+    if(nlevels <= 6) gp <- gp + theme(legend.key.size = unit(3,'lines'))
+    
+    gp
   }
   
   output$png <- downloadHandler(
