@@ -88,8 +88,8 @@ bar_graph <- function(dat,showSEs,legend_title,colors,br="\n"){
     p <- p +
       geom_errorbar(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),
                     width = 0, position = position_dodge(width = 0.9)) + 
-      geom_line(aes(x=one,y=one,color="95% Confidence Interval"))+
-      scale_color_manual(values=c("95% Confidence Interval" = 'black'))
+      geom_line(aes(color="95% Confidence Interval"))+
+      scale_color_manual(name="",values=c("95% Confidence Interval" = 'black'))
   }
   nlevels = length(unique(dat$x))
   if(nlevels==1){
@@ -285,7 +285,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
     
     nlevels = unique(gp$data$grp) %>% length
     
-    if(nlevels <= 6) gp <- gp + theme(legend.key.size = unit(3,'lines'))
+    if(nlevels <= 6) gp <- gp + theme(legend.key.size = unit(2.5,'lines'))
     
     gp
   }
