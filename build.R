@@ -38,7 +38,7 @@ build_preview <- function(info,folder,path,col_width="one-half"){
 
 hc_apps = "hc_tables/"
 
-applist = c("hc1_use","hc2_care")
+applist = c("hc1_use","hc2_care","hc3_pmed","hc4_cond")
 
 apps = list()
 for(dir in applist){
@@ -46,14 +46,12 @@ for(dir in applist){
 }
 
 app_list <- mapply(build_preview, apps, names(apps),
-                   path = hc_apps, col_width = "one-half", SIMPLIFY=F)
+                   path = hc_apps, col_width = "one-fourth", SIMPLIFY=F)
 
 index_body <- bootstrapPage(
-  div(class = "container",
-    fluidRow508(
+    fluidRow508(class = "full-screen",
       tagList(app_list)
     )
-  )
 )
 
 index_header <- build_header(dir="hc_tables")
