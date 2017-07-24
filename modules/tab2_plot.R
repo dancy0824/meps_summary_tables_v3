@@ -69,7 +69,7 @@ line_graph <- function(dat,showSEs,legend_title,colors){
     theme_minimal(base_size=16) 
 }
 
-bar_graph <- function(dat,showSEs,legend_title,colors,br="\n"){
+bar_graph <- function(dat,showSEs,legend_title,colors,hide.y.axis=FALSE,br="\n"){
 
   dat <- dat %>%
     mutate(
@@ -77,6 +77,8 @@ bar_graph <- function(dat,showSEs,legend_title,colors,br="\n"){
       x = abbrev(x),
       x = meps_wrap(x,br),
       x = factor(x, levels = rev(unique(x))))
+  
+  #save(dat,file="plotdata.Rdata")
   
   p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
     scale_fill_manual(name=legend_title, values=colors,drop=FALSE) +
@@ -91,21 +93,22 @@ bar_graph <- function(dat,showSEs,legend_title,colors,br="\n"){
       geom_line(aes(color="95% Confidence Interval"))+
       scale_color_manual(name="",values=c("95% Confidence Interval" = 'black'))
   }
-  nlevels = length(unique(dat$x))
-  if(nlevels==1){
-    p <- p + 
+  
+  if(hide.y.axis){ # Remove x axis on bar charts if year
+    p <- p +
       theme(axis.title.y = element_blank(),
             axis.text.y  = element_blank(),
             axis.ticks.y = element_blank())
   }
+  
   p + coord_flip() +
     guides(fill = guide_legend(reverse=T,order=1),
            color = guide_legend(order=2))  
 }
 
-meps_graph <- function(graph_type,...,br="\n"){
+meps_graph <- function(graph_type,...,hide.y.axis=FALSE,br="\n"){
   if(graph_type=="line") return(line_graph(...))
-  if(graph_type=="bar") return(bar_graph(br=br,...))
+  if(graph_type=="bar") return(bar_graph(br=br,hide.y.axis=hide.y.axis,...))
   return(point_graph(...))
 }
 
@@ -223,12 +226,16 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   # (also, reactive won't work with ggplot/ggplotly(?) so need a function)
   gv <- function(br){
     
+    print(rows())
+    print(rowsX())
+    print(cols())
+    
     gp <- meps_graph(
       graph_type(),
       dat = plot_data(),
       showSEs=inputs()$showSEs,
       legend_title=legend_label(),
-      colors=colors(),br=br)
+      hide.y.axis = (rows()=='ind'),colors=colors(),br=br)
     
     if(cols() == "ind") gp <- gp + theme(legend.position = "none")
     
