@@ -130,8 +130,8 @@ plotUI<- function(id){
                               label = 'Download Plot', 
                               icon=icon('download')),
            
-           uiOutput(ns("plot_caption"),inline=T),
-           uiOutput(ns("sub_caption")),
+           uiOutput(ns("plot_caption"),inline=T,role="region","aria-live"="polite"),
+           uiOutput(ns("sub_caption"),role="region","aria-live"="polite"),
 
            fluidRow(
              column(width = 9,
@@ -150,7 +150,7 @@ plotUI<- function(id){
 
            ),
            
-           uiOutput(ns("plot_footnote"))
+           uiOutput(ns("plot_footnote"),role="region","aria-live"="polite")
   )
   
 }

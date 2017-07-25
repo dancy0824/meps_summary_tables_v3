@@ -18,7 +18,7 @@ codeUI <- function(id){
                           #choices = c("R","SAS","Stata")),
                           choices = c("R","SAS")),
            
-           uiOutput(ns("code"))
+           uiOutput(ns("code"),role="region","aria-live"="polite")
       )
   
 }

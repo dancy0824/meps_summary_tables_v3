@@ -25,9 +25,9 @@ tableUI<- function(id){
                               label = 'Download table', 
                               icon = icon('download')),
            
-           uiOutput(ns("table_caption"),inline=T),
-           uiOutput(ns('meps_table')),
-           uiOutput(ns("table_footnotes"))
+           uiOutput(ns("table_caption"),inline=T,role="region","aria-live"="polite"),
+           uiOutput(ns('meps_table'),role="region","aria-live"="polite"),
+           uiOutput(ns("table_footnotes",role="region","aria-live"="polite"))
   )
   
 }

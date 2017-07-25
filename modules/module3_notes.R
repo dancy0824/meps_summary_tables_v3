@@ -9,7 +9,7 @@ hc_info <- function(id){
     uiOutput(ns("source")),
     
     h2("Notes"),
-    p(uiOutput(ns("notes"))),
+    p(uiOutput(ns("notes"),role="region","aria-live"="polite")),
     p("This tool is provided as a convenience. It is the responsibility of the user to review
       results for statistical significance and overall reasonableness."),
     
