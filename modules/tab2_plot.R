@@ -43,12 +43,11 @@ plotUI<- function(id){
 
            ),
            
-           ## temporary
-           
-           div(class = "square",
-               div(class = "content",
-                   plotOutput(ns("ggplot")))),
-
+           ## temporary -- for debugging
+           # 
+           # div(class = "square",
+           #     div(class = "content",
+           #         plotOutput(ns("ggplot")))),
            ##
            
            uiOutput(ns("plot_footnote"),role="region","aria-live"="polite")
