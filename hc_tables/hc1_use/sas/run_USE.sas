@@ -13,16 +13,25 @@ run;
 /********************  Define Macros  *******************/
 /* Reminder: only inline comments are allowed in macros */
 
+* %let substat = evnt / evnt_sop / sop ;
+
 %macro survey(grp1,grp2,stat,char1=,char2=);
+
 	%let format = FORMAT &grp1. &char1.&grp1.. &grp2. &char2.&grp2.. ;
 	%let domain = DOMAIN &grp1.*&grp2.;
 
 	%if &stat = medEXP %then %let ods_table = DomainQuantiles;
 	%else %let ods_table = Domain; 
 
+
+
 	ods output &ods_table. = sas_results; 
 	%include "&path\stats\&stat..sas" ;
 %mend;
+
+ods exclude none;
+proc print data = sas_results;
+run;
 
 %macro stdize(grp1,grp2,char1=,char2=,type=FYC);
 	%put &grp1, &grp2, &stat;
@@ -195,6 +204,7 @@ run;
 	%create_subgrps(&usegrps,&path\grps);
 
 	%include "&shared\load\load_events.sas" / source2;
+	%include "&shared\load\merge_events.sas" / source2;
 
 	options dlcreatedir;
 	libname newdir "&path\tables\&year\";
@@ -231,6 +241,8 @@ run;
 
 
 %let year = 2014;
+%let stat = avgEVT;
+
 %let stat = totEVT;
 
 %let year = 2002;

@@ -59,6 +59,7 @@ standardErrorInput <- function(id){
 yearInput <- function(id,min,max){
   ns <- NS(id)
   tags$fieldset(
+    tags$legend("Select years",class = 'usa-sr-only'),
     div(class = "flex-parent",
       div(class="flex-child-fill year-start", 
           selectInput508(ns("year_start"),label="Year:",choices=max:min,selected=min)),
