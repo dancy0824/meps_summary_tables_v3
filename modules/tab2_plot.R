@@ -88,13 +88,15 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   meps_source <- reactive(labels()$source %>% gsub("<.*?>","",.))
   
   output$plot_footnote <- renderText(labels()$footnotes$suppress %>% gsub(" -- Estimates","<em>Note:</em> Some estimates",.))
-  output$plot_caption  <- renderUI(tags$caption(caption()))
+  output$plot_caption <- renderUI(tags$caption(caption()))
   output$sub_caption <- renderUI(tags$div(class="sub-caption",sub_caption()))
 
   ############# Data ############# 
   
-  plot_data <- reactive({
+  pre_data <- reactive({
     D  <- adj()$D
+    d <- adj()$d
+    
     df <- tbl() %>% mutate(x = rows, grp = cols)
     
     if(is_trend()) df$x = df$Year
@@ -108,8 +110,18 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
         grp = abbrev(grp),
         grp = meps_wrap(grp),
         grp = factor(grp, levels = rev(unique(grp))),
-        pretty_label = paste0(grp,": ",y))
-    
+        pretty_y = formatNum(y,d=d),
+        pretty_LL = formatNum(LL,d=d),
+        pretty_UL = formatNum(UL,d=d),
+        pretty_lab = sprintf("%s: %s",grp,pretty_y),
+        pretty_CI = sprintf("%s: %s (%s, %s)",grp,pretty_y,pretty_LL,pretty_UL))
+  })
+  
+  plot_data <- reactive({
+    dat <- pre_data()
+    if(inputs()$showSEs) dat$pretty_label = dat$pretty_CI
+    else dat$pretty_label = dat$pretty_lab
+    dat %>% mutate(pretty_label = gsub("Total: ","",pretty_label))
   })
   
   ############# Formats and Functions ############# 
@@ -201,10 +213,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
         x = abbrev(x),
         x = meps_wrap(x,br),
         x = factor(x, levels = rev(unique(x))))
-    
-    save(dat,file="plotdata.Rdata")
-    #  save data....
-    
+ 
     p <- ggplot(dat,aes(x = x, y = y, fill=grp,text=pretty_label)) + 
       theme_minimal(base_size=bsize) +
       geom_bar(stat="identity",position="dodge",colour="white",show.legend=showLegend()) + 
