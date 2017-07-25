@@ -27,7 +27,7 @@ tableUI<- function(id){
            
            uiOutput(ns("table_caption"),inline=T,role="region","aria-live"="polite"),
            uiOutput(ns('meps_table'),role="region","aria-live"="polite"),
-           uiOutput(ns("table_footnotes",role="region","aria-live"="polite"))
+           uiOutput(ns("table_footnotes"),role="region","aria-live"="polite")
   )
   
 }
