@@ -106,7 +106,7 @@ dataModule <- function(input, output, session, df, stat, exclude_initial,...){
   cols = reactive({
     if(input$cols==input$rows & !is_trend()) return("ind")
     return(input$cols)
-  })
+  }) 
   
   rows = reactive({
     if(is_trend()) return("ind")
@@ -117,7 +117,9 @@ dataModule <- function(input, output, session, df, stat, exclude_initial,...){
     if(is_trend()) return("Year")
     if(!is_trend() & input$rows == "ind") return("Year")
     return(input$rows)
-  })
+  }) 
+  
+  
   
 # Standard Errors and Control Totals
   controlTotals <- reactive({
@@ -205,13 +207,18 @@ dataModule <- function(input, output, session, df, stat, exclude_initial,...){
   inputs <- reactive({
     list(years=years(),cols=cols(),rows=rows(),rowsX=rowsX(),
          showSEs=showSEs(),stat=stat(),controlTotals=controlTotals())
-  })
+  }) 
   
   decorated_tbl <- reactive({
     select_levels() %>% decorate_tbl(var_name=stat())
-  }) 
+  })
+  
+  # outlist <- reactive(
+  #   list(inputs = inputs(),tbl = decorated_tbl())
+  # ) %>% debounce(150)
 
   return(reactive(list(inputs=inputs(), tbl=decorated_tbl())))
+  return(outlist)
 }
 
 

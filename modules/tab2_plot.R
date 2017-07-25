@@ -50,7 +50,8 @@ plotUI<- function(id){
            #         plotOutput(ns("ggplot")))),
            ##
            
-           uiOutput(ns("plot_footnote"),role="region","aria-live"="polite")
+           uiOutput(ns("plot_footnote"),role="region","aria-live"="polite"),
+           uiOutput(ns("sr_table"),class="usa-sr-only",role="region","aria-live"="polite")
   )
 }
 
@@ -65,7 +66,8 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   rowsX <- reactive(inputs()$rowsX)
  
   legend_label <- reactive(grp_labels[[cols()]])
-  
+  grpLabel <- reactive(grp_labels[[rowsX()]])
+
   is_trend <- reactive(input$tabs == "trend")
   
   graph_type <- reactive({
@@ -102,24 +104,41 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
     
     df %>%
       mutate(y = coef/D, y_se = se/D) %>%
-      select(grp, x, y, y_se)  %>% 
       mutate(
         LL = y - 1.96*y_se,
         UL = y + 1.96*y_se,
         grp = abbrev(grp),
-        grp = meps_wrap(grp),
-        grp = factor(grp, levels = rev(unique(grp))),
         pretty_y = formatNum(y,d=d),
         pretty_LL = formatNum(LL,d=d),
         pretty_UL = formatNum(UL,d=d),
         pretty_lab = sprintf("%s: %s",grp,pretty_y),
         pretty_CI = sprintf("%s: %s (%s, %s)",grp,pretty_y,pretty_LL,pretty_UL))
+  }) 
+  
+  ## Output CI table for screen readers
+  hidden_tbl <- reactive({
+    dat <- pre_data() %>% 
+      select(grp,x,pretty_y,pretty_LL,pretty_UL) %>%
+      rename_cols(list(
+        grp=legend_label(),
+        x=grpLabel(),
+        pretty_y = "Point Estimate",
+        pretty_LL="Lower 95% Confidence Limit",
+        pretty_UL="Upper 95% Confidence Limit")) 
+    
+    dat[,colnames(dat)!="(none)"]
   })
   
+  output$sr_table <- renderUI(HTML508table(body = hidden_tbl()))
+  
   plot_data <- reactive({
-    dat <- pre_data()
-    if(inputs()$showSEs) dat$pretty_label = dat$pretty_CI
-    else dat$pretty_label = dat$pretty_lab
+    dat <- pre_data() %>%
+      mutate(grp = meps_wrap(grp),
+            grp = factor(grp, levels = rev(unique(grp))))
+    
+    if(inputs()$showSEs) dat <- dat %>% mutate(pretty_label = pretty_CI)
+    else  dat <- dat %>% mutate(pretty_label = pretty_lab)
+    
     dat %>% mutate(pretty_label = gsub("Total: ","",pretty_label))
   })
   
@@ -231,7 +250,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
     else if(graph_type()=="bar") gp <- bar_graph(br=br)
     else if(graph_type()=="point") gp <- point_graph()
 
-    gp + ylab("") + xlab(grp_labels[[rowsX()]]) + 
+    gp + ylab("") + xlab(grpLabel()) + 
       scale_y_continuous(labels = format_type()) 
   }
 
