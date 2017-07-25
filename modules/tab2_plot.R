@@ -2,123 +2,21 @@
 ###                   FUNCTIONS                     ###
 #######################################################
 
-
-build_legend <- function(names,colors,type="bar",showSEs=F){
-  
-  listy = list()
+build_legend <- function(names,colors,type="bar"){
+  listy = list(); 
   for(i in 1:length(names)){
     listy[[i]] =
       tags$li(
         tags$div(class = paste0("legend-",type),
                  style = paste0('background-color: ',colors[i])),
-        names[i]
-      )
-  }
-  
-  if(showSEs & type != "line"){
-    listy[[i+1]] <- 
-      tags$li(
-        tags$div(class = "legend-CI"), 
-        "95% Confidence Interval"
-      )
+        names[i])
   }
   tagList(listy)
 }
 
-point_graph <- function(dat,showSEs,legend_title,colors){
-  brk = dat$x[1]
-  
-  dat$one = 1
-  n = length(dat$x)
-  jitter = 1:n*(1/(2*n))
-  jitter = jitter - mean(jitter)
-  
-  dat$x = dat$x + jitter   
-  
-  p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
-    scale_fill_manual(name=legend_title,values=colors)+
-    scale_x_continuous(breaks=brk)
-  
-  if(showSEs){p <- p + geom_errorbar(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),width = 0) #+ 
-    #  geom_line(aes(x=one,y=one,color="95% Confidence Interval"))+
-    #  scale_color_manual(values=c("95% Confidence Interval" = 'black'))
-  }
-  
-  p + geom_point(aes(col=grp),size = 2) +
-    scale_color_manual(name=legend_title,values=colors) + 
-    expand_limits(y=0,x=c(min(dat$x)-1,max(dat$x)+1)) + 
-    theme_minimal(base_size=16) 
-}
-
-
-line_graph <- function(dat,showSEs,legend_title,colors,showLeg=TRUE){
-  brks = waiver()
-  yrs <- min(dat$x):max(dat$x)
-  if(length(yrs) <= 3) brks = yrs
-  
-  p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
-    scale_fill_manual(name=legend_title,values=colors)+
-    scale_x_continuous(breaks=brks)
-  
-  if(showSEs){p <- p + geom_ribbon(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),alpha=0.3)}
-  
-  p + geom_line(aes(col=grp),size = 1,show.legend = showLeg) +
-    geom_point(aes(col=grp),size = 2,show.legend = showLeg) +
-    scale_color_manual(name=legend_title,values=colors) + 
-    expand_limits(y=0) + 
-    theme_minimal(base_size=16) +
-    guides(colour = guide_legend(reverse=T),
-           fill = guide_legend(reverse=T))
-}
-
-bar_graph <- function(dat,showSEs,legend_title,colors,showLeg=TRUE,hide.y.axis=FALSE,br="\n"){
-
-  dat <- dat %>%
-    mutate(
-      one = 1,
-      x = abbrev(x),
-      x = meps_wrap(x,br),
-      x = factor(x, levels = rev(unique(x))))
-  
-  #save(dat,file="plotdata.Rdata")
-  
-  p <- ggplot(dat,aes(x = x, y = y, fill=grp)) +
-    scale_fill_manual(name=legend_title, values=colors,drop=FALSE) +
-    geom_bar(stat = "identity", position = "dodge", colour="white",show.legend = showLeg) + 
-    scale_x_discrete(drop=FALSE) + 
-    theme_minimal(base_size=16)
-  
-  if(showSEs){
-    p <- p +
-      geom_errorbar(aes(ymin = y-1.96*y_se, ymax = y+1.96*y_se),
-                    width = 0, position = position_dodge(width = 0.9)) + 
-      geom_line(aes(color="95% Confidence Interval"))+
-      scale_color_manual(name="",values=c("95% Confidence Interval" = 'black'))
-  }
-  
-  if(hide.y.axis){ # Remove x axis on bar charts if year
-    p <- p +
-      theme(axis.title.y = element_blank(),
-            axis.text.y  = element_blank(),
-            axis.ticks.y = element_blank())
-  }
-  
-  p + coord_flip() +
-    guides(fill = guide_legend(reverse=T,order=1),
-           color = guide_legend(order=2))  
-}
-
-meps_graph <- function(graph_type,...,showLeg=TRUE,hide.y.axis=FALSE,br="\n"){
-  if(graph_type=="line") return(line_graph(showLeg=showLeg,...))
-  if(graph_type=="bar") return(bar_graph(br=br,showLeg=showLeg, hide.y.axis=hide.y.axis,...))
-  return(point_graph(...))
-}
-
-
 #######################################################
 ###                      UI                         ###
 #######################################################
-
 
 plotUI<- function(id){
   ns <- NS(id)
@@ -135,26 +33,27 @@ plotUI<- function(id){
 
            fluidRow(
              column(width = 9,
-                    div(class="square",
-                        div(class="content",
-                            plotlyOutput(ns("plot"),height="100%",width="100%")
-                        )
-                    )
+                    div(class="square",div(class="content",
+                      plotlyOutput(ns("plot"),height="100%",width="100%")))
              ),
              
              column(width = 3,
-                    div(
-                      uiOutput(ns("legend"))
-                    )
+                    div(uiOutput(ns("legend")))
              )
 
            ),
            
+           ## temporary
+           
+           div(class = "square",
+               div(class = "content",
+                   plotOutput(ns("ggplot")))),
+
+           ##
+           
            uiOutput(ns("plot_footnote"),role="region","aria-live"="polite")
   )
-  
 }
-
 
 #######################################################
 ###                     SERVER                      ###
@@ -166,7 +65,7 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   rows <- reactive(inputs()$rows)
   rowsX <- reactive(inputs()$rowsX)
  
-  legend_label <- reactive(grp_labels[[inputs()$cols]])
+  legend_label <- reactive(grp_labels[[cols()]])
   
   is_trend <- reactive(input$tabs == "trend")
   
@@ -204,13 +103,16 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
       mutate(y = coef/D, y_se = se/D) %>%
       select(grp, x, y, y_se)  %>% 
       mutate(
+        LL = y - 1.96*y_se,
+        UL = y + 1.96*y_se,
         grp = abbrev(grp),
         grp = meps_wrap(grp),
-        #grp = str_wrap(grp,16),
-        grp = factor(grp, levels = rev(unique(grp))))
+        grp = factor(grp, levels = rev(unique(grp))),
+        pretty_label = paste0(grp,": ",y))
+    
   })
   
-  ############# Formats ############# 
+  ############# Formats and Functions ############# 
   
   colors <- reactive({
     ncolors = length(unique(plot_data()$grp))
@@ -223,24 +125,104 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
     if(grepl('expend',caption())) return(dollar)
     return(comma)
   })
+
+  hide.y.axis <- function(gg){
+    gg + theme(axis.title.y = element_blank(),
+               axis.text.y  = element_blank(),
+               axis.ticks.y = element_blank())
+  }
   
-  # This function needs to be inside server, so it can capture reactives
-  # (also, reactive won't work with ggplot/ggplotly(?) so need a function)
+  bsize <- 14
+
+  showLegend <- reactive({
+    if(cols()=='ind') return(FALSE)
+    return(NA)
+  })
+
+  add_errorbars <- function(gg,...){
+    gg + geom_errorbar(aes(ymin=LL,ymax=UL,alpha="95% Confidence Interval"),width=0,...) +
+      scale_alpha_manual(name="",values=1)
+  }
+  
+  add_points <- function(gg){
+    gg + geom_point(aes(col=grp,text=pretty_label),size=2, show.legend = showLegend()) +
+      scale_color_manual(name=legend_label(),values=colors()) + 
+      expand_limits(y=0)
+  }
+  
+  ############# Plots ############# 
+  
+  point_graph <- reactive({
+    
+    dat <- plot_data()
+    yr <- dat$x[1]
+    n = length(dat$x)
+    jitter = 1:n*(1/(2*n))
+    jitter = jitter - mean(jitter)
+    
+    dat$x = dat$x + jitter   
+
+    p <- ggplot(dat,aes(x = x, y = y)) + 
+      theme_minimal(base_size=bsize) +
+      scale_x_continuous(breaks=yr) + 
+      expand_limits(x=c(min(dat$x)-1,max(dat$x)+1))
+    
+    if(inputs()$showSEs) p <- p %>% add_errorbars
+    
+    p <- p %>% add_points
+    
+    p + guides(color=guide_legend(order=2,reverse=T))
+  })
+  
+  line_graph <- reactive({
+    dat = plot_data() 
+    brks = waiver()
+    yrs <- min(dat$x):max(dat$x)
+    if(length(yrs) <= 3) brks = yrs
+
+    p <- ggplot(dat,aes(x = x, y = y, fill=grp)) + 
+      theme_minimal(base_size=bsize) + 
+      scale_x_continuous(breaks=brks) 
+    
+    if(inputs()$showSEs) p <- p + 
+      geom_ribbon(aes(ymin=LL,ymax=UL),alpha=0.3,show.legend=F)+
+      scale_fill_manual(name=legend_label(),values=colors())
+    
+    p <- p %>% add_points
+    
+    p + geom_line(aes(col=grp),size=1, show.legend = showLegend()) +
+      guides(colour=guide_legend(reverse=T),fill=guide_legend(reverse=T))
+  })
+
+  bar_graph <- function(br="\n") {
+
+    dat <- plot_data() %>%
+      mutate(
+        x = abbrev(x),
+        x = meps_wrap(x,br),
+        x = factor(x, levels = rev(unique(x))))
+    
+    save(dat,file="plotdata.Rdata")
+    #  save data....
+    
+    p <- ggplot(dat,aes(x = x, y = y, fill=grp,text=pretty_label)) + 
+      theme_minimal(base_size=bsize) +
+      geom_bar(stat="identity",position="dodge",colour="white",show.legend=showLegend()) + 
+      scale_fill_manual(name=legend_label(),values=colors(),drop=FALSE) +
+      scale_x_discrete(drop=FALSE) 
+    
+    if(inputs()$showSEs) p <- p %>% add_errorbars(position=position_dodge(width = 0.9))
+    if(rows()=='ind') p <- p %>% hide.y.axis  
+    
+    p + coord_flip() +
+      guides(color=guide_legend(order=2),fill=guide_legend(reverse=T,order=1))  
+  }
+
   gv <- function(br){
-    
-    print(rows())
-    print(rowsX())
-    print(cols())
-    
-    gp <- meps_graph(
-      graph_type(),
-      dat = plot_data(),
-      showSEs=inputs()$showSEs,
-      legend_title=legend_label(),
-      showLeg = (cols()!='ind'),
-      hide.y.axis = (rows()=='ind'),colors=colors(),br=br)
-    
-    
+    if(graph_type()=="line") gp <- line_graph()
+    else if(graph_type()=="bar") gp <- bar_graph(br=br)
+    else if(graph_type()=="point") gp <- point_graph()
+
     gp + ylab("") + xlab(grp_labels[[rowsX()]]) + 
       scale_y_continuous(labels = format_type()) 
   }
@@ -256,28 +238,31 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
     br_length <- str_split(side_labels,"<br>") %>% lapply(nchar) %>% unlist %>% max
     marg = -12 + 7*(max_length-br_length)
 
-    pp <- gp + theme( legend.position = "none",
-                       plot.margin = margin(l = -marg))
+    pp <- gp + theme(legend.position = "none",plot.margin=margin(l=-marg))
  
-    ggplotly(pp) %>%
+    ggplotly(pp,tooltip=c("text"),hoverinfo="text") %>%
       config(collaborate=F,displaylogo=F,
         modeBarButtonsToRemove=c("toImage","lasso2d","pan2d","select2d","zoomIn2d","zoomOut2d","resetScale2d")) %>%
-      layout(font=list(family="Arial"),
-             margin=list(r=30,t=20))
+      layout(font=list(family="Arial"),margin=list(r=30,t=20))
   })
   
   output$legend <- renderUI({
-  
-    if(cols()=="ind") return("")
+    if(cols()=="ind" & graph_type()=="line") return('')
     
+    if(inputs()$showSEs & graph_type() != "line"){
+      li_CI <- tags$li(tags$div(class = "legend-CI"), "95% Confidence Interval")  
+    }else{li_CI = ""}
+    
+    if(cols()=="ind"){
+      li_main = ""; label = "";
+    }else{
+      li_main = build_legend(unique(plot_data()$grp), colors = rev(colors()), type=graph_type())  
+      label = legend_label()
+    }
+
     tagList(
-      tags$label(legend_label()),
-      tags$ul(class = "test-legend",
-            build_legend(unique(plot_data()$grp), colors = rev(colors()), 
-                         type=graph_type(), showSEs=inputs()$showSEs)
-            # tags$li(tags$span(class = "block", style='background-color: purple'),"thing one prpl"),
-            # tags$li(tags$span(class = "block", style='background-color: red'),"thing two red")
-      )
+      tags$label(label),
+      tags$ul(class = "test-legend",li_main,li_CI)
     )
   })
   
@@ -293,11 +278,13 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
             legend.text = element_text(size=11))
     
     nlevels = unique(gp$data$grp) %>% length
-    
     if(nlevels <= 6) gp <- gp + theme(legend.key.size = unit(2.5,'lines'))
-    
     gp
   }
+  
+  output$ggplot <- renderPlot({
+    outgg()
+  })
   
   output$png <- downloadHandler(
     filename = function(){ paste('meps-hc-',Sys.Date(),'.png',sep='') },
