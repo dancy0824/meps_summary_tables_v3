@@ -57,10 +57,9 @@ mepsPage <- function(id,info,form_elements,tab_elements){
    )
   )
   
- meps_header <- build_header(dir="..")
+# meps_header <- build_header(dir="..")
 
   #htmlTemplate("../../template.html", body = meps_body, footer = meps_footer)
-  htmlTemplate("../../template.html", body = meps_body, header = meps_header,
-               dir="..")
+  htmlTemplate("../../template.html", body = meps_body, dir="..")
 }
 

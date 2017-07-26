@@ -54,9 +54,10 @@ index_body <- bootstrapPage(
     )
 )
 
-index_header <- build_header(dir="hc_tables")
+#index_header <- build_header(dir="hc_tables")
 
-ui <- htmltools::htmlTemplate("template.html", body = index_body, header = index_header)
+ui <- htmltools::htmlTemplate("template.html", body = index_body, #header = index_header
+                              dir=".")
 
 write(as.character(ui),file = 'index.html')
 
