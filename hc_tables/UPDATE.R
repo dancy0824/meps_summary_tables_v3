@@ -1,14 +1,14 @@
 ################################################################
 ## Update list of MEPS files and create expanded version
 
-puf_names_current = read.csv(
-  "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_file_names.csv",
-  stringsAsFactors = F)
+meps_file = "C:/Users/emily.mitchell/Desktop/Programming/GitHub/hhs_ahrq/MEPS/Quick_Reference_Guides/meps_file_names.csv"
+#meps_file = "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_file_names.csv"
+
+puf_names_current = read.csv(meps_file,stringsAsFactors = F)
 
 puf_names <- puf_names_current %>% 
   mutate(Year = as.numeric(Year)) %>% 
-  filter(!is.na(Year))
-
+  filter(!is.na(Year)) 
 
 setwd("C:/Users/emily.mitchell/Desktop/Programming/GitHub/meps_summary_tables/hc_tables/shared")
 
@@ -25,7 +25,9 @@ hc_list <- c("h10a","h26bf1",
 puf_expanded <- puf_names %>% rename(RX=RX.Events)
 
 puf_expanded <- puf_expanded %>% 
-  mutate(RX = replace(RX,RX=="h10a","hc10a"))
+  mutate(RX = replace(RX,RX=="h10a","hc10a"),
+         CLNK = replace(CLNK,CLNK=="h10if1","hc10if1"),
+         Conditions = replace(Conditions,Conditions=="h06r","hc006r"))
 
 for(evnt in names(event_letters)){
   letter = event_letters[[evnt]]

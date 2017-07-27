@@ -1,3 +1,6 @@
+
+### NOTE! If you update the meps_file_names.csv, run UPDATE.R first to create puf_names.csv ###
+
 library(dplyr)
 
 setwd("C:/Users/emily.mitchell/Desktop/Programming/GitHub/meps_summary_tables/hc_tables/shared/PUFS")
@@ -22,11 +25,17 @@ downloadSSP <- function(filename){
 meps_names <- read.csv("../puf_names.csv",stringsAsFactors = F)
 
 meps_names_fyc <- meps_names %>% select(FYC) %>% rm_empty
-meps_names_RX <- meps_names %>% select(RX.Events) %>% rm_empty
+meps_names_RX   <- meps_names %>% select(RX.Events) %>% rm_empty
 meps_names_evnt <- meps_names %>% select(Events) %>% rm_empty
+meps_names_cond <- meps_names %>% select(Conditions) %>% rm_empty
+meps_names_CLNK <- meps_names %>% select(CLNK) %>% rm_empty
+meps_names_RXLK <- meps_names %>% select(RXLK) %>% rm_empty
 
 lapply(meps_names_fyc,downloadSSP)
 lapply(meps_names_RX,downloadSSP)
+lapply(meps_names_cond,downloadSSP)
+lapply(meps_names_CLNK,downloadSSP)
+lapply(meps_names_RXLK,downloadSSP)
 
 for(letter in letters[2:8]){
   event_files <- gsub("\\*",letter,meps_names_evnt)
