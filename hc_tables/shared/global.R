@@ -55,12 +55,10 @@ get_file_names <- function(year){
 }
 
 
-readSource <- function(file,...,dir=".",verbose=T){
+readSource <- function(file,...,dir="."){
   fileName <- sprintf("%s/%s",dir,file) %>% gsub("//","/",.)
   codeString <- readChar(fileName,file.info(fileName)$size)
   codeString <- codeString %>% rsub(...) %>% gsub("\r","",.)
-  
-  if(verbose) codeString %>% writeLines
   codeString
 }
 

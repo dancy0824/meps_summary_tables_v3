@@ -25,7 +25,8 @@ sl = length(subgrp_list)
 #########################################################
 
 
-run <- function(codeString){
+run <- function(codeString,verbose=T){
+  if(verbose) writeLines(codeString)
   eval(parse(text=codeString),envir=.GlobalEnv)
 }
 
