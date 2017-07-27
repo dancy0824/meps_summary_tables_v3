@@ -5,11 +5,7 @@
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 # options(shiny.reactlog=T)
 
-source("../shared/app_preamble.R", chdir=T, local=T)
-source("global.R",chdir=T,local=T)
-source("app_info.R",chdir=T,local=T)
-source("app_code.R",chdir=T,local=T)
-load("USE_TABLES.Rdata")
+source("../shared/app_preamble.R", chdir=F, local=T)
 
 ###########################################################
 
@@ -33,10 +29,8 @@ ui <- mepsPage("use",info=info,form_elements=form_elements)
 
 ##############################################################
 
-
 # Exclude levels from initial select
   all_levels <- c(use_tables$levels1, use_tables$levels2) %>% unique
-  
   
   ## this should be a function in shared/function.R instead
   exclude_initial <- c(
@@ -47,7 +41,6 @@ ui <- mepsPage("use",info=info,form_elements=form_elements)
     grep("All",all_levels,value=T,ignore.case=T)
   )
 
-  
 # Exclude 'Missing' entirely (can comment out for debugging)
   exclude_choices <- c(
     grep("missing",all_levels,value=T,ignore.case=T)

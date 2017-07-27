@@ -5,13 +5,7 @@
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 # options(shiny.reactlog=T)
 
-source("../shared/app_preamble.R", chdir=T, local=T)
-source("global.R",chdir=T,local=T)
-source("app_info.R",chdir=T,local=T)
-source("app_code.R",chdir=T,local=T)
-source("global.R",chdir=T,local=T)
-load("CARE_TABLES.Rdata")
-
+source("../shared/app_preamble.R", chdir=F, local=T)
 
 ###########################################################
 
