@@ -39,8 +39,7 @@ source("../../shared/global.R")
 source("../../shared/r/run_preamble.R",chdir=T)
 
 # Local
-# source("../global.R",chdir=T) -- doesn't exist yet
-
+source("../dictionaries.R")
 source("stats.R")
 
 ##################################################
@@ -84,15 +83,6 @@ for(year in year_list){
   runSource("design/EVNTdsgn.R",yy=yr) # event-level
   runSource("design/PERSdsgn.R",yy=yr,subgrps=sg) # person-level
   runSource("design/PERSevnt.R",yy=yr,subgrps=sg) # person-level, by event type
-  
-  ####
-  cond_stats = list(
-      "Number of people with care" = "totPOP",
-      "Number of events"           = "totEVT",
-      "Total expenditures ($)"     = "totEXP",
-      "Mean expenditure per person with care ($)"= "meanEXP"
-  )
-  ###
 
   for(stat in cond_stats){
     

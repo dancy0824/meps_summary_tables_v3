@@ -1,23 +1,36 @@
 ##################################################
-###     APP: UTILIZATION AND EXPENDITURES      ###
+###          APP: MEDICAL CONDITIONS           ###
 ##################################################
 
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 # options(shiny.reactlog=T)
 
-source("../shared/app_preamble.R", chdir=T, local=T)
-source("app_info.R",chdir=T,local=T)
-#source("global.R",chdir=T,local=T)
-#source("app_code.R",chdir=T,local=T)
-
+source("../shared/app_preamble.R", chdir=F, local=T)
 
 ###########################################################
 
+
 form_elements <- tagList(
-   h1("This app is under construction")
+  
+  selectInput508("stat",label="Select statistic:",choices=cond_stats),
+  standardErrorInput("cond"),
+ 
+  dataViewInput("cond"),
+  yearInput("cond",min=min(cond_tables$Year),max=max(cond_tables$Year)),
+  
+  rcInput("cond",type="rows",choices=subgrps,class="hide-if-trend slide"),
+  rcInput("cond",type="cols",choices=c("Condition"),class="hidden")
 )
 
-ui <- mepsPage("cond",info=info,form_elements=form_elements)
+tab_panel <- tabsetPanel(type="pills",
+  tableUI('cond',DT=T),
+  #plotUI('cond'),
+  codeUI('cond')
+)
+
+ui <- mepsPage("cond",info=info,form_elements=form_elements,tab_panel=tab_panel)
+
+
 
 ##############################################################
 
@@ -25,7 +38,44 @@ ui <- mepsPage("cond",info=info,form_elements=form_elements)
 #################################
 
 server <- function(input,output,session) {
+  
+  stat <- reactive(input$stat)
 
+  adj <- reactive({
+    D <- switch(stat(),"totPOP"=1E3, "totEXP"=1E9,"totEVT"=1E6,1)
+    if(stat() %>% startsWith("pct")) D = 1E-2
+
+    lab <- ifelse(D==1E3, " in thousands",
+           ifelse(D==1E6, " in millions",
+           ifelse(D==1E9, " in billions","")))
+
+    d <- ifelse(D==1,0,1)
+
+    return(list(D=D,d=d,label=lab))
+  })
+
+
+  ### Modules ###
+
+  # Edit inputs and filter data
+  meps_data <-
+    callModule(dataModule,"cond",
+               df = cond_tables,
+               stat = stat,
+               exclude_choices = c(""),
+               exclude_initial = c(""))
+
+  meps_tbl <- reactive(meps_data()$tbl)
+  meps_inputs <- reactive(meps_data()$inputs) # years, rows, cols, stat
+
+
+  # Labels, caption, footnotes, notes
+  meps_labels <- callModule(notesModule,"cond", tbl=meps_tbl, inputs=meps_inputs, adj=adj)
+
+  # tabPanels
+  callModule(tableModule,"cond", tbl=meps_tbl, inputs=meps_inputs, labels=meps_labels, adj=adj, pivot=T)
+  callModule(plotModule, "cond", tbl=meps_tbl, inputs=meps_inputs, labels=meps_labels, adj=adj)
+  callModule(codeModule, "cond", inputs=meps_inputs)
 }
 
   
