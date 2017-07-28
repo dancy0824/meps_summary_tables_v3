@@ -2,13 +2,6 @@
 ###   Accessibility and quality of care   ###
 #############################################
 
-survey <- function(grp1,stat,yr,...){
-  svyString <- r_svy(grps=grp1,stat=stat,...)
-  cat(stat,":",svyString %>% writeLines)
-  results <- run(svyString)
-  results %>% standardize(grp1=grp1,stat=stat) 
-} 
-
 standardize <- function(results,grp1,stat){
   results %>% 
     rename_(levels1=grp1) %>%
@@ -32,13 +25,14 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 app <- "hc2_care"
 
 # Shared
-source("../../shared/global.R")
+source("../../shared/app_global.R")
 source("../../shared/r/run_preamble.R",chdir=T)
 
 # Local
-source("../global.R",chdir=T)
+source("../dictionaries.R",chdir=T)
+source("stats.R")
 
-caregrps = care_subgrps %>% unlist
+caregrps = care_subgrps %>% unlist %>% setNames(NULL)
 
 ##################################################
 ###                   RUN                      ###
@@ -47,6 +41,17 @@ caregrps = care_subgrps %>% unlist
 # Load packages
   runSource('load/load_pkg.R',dir=shared)
   
+args = commandArgs(trailingOnly = TRUE)
+if(length(args) > 0){
+  year_start = as.numeric(args[1])
+  year_end = as.numeric(args[2])
+}else{
+  year_start = min(meps_names$Year)
+  year_end = max(meps_names$Year)
+}
+year_list = year_start:year_end
+
+
 for(year in year_list){   print(year)
   
   dir.create(sprintf('%s/%s',tables,year), showWarnings = FALSE)
@@ -55,18 +60,16 @@ for(year in year_list){   print(year)
   ya <- substring(year+1,3,4)
   
 # Load data
-  runSource('load/load_fyc.R',dir=shared,
-            "year"=year,"yy"=yr,"PUFdir"=PUFdir,
-             get_file_names(year))  
+  runSource('load/load_fyc.R',dir=shared,year=year,yy=yr,PUFdir=PUFdir,get_file_names(year))  
   
 # Add subgroups  
-  for(grp in subgrp_load) runSource(sprintf("subgrps/%s.R",grp),dir=shared,"yy"=yr)
-  for(grp in caregrps) runSource(sprintf("grps/%s.R",grp),dir=path,"yy"=yr,"ya"=ya,"yb"=yb)
+  for(grp in subgrp_load) runSource(sprintf("subgrps/%s.R",grp),dir=shared,yy=yr)
+  for(grp in caregrps) runSource(sprintf("grps/%s.R",grp),dir=path,yy=yr,ya=ya,yb=yb)
   
 # Define design
-  runSource("svydesign/design_fyc.R", dir=shared,"yy"=yr)
-  runSource("svydesign/design_diab.R",dir=shared,"yy"=yr)
-  runSource("svydesign/design_saq.R", dir=shared,"yy"=yr)
+  runSource("svydesign/design_fyc.R", dir=shared,yy=yr)
+  runSource("svydesign/design_diab.R",dir=shared,yy=yr)
+  runSource("svydesign/design_saq.R", dir=shared,yy=yr)
     
 # Run for each statistic
   
@@ -74,10 +77,14 @@ for(year in year_list){   print(year)
     
     outfile <- sprintf("%s/%s.csv",year,stat)
     
+    svy = stat
+    if(!svy %in% names(meps_svyby)) svy = strsplit(stat,"_")[[1]][1]
+  
     for(grp1 in subgrp_list){
       if(done(outfile,dir=tables,grp1=grp1,grp2=stat)) next
       
-      results <- survey(grp1=grp1,stat=stat,yr=yr)
+      out <- meps_svyby[[svy]] %>% rsub(by=grp1,formula=stat) %>% run
+      results <- out %>% standardize(grp1=grp1,stat=stat)
       update.csv(results,file=outfile,dir=tables)
     }
   }

@@ -30,7 +30,7 @@ standardize <- function(df,grp1,grp2,stat,type=""){
 ###                  LISTS                     ###
 ##################################################
 
-# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 app <- "hc4_cond"
 
@@ -109,14 +109,14 @@ for(year in year_list){
 
     # by event type
       if(!done(outfile,dir=tables,grp1="event",grp2="Condition")){
-        out <- meps_event[[stat]] %>% rsub(by=by,yy=yr) %>% run
+        out <- meps_event[[stat]] %>% rsub(yy=yr) %>% run
         results <- out %>% standardize("event","Condition",stat)
         update.csv(results,file=outfile,dir=tables)
       }
       
     # by SOP
       if(!done(outfile,dir=tables,grp1="sop",grp2="Condition")){
-        out <- meps_sop[[stat]] %>% rsub(by=by,yy=yr)  %>% run
+        out <- meps_sop[[stat]] %>% rsub(yy=yr)  %>% run
         results <- out %>% standardize("sop","Condition",stat,type="sop")
         update.csv(results,file=outfile,dir=tables)
       }
@@ -124,69 +124,4 @@ for(year in year_list){
   
 }   
 
-      # by = "~Condition+.grp." # (or "~Condition" if grp=='ind' )
-      # svyby(~ind, by = .by., FUN=svytotal,design=PERSdsgn) # totPOP
-      # svyby(~ind, by = .by., FUN=svytotal,design=EVNTdsgn) # totEVT
-      # svyby(~XP13X, by = .by., FUN=svytotal,design=PERSdsgn) # totEXP
-      # svyby(~XP13X, by = .by., FUN=svymean,design=PERSdsgn)  # meanEXP
-      
-    
-      # svyby(~ind, by = ~Condition+event,FUN=svytotal,design=PERSevnt) # totPOP
-      # svyby(~ind, by = ~Condition+event,FUN=svytotal,design=EVNTdsgn) # totEVT
-      # svyby(~XP13X, by = ~Condition+event,FUN=svytotal,design=PERSevnt) # totEXP
-      # svyby(~XP13X, by = ~Condition+event,FUN=svymean, design=PERSevnt) # meanEXP
-      
-  
-      
-      # svyby(~(XP13X>0)+(SF13X>0)+(MR13X>0)+(MD13X>0)+(PR13X>0)+(OZ13X>0),
-      #       by = ~Condition,FUN=svytotal,design=PERSdsgn) # totPOP
-      # 
-      # svyby(~(XP13X>0)+(SF13X>0)+(MR13X>0)+(MD13X>0)+(PR13X>0)+(OZ13X>0), 
-      #       by = ~Condition,FUN=svytotal,design=EVNTdsgn) # totEVT
-      # 
-      # svyby(~XP13X+SF13X+MR13X+MD13X+PR13X+OZ13X,
-      #       by = ~Condition,FUN=svytotal,design=PERSdsgn) # totEXP
-      # 
-      # svyby(~XP13X+SF13X+MR13X+MD13X+PR13X+OZ13X,
-      #       by = ~Condition,FUN=svymean,design=PERSdsgn) # meanEXP
-      
-      
-  # # Table 1: Number of persons with care
-  #   out1a <- svyby(~ind,by = ~Condition,FUN=svytotal,design=PERSdsgn) # all events
-  #   out1b <- svyby(~ind,by = ~Condition+event,FUN=svytotal,design=PERSevnt)   # by event type
-  
-  # # Table 2: Number of events (by event type)
-  #   out2a <- svyby(~ind,by = ~Condition,FUN=svytotal,design=EVNTdsgn) # all events
-  #   out2b <- svyby(~ind,by = ~Condition+event,FUN=svytotal,design=EVNTdsgn)     # by event type
- 
-  # # Table 3: Total expenses
-  #   out3.1 <- svyby(~XP13X,by = ~Condition,FUN=svytotal,design=EVNTdsgn) # all events
-  #   out3.2 <- svyby(~XP13X,by = ~Condition+event,FUN=svytotal,design=EVNTdsgn)  # by event type
-    
-  # # Table 3a: Mean expenses per person with care
-  #   out3a.1 <- svyby(~XP13X,by = ~Condition,FUN=svymean,design=PERSdsgn) # all events
-  #   out3a.2 <- svyby(~XP13X,by = ~Condition+event,FUN=svymean,design=PERSevnt)  # by event type
-      
-  # # Table 4: Total expenses
-  #   # All sop (see above)
-  #   out4 <- svyby(~XP13X+SF13X+MR13X+MD13X+PR13X+OZ13X,by = ~Condition,FUN=svytotal,design=EVNTdsgn)  # by SOP
-        
-     # round(out2[,c("SF13X","PR13X","MR13X","MD13X","OZ13X")]/out2$XP13X*100,1)
-      
-    # out1a %>% 
-    #   full_join(out2a,by="Condition",suffix=c(".1",".2")) %>% 
-    #   full_join(out3.1,by="Condition",suffix=c("",".3")) %>% 
-    #   full_join(out3a.1,by="Condition",suffix=c("",".3a"))
-    #   
-    # out1b %>% 
-    #   full_join(out2b,by=c("Condition","event"),suffix=c(".1",".2")) %>% 
-    #   full_join(out3.2,by=c("Condition","event"),suffix=c("",".3")) %>% 
-    #   full_join(out3a.2,by=c("Condition","event"),suffix=c("",".3a"))
-    # 
-    # out4
-    # 
-    
-    
-      
-  
   

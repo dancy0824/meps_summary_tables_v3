@@ -5,10 +5,10 @@
 
 source("r/stats.R")
 
-r_svy <- function(grps,stat,yr,display=F){
+r_svy <- function(grps,stat,yr){
   
-  # Remove filler subgroups if using display
-  if(display) gp <- grps[!grps %in% c("ind")] else gp <- grps
+  # Remove filler subgroups 
+  gp <- grps[!grps %in% c("ind")] 
   
   by <- paste0(gp,collapse="+")
   
@@ -24,5 +24,5 @@ r_svy <- function(grps,stat,yr,display=F){
 
 
 get_r_code <- function(grps,stat,yr){
-  r_svy(grps,stat,yr,display=T)
+  r_svy(grps,stat,yr)
 }
