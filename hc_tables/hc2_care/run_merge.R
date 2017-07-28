@@ -26,6 +26,8 @@ delay_dictionary = list(
   "delay_DN" = "Dental care",
   "delay_PM" = "Prescription medicines") %>% stack
 
+years = list.files("r/tables") %>% as.numeric %>% na.omit; 
+
 ### CARE FILES ###
 out <- list()
 for(year in years){                 cat(year,"..")
@@ -41,6 +43,8 @@ all_care <- all_care %>%
     levels2 = replace(levels2,startsWith(levels2,"other"), "Other")) 
 
 care_tables <- all_care %>% add_labels(delay_dictionary)
+
+care_tables$n = 1000
 
 save(care_tables, file="TABLES.Rdata")
 
