@@ -19,7 +19,14 @@ form_elements <- tagList(
   rcInput("care",type="rows",choices=subgrps,class="hide-if-trend slide")
 )
 
-ui <- mepsPage("care",info=info,form_elements=form_elements)
+tab_panel <- tabsetPanel(type="pills",
+  tableUI('care'),
+  plotUI('care'),
+  codeUI('care')
+)
+
+
+ui <- mepsPage("care",info=info,form_elements=form_elements,tab_panel=tab_panel)
 
 ###########################################################
 

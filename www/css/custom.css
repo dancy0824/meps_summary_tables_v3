@@ -29,6 +29,13 @@ select{
   text-align: center;
 }
 
+.gray{
+  color: #5b616b;
+}
+
+.hidden{
+  display: none;
+}
 
 
 /*****  Header  *****/
@@ -85,8 +92,20 @@ caption, .caption{
   display: inline;
 }
 
+.dataTables_wrapper .dataTables_filter {
+    float: left !important; 
+    text-align: left !important; 
+    width: 100%;
+}
 
-
+input[type="search"]{
+  display: inline-block;
+  height: 3rem;
+  padding: 0 1rem;
+  width: 70%;
+  font-weight: 400;
+  
+}
 
 
 .em-legend{

@@ -2,12 +2,14 @@
 ###                   FUNCTIONS                     ###
 #######################################################
 
-spread_tbl <- function(data,stat,labels=NULL){              
+spread_tbl <- function(data,stat,labels=NULL,pivot=FALSE){    
+  spread_by = ifelse(pivot,"rows","cols")
+  
   data %>%
     mutate(cols = factor(cols, levels = unique(cols)),
            rows = factor(rows, levels = unique(rows))) %>%
     select_("rows","cols",stat) %>% distinct %>%
-    spread_("cols",stat) %>%
+    spread_(spread_by,stat) %>%
     rename_cols(labels)
 }
 
@@ -16,8 +18,12 @@ spread_tbl <- function(data,stat,labels=NULL){
 ###                      UI                         ###
 #######################################################
 
-tableUI<- function(id){
+
+tableUI<- function(id,DT=F){
   ns <- NS(id)
+  
+  if(DT){tbl <- DT::dataTableOutput(ns('meps_DT'))
+  }else{ tbl <- uiOutput(ns('meps_table'),role="region","aria-live"="polite")}
   
   tabPanel(title="Table",icon=icon("table"),
            downloadButton508( ns("csv"), 
@@ -26,7 +32,9 @@ tableUI<- function(id){
                               icon = icon('download')),
            
            uiOutput(ns("table_caption"),inline=T,role="region","aria-live"="polite"),
-           uiOutput(ns('meps_table'),role="region","aria-live"="polite"),
+           #uiOutput(ns('meps_table'),role="region","aria-live"="polite"),
+           #dataTableOutput(ns('meps_table')),
+           tbl,
            uiOutput(ns("table_footnotes"),role="region","aria-live"="polite")
   )
   
@@ -38,7 +46,7 @@ tableUI<- function(id){
 ###                     SERVER                      ###
 #######################################################
 
-tableModule <- function(input, output, session, tbl, inputs, adj, labels){
+tableModule <- function(input, output, session, tbl, inputs, adj, labels,pivot=F){
   
   table_caption <- reactive(labels()$caption %>% gsub("<SE>","(standard errors)",.))
   dl_caption <- reactive(labels()$caption %>% gsub(" <SE>","",.))
@@ -62,22 +70,29 @@ tableModule <- function(input, output, session, tbl, inputs, adj, labels){
 
 # Display table     
 
-  display_tbl <- reactive({                                              
-     formatted_tbl() %>% 
-      spread_tbl(stat = ifelse(inputs()$showSEs,"coef_se","coef"), labels = labels()$labels) 
+  display_tbl <- reactive({    
+   formatted_tbl() %>% 
+      spread_tbl(stat=ifelse(inputs()$showSEs,"coef_se","coef"), labels=labels()$labels, pivot=pivot) 
   }) 
+  
   
   output$meps_table <- renderUI({
     HTML508table(body = display_tbl(), caption = table_caption())
   })
+
+  output$meps_DT <- DT::renderDataTable({
+    DT::datatable(display_tbl(),rownames=F,select="none",
+                  options = list(paging = FALSE),escape=F)
+  })
+  
   
   output$table_footnotes <- renderText(paste0(footnotes(),collapse=""))
   
   
 # Download table
 
-  coef_tab <- reactive(formatted_tbl() %>% spread_tbl(stat="coef",labels=labels()$labels))
-  se_tab   <- reactive(formatted_tbl() %>% spread_tbl(stat="se",  labels=labels()$labels))
+  coef_tab <- reactive(formatted_tbl() %>% spread_tbl(stat="coef",labels=labels()$labels,pivot=pivot))
+  se_tab   <- reactive(formatted_tbl() %>% spread_tbl(stat="se",  labels=labels()$labels,pivot=pivot))
   
   output$csv <- downloadHandler(
     filename = function(){ paste('meps-hc-accessed-',Sys.Date(),'.csv',sep='') },

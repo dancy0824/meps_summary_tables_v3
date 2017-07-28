@@ -3,7 +3,7 @@
 #####################################################
 
 
-mepsPage <- function(id,info,form_elements,tab_elements){
+mepsPage <- function(id,info,form_elements,tab_panel){
   
   meps_body <- bootstrapPage(
     
@@ -14,9 +14,8 @@ mepsPage <- function(id,info,form_elements,tab_elements){
     fluidRow(class = "full-screen",
              column(width=12,class="col-md-3",
                     tags$form(class = "usa-form-large", form_elements)),
-             column(width=12,class="col-md-9",
-                    tabsetPanel(type="pills",tableUI(id),plotUI(id),codeUI(id)),
-                    hc_info(id))
+             
+             column(width=12,class="col-md-9",tab_panel,hc_info(id))
     )
   )
   
