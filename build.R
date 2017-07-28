@@ -5,8 +5,9 @@
 # R: 3.3.3
 
 # require(devtools)
-# install_version("plotly", version = "4.5.6", repos = "http://cran.us.r-project.org")
-
+# install_version("plotly",  version = "4.5.6", repos = "http://cran.us.r-project.org")
+# install_version("ggplot2", version = "2.2.0", repos = "http://cran.us.r-project.org")
+# install.packages('dplyr')
 
 ## Run these commands to organize packrat
 

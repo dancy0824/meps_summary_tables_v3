@@ -2,6 +2,7 @@
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 library(shiny)
+library(DT)
 library(stringr)
 library(plotly)
 library(RColorBrewer)

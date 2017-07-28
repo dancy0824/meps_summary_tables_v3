@@ -29,6 +29,7 @@ select{
   text-align: center;
 }
 
+
 .gray{
   color: #5b616b;
 }
@@ -91,6 +92,7 @@ caption, .caption{
   font-size: 2.2rem;
   display: inline;
 }
+
 
 .dataTables_wrapper .dataTables_filter {
     float: left !important; 
