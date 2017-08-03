@@ -54,6 +54,15 @@ sp_list = c("EXP"="XP","SLF"="SF","PTR"="PR",
 event_list = names(use_list)
 sop_list = names(sp_list)
 
+get_caption <- function(stat_label,rows,cols,se_caption,year_caption){
+  subgrp_caption <- get_subgrp_caption(rows,cols)
+  add_caption <- ""
+  if(grepl("number of people",tolower(stat_label))){
+    if(grepl('event',tolower(subgrp_caption))) add_caption <- " with an event,"
+    if(grepl('source of payment',tolower(subgrp_caption))) add_caption <- " with an expenditure"
+  }
+  sprintf("%s%s%s%s, United States, %s",stat_label,add_caption,se_caption,subgrp_caption,year_caption)
+}
 
 ##################################################
 ###               FOR RUN_USE                  ###

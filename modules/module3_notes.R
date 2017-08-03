@@ -53,27 +53,15 @@ notesModule <- function(input, output, session, tbl, inputs, adj){
     c(min(years()),max(years())) %>% unique %>% paste0(collapse="-")
   })
   
-  subgrp_caption <- reactive({
-    glabels <- c(grp_labels[[rows()]], grp_labels[[cols()]])
-    glabels <- glabels[!glabels%in%c("","(none)","Year")] %>% tolower
-    if(length(glabels)==0) return("")
-    return(sprintf(" by %s",paste0(glabels,collapse=" and ")))
-  })
-  
   se_caption <- reactive({
     if(!inputs()$showSEs) return("")
     return(" <SE>")
   })
   
   caption <- reactive({
-    add_caption <- ""
-    if(grepl("number of people",tolower(stat_label()))){
-      if(grepl('event',tolower(subgrp_caption()))) add_caption <- " with an event," 
-      if(grepl('source of payment',tolower(subgrp_caption()))) add_caption <- " with an expenditure" 
-    }
-    sprintf("%s%s%s%s, United States, %s",stat_label(),add_caption,se_caption(),subgrp_caption(),year_caption())
+    get_caption(stat_label(),rows(),cols(),se_caption(),year_caption())
   })
-  
+
   #################
   
   source_text <- reactive( # also used in download table

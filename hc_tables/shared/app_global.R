@@ -64,6 +64,21 @@ subgrp_code <- function(grps,lang="r"){
     paste(collapse="\n")
 } 
 
+#####################################################
+###              CAPTION FUNCTIONS                ###
+#####################################################
+
+get_subgrp_caption <- function(rows="",cols=""){
+  glabels <- c(grp_labels[[rows]], grp_labels[[cols]])
+  glabels <- glabels[!glabels%in%c("","(none)","Year")] %>% tolower
+  if(length(glabels)==0) return("")
+  return(sprintf(" by %s",paste0(glabels,collapse=" and ")))
+}
+
+get_caption <- function(stat_label,rows,cols,se_caption,year_caption){
+  subgrp_caption <- get_subgrp_caption(rows,cols)
+  sprintf("%s%s%s, United States, %s",stat_label,se_caption,subgrp_caption,year_caption)
+}
 
 #####################################################
 ###              CODE TAB FUNCTIONS               ###

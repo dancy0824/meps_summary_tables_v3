@@ -27,6 +27,6 @@ source("../shared/app_global.R",local=TRUE)
 
 source("app_info.R",local=T)
 source("app_code.R",local=T)
-source("dictionaries.R",local=T)
+source("dictionaries.R",local=T) # run dictionaries last to overwrite default functions
 
 load("TABLES.Rdata")

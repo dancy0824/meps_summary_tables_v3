@@ -18,11 +18,11 @@ care_subgrps = list(
     "Children receiving dental care" = "child_dental"
   ), 
   "Diabetes Care" = c(
-    "Had H1b measurement" = "diab_a1c",
-    "Had lipid profile" = "diab_chol",
-    "Had eye exam"  = "diab_eye",
-    "Had foot care" = "diab_foot",
-    "Had flu shot" = "diab_flu"
+    "H1b measurement" = "diab_a1c",
+    "Lipid profile" = "diab_chol",
+    "Eye exam"  = "diab_eye",
+    "Foot care" = "diab_foot",
+    "Flu shot" = "diab_flu"
   ),
   
   "Quality of Care: Adults" = c(
@@ -32,7 +32,7 @@ care_subgrps = list(
     "How often doctor explained things"   = "adult_explain",
     "How often doctor showed respect"     = "adult_respect",
     "How often doctor spent enough time"  = "adult_time",
-    "Rating for care received" = "adult_rating"
+    "Rating for care" = "adult_rating"
   ),
   
   "Quality of Care: Children" = c(
@@ -42,8 +42,20 @@ care_subgrps = list(
     "How often doctor explained things"   = "child_explain",
     "How often doctor showed respect"     = "child_respect",
     "How often doctor spent enough time"  = "child_time",
-    "Rating for care received" = "child_rating"
+    "Rating for care" = "child_rating"
   )
+)
+
+care_captions <- list(
+  "usc" = "Percent of ",
+  "difficulty" = "Percent of ",
+  "rsn" = "",
+  "adult_nosmok" = "Percent of ",
+  "child_dental" = "Percent of ",
+  
+  "diab" = "Percent of adults with diabetes reporting ",
+  "adult" = "Percent of adults reporting ",
+  "child" = "Percent of children reporting "
 )
 
 grp_labels <- subgrps %>% invertList %>% as.list  
@@ -54,4 +66,14 @@ grp_labels <- c(grp_labels,care_labels)
 
 stat_labels <- list("pctPOP"="Percent of population")
 
+
+get_caption <- function(stat_label,rows,cols,se_caption,year_caption){
+  subgrp_caption <- get_subgrp_caption(rows)
+  lookup = cols
+  if(!cols %in% names(care_captions)) lookup = strsplit(lookup,"_")[[1]][1]
+  care_caption <- care_captions[[lookup]]
+  care_stat <- care_labels[[cols]] %>% tolower
+  cap <- sprintf("%s%s%s%s, United States, %s",care_caption,care_stat,se_caption,subgrp_caption,year_caption)
+  paste0(toupper(substr(cap,1,1)),substring(cap,2))
+}
 
