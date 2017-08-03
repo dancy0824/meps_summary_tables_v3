@@ -21,8 +21,7 @@
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-source("hc_tables/shared/app_functions.R")
-source("hc_tables/shared/app_functions508.R")
+source("hc_tables/shared/app_global.R")
 
 library(htmltools)
 library(shiny)
@@ -39,7 +38,8 @@ build_preview <- function(info,folder,path,col_width="one-half"){
 
 hc_apps = "hc_tables/"
 
-applist = c("hc1_use","hc2_care","hc3_pmed","hc4_cond")
+#applist = c("hc1_use","hc2_care","hc3_pmed","hc4_cond")
+applist = c("hc1_use","hc2_care")
 
 apps = list()
 for(dir in applist){
