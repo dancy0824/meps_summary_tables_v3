@@ -34,27 +34,14 @@ tab_panel <- tabsetPanel(type="pills",
 
 ui <- mepsPage("use",info=info,form_elements=form_elements,tab_panel=tab_panel)
 
-
 ##############################################################
 
 # Exclude levels from initial select
   all_levels <- c(use_tables$levels1, use_tables$levels2) %>% unique
-  
-  ## this should be a function in shared/function.R instead
-  exclude_initial <- c(
-    grep("physician",all_levels,value=T,ignore.case=T),
-    grep("agency|independent",all_levels,value=T,ignore.case=T),
-    grep("<65,|65\\+,",all_levels,value=T,ignore.case=T),
-    grep("Under 5|5-17|18-44|45-64",all_levels,value=T,ignore.case=T),
-    grep("All",all_levels,value=T,ignore.case=T)
-  )
+  exclude_initial <- exclude_levels(all_levels)
+  exclude_choices <- grep("missing",all_levels,value=T,ignore.case=T)
 
-# Exclude 'Missing' entirely (can comment out for debugging)
-  exclude_choices <- c(
-    grep("missing",all_levels,value=T,ignore.case=T)
-  )
-  
-#################################
+##############################################################
 
 server <- function(input,output,session) {
 

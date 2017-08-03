@@ -27,7 +27,17 @@ tab_panel <- tabsetPanel(type="pills",
 
 ui <- mepsPage("care",info=info,form_elements=form_elements,tab_panel=tab_panel)
 
-###########################################################
+
+##############################################################
+
+# Exclude levels from initial select
+all_levels <- c(care_tables$levels2) %>% unique
+exclude_initial <- exclude_levels(all_levels)
+exclude_choices <- c(
+  grep("missing",all_levels,value=T,ignore.case=T),
+  grep("inapplicable",all_levels,value=T,ignore.case=T)
+)
+##############################################################
 
 server <- function(input, output,session) {
   
@@ -45,8 +55,8 @@ server <- function(input, output,session) {
     callModule(dataModule,"care", 
                df = care_tables,
                stat = stat,
-               exclude_choices = c(""),
-               exclude_initial = c(""))
+               exclude_choices = exclude_choices,
+               exclude_initial = exclude_initial)
   
   meps_tbl <- reactive(meps_data()$tbl)
   meps_inputs <- reactive(meps_data()$inputs) # years, rows, cols, stat

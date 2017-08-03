@@ -172,6 +172,14 @@ meps_wrap = function(s,br = "\n"){
     gsub("Inapplicable \\(age",sprintf("Inapplicable%s\\(age",br),.)
 }
 
+exclude_levels <- function(all_levels){
+  c(grep("physician",all_levels,value=T,ignore.case=T),
+    grep("agency|independent",all_levels,value=T,ignore.case=T),
+    grep("<65,|65\\+,",all_levels,value=T,ignore.case=T),
+    grep("Under 5|5-17|18-44|45-64",all_levels,value=T,ignore.case=T),
+    grep("All",all_levels,value=T,ignore.case=T)
+  )
+}
 
 
 ###################################
