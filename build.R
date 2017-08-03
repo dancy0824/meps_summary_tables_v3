@@ -47,7 +47,7 @@ for(dir in applist){
 }
 
 app_list <- mapply(build_preview, apps, names(apps),
-                   path = hc_apps, col_width = "one-fourth", SIMPLIFY=F)
+                   path = hc_apps, col_width = "one-half", SIMPLIFY=F)
 
 index_body <- bootstrapPage(
     fluidRow508(class = "full-screen",
