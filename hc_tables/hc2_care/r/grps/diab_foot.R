@@ -6,17 +6,19 @@ if(year > 2007){
       never_chk = (DSFTNV53 == 1),
       dontknow  = (DSFT.yy.53 == -8),
       non_resp  = (DSFT.yy.53 %in% c(-7,-9)),
+      inapp     = (DSFT.yy.53 == -1),
       not_past_year = FALSE
     )
 }else{
   FYC <- FYC %>% 
     mutate(
-      past_year = (DSCKFT53 == 1),
-      more_year = FALSE,
-      never_chk = FALSE,
+      past_year = (DSCKFT53 >= 1),
       not_past_year = (DSCKFT53 == 0),
       dontknow  = (DSCKFT53 == -8),
-      non_resp  = (DSCKFT53 %in% c(-7,-9))
+      non_resp  = (DSCKFT53 %in% c(-7,-9)),
+      inapp     = (DSCKFT53 == -1),
+      more_year = FALSE,
+      never_chk = FALSE
     )
 }
 
@@ -25,8 +27,10 @@ FYC <- FYC %>%
     diab_foot = as.factor(case_when(
       .$past_year ~ "In the past year",
       .$more_year ~ "More than 1 year ago",
-      .$not_past_year ~ "Never had feet checked",
+      .$never_chk ~ "Never had feet checked",
+      .$not_past_year ~ "No exam in past year",
       .$dontknow ~ "Don\'t know",
       .$non_resp ~ "Non-response",
+      .$inapp ~ "Inapplicable",
       TRUE ~ "Missing"))
   )

@@ -42,6 +42,18 @@ notes$event <- "
 "
 
 
+###########################################
+##   Accessibility and Quality of Care   ##
+###########################################
+
+notes$diab_foot <- "
+After 2007, the questionnaire for foot care changed slightly, splitting 
+<i>No exam in past year</i> into exam <i>More than 1 year ago</i> and 
+<i>Never had feet checked</i>.
+"
+
+
+
 ################################
 ##        Demographics        ##
 ################################

@@ -46,7 +46,7 @@ if(length(args) > 0){
   year_start = as.numeric(args[1])
   year_end = as.numeric(args[2])
 }else{
-  year_start = min(meps_names$Year)
+  year_start = 2002
   year_end = max(meps_names$Year)
 }
 year_list = year_start:year_end
@@ -74,9 +74,9 @@ for(year in year_list){   print(year)
 # Run for each statistic
   
   for(stat in caregrps){
-    
+
     outfile <- sprintf("%s/%s.csv",year,stat)
-    
+
     svy = stat
     if(!svy %in% names(meps_svyby)) svy = strsplit(stat,"_")[[1]][1]
   
