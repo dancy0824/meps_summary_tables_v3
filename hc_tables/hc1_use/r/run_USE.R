@@ -25,7 +25,7 @@ standardize <- function(results,grp1,grp2,stat){
 ###                  LISTS                     ###
 ##################################################
 
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 app <- "hc1_use"
 

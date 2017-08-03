@@ -16,11 +16,18 @@ standardize <- function(results,grp1,stat){
     select(grp1,grp2,levels1,levels2,pctPOP,pctPOP_se)
 }
 
+standardize_n <- function(results,grp1,grp2){
+  results %>%
+    mutate(grp1=grp1,grp2=grp2,n=counts) %>%
+    mutate_(levels1=grp1) %>%
+    select(grp1,grp2,levels1,counts)
+}
+
 ##################################################
 ###                  LISTS                     ###
 ##################################################
 
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 app <- "hc2_care"
 
@@ -81,15 +88,19 @@ for(year in year_list){   print(year)
     if(!svy %in% names(meps_svyby)) svy = strsplit(stat,"_")[[1]][1]
   
     for(grp1 in subgrp_list){
-      if(done(outfile,dir=tables,grp1=grp1,grp2=stat)) next
+      #if(done(outfile,dir=tables,grp1=grp1,grp2=stat)) next
       
-      out <- meps_svyby[[svy]] %>% rsub(by=grp1,formula=stat) %>% run
+      out <- meps_svyby[[svy]] %>% rsub(by=grp1,formula=stat,FUN="svymean") %>% run
       results <- out %>% standardize(grp1=grp1,stat=stat)
-      update.csv(results,file=outfile,dir=tables)
+      
+      # sample size
+      out_n <- meps_svyby[[svy]] %>% rsub(by=grp1,formula=stat,FUN="unwtd.count") %>% run
+      results_n <- out_n %>% standardize_n(grp1=grp1,grp2=stat)
+      
+      both <- full_join(results,results_n,by=c("grp1","grp2","levels1"))
+      
+      update.csv(both,file=outfile,dir=tables)
     }
   }
 
 } # end of yearlist loop
-
-
- 

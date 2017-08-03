@@ -31,7 +31,7 @@ ui <- mepsPage("care",info=info,form_elements=form_elements,tab_panel=tab_panel)
 ##############################################################
 
 # Exclude levels from initial select
-all_levels <- c(care_tables$levels2) %>% unique
+all_levels <- c(care_tables$levels1,care_tables$levels2) %>% unique
 exclude_initial <- exclude_levels(all_levels)
 exclude_choices <- c(
   grep("missing",all_levels,value=T,ignore.case=T),

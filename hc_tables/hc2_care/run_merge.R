@@ -42,9 +42,10 @@ all_care <- all_care %>%
     levels2 = replace(levels2,startsWith(levels2,"insure"),"Insurance related"),
     levels2 = replace(levels2,startsWith(levels2,"other"), "Other")) 
 
-care_tables <- all_care %>% add_labels(delay_dictionary)
-
-care_tables$n = 1000
+care_tables <- all_care %>% 
+  add_labels(delay_dictionary) %>% 
+  mutate(n=counts) %>%
+  select(-counts)
 
 save(care_tables, file="TABLES.Rdata")
 
