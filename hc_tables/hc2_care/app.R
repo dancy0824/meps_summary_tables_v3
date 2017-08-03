@@ -25,7 +25,6 @@ tab_panel <- tabsetPanel(type="pills",
   codeUI('care')
 )
 
-
 ui <- mepsPage("care",info=info,form_elements=form_elements,tab_panel=tab_panel)
 
 ###########################################################

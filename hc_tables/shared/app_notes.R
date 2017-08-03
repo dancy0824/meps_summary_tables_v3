@@ -52,6 +52,10 @@ After 2007, the questionnaire for foot care changed slightly, splitting
 <i>Never had feet checked</i>.
 "
 
+notes$difficulty <- "
+Difficulty categories are not mutually exclusive. For instance, a person can have difficulty obtaining both
+medical and dental care.
+"
 
 
 ################################
