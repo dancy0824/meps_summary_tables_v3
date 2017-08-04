@@ -48,6 +48,7 @@ r_evnt <- function(grps,stat){
   code <- readSource("../shared/r/load/load_fyc.R")
   code <- code %>% add(subgrp_code(grps=grps,lang='r'))
   code <- code %>% add(readSource("r/load_events.R"))
+  code <- code %>% add(readSource("r/merge_events.R"))
   code <- code %>% add(readSource("../shared/r/svydesign/design_evnt.R"))
    
   gp <- grps[!grps %in% c("ind","sop")]

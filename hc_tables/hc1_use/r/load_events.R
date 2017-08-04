@@ -42,10 +42,3 @@ OBV <- OBV %>% mutate(
 OPT <- OPT %>% mutate(
   event_v2X = recode_factor(SEEDOC,
     .default='Missing','1'='OPY','2'='OPZ'))
-
-# Stack events into single dataset
-stacked_events <- bind_rows(RX,DVT,OMA,IPT,ERT,OPT,OBV,HHT)
-
-# Merge EVENTS data onto FYC file
-FYCsub <- FYC %>% select(.subgrps.DUPERSID,PERWT.yy.F,VARSTR,VARPSU)
-EVENTS <- stacked_events %>% full_join(FYCsub, by='DUPERSID')

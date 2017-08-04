@@ -74,6 +74,7 @@ for(year in year_list){
 
 # Load EVENTS and merge with FYC 
   runSource('load_events.R',yy=yr,PUFdir=PUFdir,subgrps=sg,get_file_names(year))
+  runSource('merge_events.R',yy=yr,subgrps=sg)
   
 # Define survey design  
   runSource("svydesign/design_fyc.R",dir=shared,"yy"=yr)
