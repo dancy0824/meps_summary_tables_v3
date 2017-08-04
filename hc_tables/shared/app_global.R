@@ -84,6 +84,15 @@ get_caption <- function(stat_label,rows,cols,se_caption,year_caption){
 ###              CODE TAB FUNCTIONS               ###
 #####################################################
 
+subgrp_comma <- function(grps){
+  sg <- paste(grps,collapse=",")
+  if(sg != "") sg = paste0(sg,",")
+}
+
+subgrp_formula <- function(grps){
+  sprintf("~%s",paste(grps,collapse="+"))
+}
+
 get_file_names <- function(year){
   meps_names %>% 
     filter(Year==year) %>%

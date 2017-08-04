@@ -17,4 +17,3 @@ nEVTdsgn <- svydesign(
   weights = ~PERWT.yy.F,           
   data = n_events,
   nest = TRUE)
-

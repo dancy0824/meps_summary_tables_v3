@@ -21,6 +21,3 @@ OBD = OBV %>% filter(event_v2X == "OBD")
 OBO = OBV %>% filter(event_v2X == "OBO")
 OPY = OPT %>% filter(event_v2X == "OPY")
 OPZ = OPT %>% filter(event_v2X == "OPZ")
-
-
-
