@@ -1,6 +1,7 @@
 /* Colors
 #015289 : meps blue regular
 #0a3b61 : meps dark blue (guesstimate)
+#5b616b: uswds gray
 */
 
 body{font-family: Source Sans Pro,Helvetica Neue,Helvetica,Roboto,Arial,sans-serif;}
@@ -73,6 +74,14 @@ select{
   width: 100% ;
 }
 
+/*****  Code  *****/
+
+.code-select select{
+  max-width: 250px;
+  width: 80%;
+  display: inline-block;
+}
+
 /*****  Table  *****/
 
 table caption{
@@ -81,6 +90,7 @@ table caption{
 
 table{
   margin: 0;
+  margin-top: 10px;
 }
 
 .meps-table{
@@ -171,35 +181,32 @@ input[type="search"]{
 .download-button{
   display: inline;
   padding: 0.2rem 1rem;
+  font-size: 24px;
+  color: #5b616b;
+  background-color: white;
+  text-decoration: none;
+  margin-right: 0;
 }
 
-.download-button, 
+/*.download-button, */
 .download-button:visited,
 .download-button:active,
 .download-button:hover,
-.download-button:focus{ /* copying usa-button-secondary */
-   background-color: #e31c3d;
+.download-button:focus{ 
+   background-color: white;
    text-decoration: none;
-   color: white;
+   color: black;
 }
 
 .download-button:hover, 
 .downlad-button:focus,
 .download-button:visited:hover{
-  background-color: #cd2026;
+  background-color: white;
 }
 
 .download-button:visited:active,
 .download-button:active{
-  background-color: #981b1e;
-}
-
-.download-button, 
-.download-button:visited,
-.download-button:active,
-.download-button:hover,
-.download-button:focus{
-  text-decoration:none;
+  background-color: white;
 }
 
 
