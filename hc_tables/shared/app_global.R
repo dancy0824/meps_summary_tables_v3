@@ -87,6 +87,7 @@ get_caption <- function(stat_label,rows,cols,se_caption,year_caption){
 subgrp_comma <- function(grps){
   sg <- paste(grps,collapse=",")
   if(sg != "") sg = paste0(sg,",")
+  sg
 }
 
 subgrp_formula <- function(grps){

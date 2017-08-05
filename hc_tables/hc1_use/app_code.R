@@ -3,6 +3,7 @@
 ###                    CODE STRINGS                         ###
 ###############################################################
 
+source("r/stats/stats.R")
 
 r_fyc <- function(grps,stat){
   
@@ -10,8 +11,8 @@ r_fyc <- function(grps,stat){
   code <- code %>% add(subgrp_code(grps=grps,lang='r')) 
 
   if(all(c("event","sop") %in% grps)){code <- code %>% add(readSource("r/grps/event_sop.R"))
-  }else if("event" %in% grps) { code <- code %>% add(readSource("r/grps/sop.R"))
-  }else if("sop" %in% grps) { code <- code %>% add(readSource("r/grps/event.R"))}
+  }else if("event" %in% grps) { code <- code %>% add(readSource("r/grps/event.R"))
+  }else if("sop" %in% grps) { code <- code %>% add(readSource("r/grps/sop.R"))}
 
   code <- code %>% add(readSource("../shared/r/svydesign/design_fyc.R"))
   
@@ -74,7 +75,8 @@ r_evnt <- function(grps,stat){
     code <- code %>% add(meps_code %>% rsub(sop=sop,use=use,sp=sp))
   }
   
-  code %>% rsub(by=subgrp_formula(gp),subgrps=subgrp_comma(gp))
+  gp2 <- gp[gp != 'event']
+  code %>% rsub(by=subgrp_formula(gp),subgrps=subgrp_comma(gp2))
 }
 
 
@@ -93,12 +95,12 @@ r_avgEVT <- function(grps,stat="avgEVT"){
   ## Load analysis code
   
   # Remove extra subgroups
-  gp <- grps[!grps %in% c("ind","event","sop")]
+  gp <- grps[!grps %in% c("event","sop")]
   if(length(gp)==0) meps_code = meps_svy[[read_stat]] else meps_code = meps_svyby[[read_stat]]
   
   # Iterate over events, sops, if needed  
-  if('event' %in% grps) events = event_list else events = "TOT"
-  if('sop' %in% grps) sop_formula = "EXP+SLF+MCR+MCD+PTR+PTZ" else sop_formula = "EXP"
+  if('event' %in% grps) events = event_list[event_list!="TOT"] else events = "TOT"
+  if('sop' %in% grps) sop_formula = "EXP+SLF+MCR+MCD+PTR+OTZ" else sop_formula = "EXP"
   
   # Add instructions for 'v2X' variables
   v2X <- grps[grps %in% c("agegrps","insurance")]
@@ -108,6 +110,8 @@ r_avgEVT <- function(grps,stat="avgEVT"){
     for(event in events){
       code <- code %>% add(meps_code %>% rsub(event=event))
     }
+  
+  if(length(gp)==0) gp = "ind"
   
   code %>% rsub(by=subgrp_formula(gp),subgrps=subgrp_comma(gp),sop=sop_formula)
 }

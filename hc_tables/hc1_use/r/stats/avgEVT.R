@@ -1,3 +1,5 @@
+stacked_events <- bind_rows(RX,DVT,OMA,IPT,ERT,OPT,OBV,HHT)
+
 pers_events <- stacked_events %>%
   group_by(DUPERSID) %>%
   summarise(EXP = sum(XP.yy.X >= 0)) 
