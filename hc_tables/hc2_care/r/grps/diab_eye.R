@@ -3,7 +3,8 @@ if(year > 2001){
     mutate(past_year = (DSEY.yy.53==1 | DSEY.ya.53==1),
            more_year = (DSEY.yb.53==1 | DSEB.yb.53==1),
            never_chk = (DSEYNV53 == 1),
-           non_resp =( DSEY.yy.53== -9)
+           dontknow  = (DSEY.yy.53 == -8),
+           non_resp = (DSEY.yy.53== -9)
     )
 }else{
   FYC <- FYC %>%
@@ -11,8 +12,8 @@ if(year > 2001){
       past_year = (DSEYE53 %in% c(1,2)),
       more_year = (DSEYE53 %in% c(3,4)),
       never_chk = (DSEYE53 == 5),
-      dontknow  = (DSCKFT53 == -8),
-      non_resp  = (DSCKFT53 %in% c(-7,-9))
+      dontknow  = (DSEYE53 == -8),
+      non_resp  = (DSEYE53 %in% c(-7,-9))
     )
 }
 

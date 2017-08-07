@@ -52,7 +52,7 @@ subgrp_vec <- unlist(subgrps)
 subgrp_code <- function(grps,lang="r"){
   lang <- tolower(lang)
   
-  subgrps <- subgrp_vec[subgrp_vec != 'ind']
+  subgrps <- c("agevar",subgrp_vec[subgrp_vec != 'ind'])
   subgrps <- grps[grps %in% subgrps] %>% unique
   
   # add agevar if needed

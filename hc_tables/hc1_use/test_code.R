@@ -22,7 +22,6 @@ for(year in c(2013,2007,2001,1996)){
     for(g1 in c("ind","insurance","event","sop")){
       for(g2 in c("race","event","sop")){
         
-
         if(g1==g2) next
 
         if(i <= length(PARAMS)){
@@ -35,12 +34,10 @@ for(year in c(2013,2007,2001,1996)){
 
         grps = c(g1,g2)
 
-        test <- get_r_code(stat,grps,year) %>% run
+        test <- get_r_code(rows=g1,cols=g2,stat=stat,year=year) %>% run
 
         PARAMS[[i]] = list(year=year,stat=stat,g1=g1,g2=g2)
-
         TEST[[i]] = test
-
         COMP[[i]] = use_tables %>%
           filter(Year==year,grp1==g1,grp2==g2) %>%
           select(grp1,grp2,levels1,levels2,stat,stat_se,Year)
