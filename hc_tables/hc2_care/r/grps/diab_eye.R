@@ -24,5 +24,4 @@ FYC <- FYC %>%
       .$never_chk ~ "Never had eye exam",
       .$dontknow ~ "Don\'t know",
       .$non_resp ~ "Non-response",
-      TRUE ~ "Missing"))
-  )
+      TRUE ~ "Missing")))

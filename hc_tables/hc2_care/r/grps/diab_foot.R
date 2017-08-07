@@ -32,5 +32,4 @@ FYC <- FYC %>%
       .$dontknow ~ "Don\'t know",
       .$non_resp ~ "Non-response",
       .$inapp ~ "Inapplicable",
-      TRUE ~ "Missing"))
-  )
+      TRUE ~ "Missing")))

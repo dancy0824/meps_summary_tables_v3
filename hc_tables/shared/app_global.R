@@ -187,7 +187,7 @@ exclude_levels <- function(all_levels){
     grep("agency|independent",all_levels,value=T,ignore.case=T),
     grep("<65,|65\\+,",all_levels,value=T,ignore.case=T),
     grep("Under 5|5-17|18-44|45-64",all_levels,value=T,ignore.case=T),
-    grep("All",all_levels,value=T,ignore.case=T)
+    grep("All ",all_levels,value=T,ignore.case=T)
   )
 }
 

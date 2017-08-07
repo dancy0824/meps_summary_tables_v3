@@ -43,18 +43,24 @@ codeUI <- function(id){
 
 codeModule <- function(input, output, session, inputs){
    
-  grps <- reactive(c(inputs()$rows, inputs()$cols))
+  rows <- reactive(inputs()$rows)
+  cols <- reactive(inputs()$cols)
   year <- reactive(max(inputs()$years))
   stat <- reactive(inputs()$stat)
   
   lang <- reactive(input$code_language)
  
   r_code <- reactive({
-    paste(get_r_code(grps=grps(),stat=stat(),year=year()))
+    print(rows())
+    print(cols())
+    print(stat())
+    print(year())
+    
+    paste(get_r_code(rows=rows(),cols=cols(),stat=stat(),year=year()))
   })
   
   sas_code <- reactive({
-    paste(get_sas_code(grps=grps(),stat=stat(),year=year()))
+    paste(get_sas_code(rows=rows(),cols=cols(),stat=stat(),year=year()))
   })
   
   stata_code <- reactive({

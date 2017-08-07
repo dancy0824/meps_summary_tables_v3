@@ -31,7 +31,7 @@ meps_svy <- list(
   'rsn_DN' = 'svymean(~afford_DN + insure_DN + other_DN, design=subset(FYCdsgn, ACCELI42==1 & delay_DN==1))',
   'rsn_PM' = 'svymean(~afford_PM + insure_PM + other_PM, design=subset(FYCdsgn, ACCELI42==1 & delay_PM==1))',
   
-  'diab' = 'svymean(~.formula., FUN = svymean, by = ~.by., design=DIABdsgn)',
+  'diab' = 'svymean(~.formula., design=DIABdsgn)',
   
   'adult_nosmok'  = 'svymean(~.formula., design=subset(SAQdsgn, ADSMOK42==1 & CHECK53==1))',
   'adult_routine' = 'svymean(~.formula., design=subset(SAQdsgn, ADRTCR42==1 & AGELAST >= 18))',

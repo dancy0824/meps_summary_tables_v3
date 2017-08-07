@@ -117,12 +117,14 @@ r_avgEVT <- function(grps,stat="avgEVT"){
 }
 
 
-get_r_code <- function(stat,grps,year){
+get_r_code <- function(rows,cols,stat,year){
   
   yr <- substring(year,3,4)
   
   ## Load packages
   code <- readSource('../shared/r/load/load_pkg.R')
+  
+  grps = c(rows,cols)
   
   if(stat == "avgEVT"){ code <- code %>% add(r_avgEVT(grps=grps)) 
   }else if(stat %in% fyc_stats){code <- code %>% add(r_fyc(grps=grps,stat=stat)) 

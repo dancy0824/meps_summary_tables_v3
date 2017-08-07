@@ -26,5 +26,4 @@ FYC <- FYC %>%
       .$never_chk ~ "Never had flu shot",
       .$dontknow ~ "Don\'t know",
       .$non_resp ~ "Non-response",
-      TRUE ~ "Missing"))
-  )
+      TRUE ~ "Missing")))
