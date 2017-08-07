@@ -19,10 +19,18 @@ codeUI <- function(id){
                                 icon=icon('download'))
             ),
            
-           tags$p(
-             "The following code can be used to generate the selected estimates.
-              For trend estimates, example code is shown for the most recent year selected:"),
+           tags$p(HTML(
+             "To run the code, first download and unzip the required public use data files from the
+             <a href = 'https://meps.ahrq.gov/mepsweb/data_stats/download_data_files.jsp' target='_blank_'>
+              MEPS data files page</a>, and save them to your computer.  
+             More information on downloading and analyzing MEPS data in R, SAS, and Stata can be found 
+             at the <a href = 'https://github.com/HHS-AHRQ/MEPS#accessing-meps-hc-data' target='_blank_'>AHRQ GitHub site</a>."
+           )),
            
+           tags$p("The following code can be used to generate the selected estimates, where
+            the SAS transport data files (.ssp) have been saved to the folder 'C:\\MEPS'.
+            For trend estimates, example code is shown for the most recent year selected:"),
+
            tags$pre(uiOutput(ns("code"),role="region","aria-live"="polite"))
       )
   
