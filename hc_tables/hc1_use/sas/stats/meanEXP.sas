@@ -5,11 +5,11 @@ data MEPS_gt0; set MEPS;
 	end;
 run;
 
-proc surveymeans data = MEPS_gt0 mean missing nobs; 
+proc surveymeans data = MEPS_gt0 mean nobs nomcar; 
 	&format.;
 	VAR &vars.;
 	STRATA VARSTR;
 	CLUSTER VARPSU;
 	WEIGHT PERWT&yy.F; 
-	&domain;
+	&domain.;
 run;

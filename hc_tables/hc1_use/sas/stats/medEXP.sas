@@ -5,7 +5,7 @@ data MEPS_gt0; set MEPS;
 	end;
 run;
 
-proc surveymeans data = MEPS_gt0 median missing nobs; 
+proc surveymeans data = MEPS_gt0 median nobs nomcar; 
 	&format.;
 	VAR &vars.;
 	STRATA VARSTR;

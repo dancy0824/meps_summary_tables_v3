@@ -20,6 +20,8 @@ hc_tables/code/SSS/*
 
 packrat/*
 
+TEST*
+
 
 *.Rproj
 *.log

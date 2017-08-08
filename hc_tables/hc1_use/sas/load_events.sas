@@ -45,8 +45,10 @@
 			else TR&yy.X=&evnt.TR&yy.X;
 		%end;
 
-		keep SF: MR: MD: PV: TR: VA: OF: SL: WC: OR: OU: OT: XP: 
-			SEEDOC: MPCELIG: SELFAGEN: DUPERSID event ;
+		PR&yy.X = PV&yy.X+TR&yy.X;
+	    OZ&yy.X = OF&yy.X+SL&yy.X+OT&yy.X+OR&yy.X+OU&yy.X+WC&yy.X+VA&yy.X;
+
+		keep DUPERSID event: SEEDOC XP&yy.X SF&yy.X PR&yy.X MR&yy.X MD&yy.X OZ&yy.X;
 	run;
 %mend;
 
@@ -60,13 +62,6 @@
 %load_events(HH,&HH.);
 
 /* Define sub-levels for office-based, outpatient, and home health */
-data HH; set HH;
-	if year = 1996 then MPCELIG = SELFAGEN;
-	if MPCELIG = 1 then event_v2X = 'HHA';
-	else if MPCELIG = 2 then event_v2X = 'HHN';
-	else event_v2X = '';
-run;
-
 data OB; set OB;
 	if SEEDOC = 1 then event_v2X = 'OBD';
 	else if SEEDOC = 2 then event_v2X = 'OBO';
@@ -79,25 +74,7 @@ data OP; set OP;
 	else event_v2X = '';
 run;
 
-/* Stack events into single dataset */
-data stacked_events;
-	set RX DV OM IP ER OP OB HH;
-	PR&yy.X = PV&yy.X+TR&yy.X;
-    OZ&yy.X = OF&yy.X+SL&yy.X+OT&yy.X+OR&yy.X+OU&yy.X+WC&yy.X+VA&yy.X;
-	keep DUPERSID event:  XP&yy.X SF&yy.X PR&yy.X MR&yy.X MD&yy.X OZ&yy.X;
-run;
-
-
-/* Merge EVENTS onto FYC file */
-
+/* Merge with FYC file */
 data FYCsub; set MEPS;
 	keep &subgrps. DUPERSID PERWT&yy.F VARSTR VARPSU;
-run;
-
-proc sort data = stacked_events; by DUPERSID; run;
-proc sort data = FYCsub; by DUPERSID; run;
-
-data EVENTS;
-	merge stacked_events FYCsub;
-	by DUPERSID;
 run;

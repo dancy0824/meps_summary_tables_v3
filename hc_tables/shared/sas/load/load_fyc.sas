@@ -19,6 +19,3 @@ data MEPS;
 		PERWT&yy.F = WTDPER&yy.;
 	end;
 run;
-
-
-%put &FYC..ssp;

@@ -1,7 +1,7 @@
 data EVENTS_ge0; set EVENTS;
 	array vars &uses.;
 	do over vars;
-		vars = (vars &gt 0);
+		vars = (vars &gt. 0);
 	end;
 run; 
 
