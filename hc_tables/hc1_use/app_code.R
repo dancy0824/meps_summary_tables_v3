@@ -188,16 +188,15 @@ get_sas_code <- function(rows,cols,stat,year){
     vars <- paste0(event_list,"EXP&yy.",collapse=" ") %>% str_wrap(brk,exdent=exdent)
   }
 
-  gp <- gp_format <- gp_domain <- grps[!grps %in% c("ind","sop","event")]
-  if(stat %in% c("totEVT","meanEVT")) gp_domain <- c(gp_domain,"event")
+  gp <- gp_format <- grps[!grps %in% c("ind","sop","event")]
+  gp_domain <- grps[!grps %in% c("ind","sop")]
   
-  if(length(gp) > 0){
-    format <- sprintf('FORMAT %s',paste(gp_format,paste0(gp_format,"."),collapse=" "))
-    domain <- sprintf('DOMAIN %s',paste(gp_domain,collapse="*"))
-  }else{
-    format <- domain <- ""
-  }
-
+  if(!stat %in% c("totEVT","meanEVT")) gp_domain <- gp_domain[gp_domain!="event"]
+  
+  format <- domain <- ""
+  if(length(gp_format) > 0) format <- sprintf('FORMAT %s',paste(gp_format,paste0(gp_format,"."),collapse=" "))
+  if(length(gp_domain) > 0) domain <- sprintf('DOMAIN %s',paste(gp_domain,collapse="*"))
+  
   if(stat == 'avgEVT') stat = paste0('avgEVT',addon)
   
   code <- code %>% add(readSource(sprintf("sas/stats/%s.sas",stat)))
@@ -210,6 +209,8 @@ get_sas_code <- function(rows,cols,stat,year){
     gsub("\t\n;","",.) 
     
 }
+
+#get_sas_code(rows="event",cols="sop",stat="totEVT",year=2013) %>% writeLines
 
 # 
 # g1 = "sex"
