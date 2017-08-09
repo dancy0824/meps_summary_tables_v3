@@ -39,6 +39,8 @@ emergency room visits, and home health events. A <i>home health event</i> is def
 
 notes$event <- "
 <i>Other medical expenses</i> are expenses for medical equipment such as eyeglasses, hearing aids, or wheelchairs.
+<i>Physician office visits</i> and <i>Non-physician office visits</i> are sub-categories of <i>Office-based events</i>.
+<i>Physician hosp. visits</i> and <i>Non-physician hosp. visits</i> are sub-categories of <i>Outpatient events</i>.
 "
 
 
