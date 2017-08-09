@@ -51,11 +51,6 @@ codeModule <- function(input, output, session, inputs){
   lang <- reactive(input$code_language)
  
   r_code <- reactive({
-    print(rows())
-    print(cols())
-    print(stat())
-    print(year())
-    
     paste(get_r_code(rows=rows(),cols=cols(),stat=stat(),year=year()))
   })
   

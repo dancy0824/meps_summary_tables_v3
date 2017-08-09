@@ -10,8 +10,6 @@ library(dplyr)
 library(tidyr)
 library(scales)
 
-addResourcePath('www','../../www')
-
 meps_names <- read.csv("../shared/puf_expanded.csv", stringsAsFactors=F)
 
 source("../../modules/module1_data.R",local=TRUE)
@@ -30,3 +28,5 @@ source("app_code.R",local=T)
 source("dictionaries.R",local=T) # run dictionaries last to overwrite default functions
 
 load("TABLES.Rdata")
+
+addResourcePath('www','../../www')

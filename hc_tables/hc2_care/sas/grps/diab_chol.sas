@@ -18,9 +18,9 @@ data MEPS; set MEPS;
 	if past_year = 1 then diab_chol = 1;
 	else if more_year = 1 then diab_chol = 2;
 	else if never_chk = 1 then diab_chol = 3;
-	else if dontknow = 1  then diab_chol = 4;
-	else if non_resp = 1  then diab_chol = 5;
-	else diab_chol = 6;
+	else if dontknow = 1  then diab_chol = -8;
+	else if non_resp = 1  then diab_chol = -7;
+	else diab_chol = -9;
 run;
 
 proc format;
@@ -28,9 +28,18 @@ proc format;
 		1 = "In the past year"
 		2 = "More than 1 year ago"
 		3 = "Never had cholesterol checked"
-		4 = "Don't know"
-	    5 = "Non-response"
-		6 = "Missing";
+		4 = "No exam in past year"
+		-1 = "Inapplicable"
+		-7 = "Non-response"
+		-8 = "Don't know"
+	    -9 = "Missing";
 run;
-  
+
+proc surveyfreq data = MEPS missing; 
+	FORMAT diab_chol diab_chol. &fmt.;
+	STRATA VARSTR;
+	CLUSTER VARPSU;
+	WEIGHT DIABW&yy.F; 
+	TABLES &grp.diab_chol / row;
+run;
 
