@@ -1,10 +1,12 @@
 ## MERGE FYC AND EVENT TABLES
 
+app <- 'hc1_use'
+
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-source("../shared/global.R",chdir=T)
-source("global.R",chdir=T) 
-source("run_global.R")
+source("../shared/r/run_preamble.R",chdir=T)
+source("../shared/app_preamble.R",chdir=F)
+source("dictionaries.R",chdir=T)
 
 years = 2014:1996
 

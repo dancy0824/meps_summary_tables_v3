@@ -77,7 +77,7 @@ event_dictionary <-
        "DVT"="Dental visits",
        "RX" ="Prescription medicines",
        "OBV"="Office-based events",
-       "OBD"="Physician Office visits",
+       "OBD"="Physician office visits",
        "OBO"="Non-physician office visits",
        "OPT"="Outpatient events",
        "OPY"="Physician hosp. visits",
