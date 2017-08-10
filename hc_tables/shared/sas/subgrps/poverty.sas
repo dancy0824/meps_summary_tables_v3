@@ -5,7 +5,7 @@ run;
 
 proc format;
 	value poverty
-		1 = "Negative or Poor"
+		1 = "Negative or poor"
 		2 = "Near-poor"
 		3 = "Low income"
 		4 = "Middle income"
