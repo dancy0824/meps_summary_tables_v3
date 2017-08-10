@@ -20,6 +20,6 @@ proc surveyfreq data = MEPS missing;
 	STRATA VARSTR;
 	CLUSTER VARPSU;
 	WEIGHT SAQWT&yy.F; 
-	TABLES domaindomain*&grp.adult_illness / row;
+	TABLES domain*&grp.adult_illness / row;
 run;
 
