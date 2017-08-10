@@ -51,7 +51,7 @@ dataViewInput <- function(id){
 standardErrorInput <- function(id){
   ns <- NS(id)
   div(
-    checkboxInput508(ns("showSEs"),label="Show Standard Errors",inline=T),
+    checkboxInput508(ns("showSEs"),label="Show standard errors",inline=T),
     uiOutput(ns("CInote"),class="control-message")
   )
 }
