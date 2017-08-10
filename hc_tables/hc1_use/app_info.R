@@ -4,7 +4,7 @@
 
 info <- list(
   
-  title = "Use, Expenditures, and Population Characteristics",
+  title = "Use, expenditures, and population characteristics",
 
   description = "The MEPS online summary tables provide an interactive platform allowing users to quickly 
     access statistics on health care utilization and expenditures. Some of the types of data available here include: mean and 
