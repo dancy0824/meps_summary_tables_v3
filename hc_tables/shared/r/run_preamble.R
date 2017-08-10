@@ -103,20 +103,18 @@ get_totals <- function(grp,df,label="All persons"){
     switch_labels
 }
 
+
+is_ordered <- function(v1,v2) mapply(function(x1,x2) sort(c(x1,x2))[1]==x1,v1,v2)
+
 reorder_cols <- function(df){
-  df2 <- df %>% rowwise %>%
-    mutate(ordered = sort(c(grp1,grp2))[1] == grp1,
-           ordered = replace(ordered,grp1=='ind',TRUE),
-           # ordered = replace(ordered,grp1%in%c("sop","event"),FALSE),
-           # ordered = replace(ordered,grp2 == 'sop',TRUE)) %>%
-           ordered = replace(ordered,grp1%in%c("sop","event"),FALSE),
-           ordered = replace(ordered,grp2%in%c("sop","event"),TRUE)) %>%
-    ungroup
+  
+  df2 <- df %>% 
+    mutate(ordered = is_ordered(grp1,grp2),
+           ordered = replace(ordered,grp1=='ind',TRUE))
   
   Ordered <- df2 %>% filter(ordered)
   Unordered <- df2 %>% filter(!ordered) %>% switch_labels
   
   bind_rows(Ordered,Unordered) %>% select(-ordered)
 }
-
 
