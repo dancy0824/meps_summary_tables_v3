@@ -20,6 +20,8 @@ subgrp_list  <- c(subgrps,"insurance_v2X","agegrps_v2X")
 
 sl = length(subgrp_list)
 
+age_levels = c("Under 18","Under 5","5-17","18-64","18-44","45-64","65+")
+
 #########################################################
 ##                      FUNCTIONS                      ##
 #########################################################
@@ -107,14 +109,25 @@ get_totals <- function(grp,df,label="All persons"){
 is_ordered <- function(v1,v2) mapply(function(x1,x2) sort(c(x1,x2))[1]==x1,v1,v2)
 
 reorder_cols <- function(df){
-  
   df2 <- df %>% 
     mutate(ordered = is_ordered(grp1,grp2),
            ordered = replace(ordered,grp1=='ind',TRUE))
-  
   Ordered <- df2 %>% filter(ordered)
   Unordered <- df2 %>% filter(!ordered) %>% switch_labels
-  
   bind_rows(Ordered,Unordered) %>% select(-ordered)
 }
 
+reorder_levels <- function(df,new_levels){
+  orig_l1 = unique(df$levels1)
+  orig_l2 = unique(df$levels2)
+  
+  new_l1 = c(orig_l1[!orig_l1 %in% new_levels],new_levels)
+  new_l2 = c(orig_l2[!orig_l2 %in% new_levels],new_levels)
+  
+  df %>% 
+    mutate(levels1 = factor(levels1,levels=new_l1),
+           levels2 = factor(levels2,levels=new_l2)) %>%
+    arrange(-Year,levels1,levels2) %>%
+    mutate(levels1 = as.character(levels1),
+           levels2 = as.character(levels2))
+}

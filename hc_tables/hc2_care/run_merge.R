@@ -8,8 +8,6 @@ source("../shared/app_global.R",chdir=T)
 source("../shared/r/run_preamble.R",chdir=T)
 source("dictionaries.R")
 
-library(dplyr)
-
 ########################################################
  
 care_grps <- care_subgrps %>% unlist
@@ -46,6 +44,8 @@ care_tables <- all_care %>%
   add_labels(delay_dictionary) %>% 
   mutate(n=counts) %>%
   select(-counts)
+
+care_tables <- care_tables %>% reorder_levels(age_levels)
 
 save(care_tables, file="TABLES.Rdata")
 

@@ -58,8 +58,6 @@ load_years <- function(stats,years){
      full_join(all_fyc,all_evnt,by=c("grp1","grp2","levels1","levels2", "Year")) %>%
      as.data.frame
 
-  # use_tables <- use_tables %>% filter(Year==2014)
-   
    use_tables <- use_tables %>% 
      filter(!levels1 %in% c("HHA","HHN"),
             !levels2 %in% c("HHA","HHN"))
@@ -67,14 +65,13 @@ load_years <- function(stats,years){
    use_tables <- use_tables %>% 
      mutate(levels1 = replace(levels1,levels1=="Negative or Poor","Negative or poor"),
             levels2 = replace(levels2,levels2=="Negative or Poor","Negative or poor"))
-            
+   
+   use_tables <- use_tables %>% reorder_levels(age_levels)
    
    use_tables %>% filter(is.na(totPOP)) %>% head(100)
    use_tables %>% filter(is.na(n) & totPOP > 0)  %>% head(100)
    use_tables %>% filter(is.na(totEVT) & pctEXP > 0) %>% head(100)
    use_tables %>% filter(is.na(avgEVT)) %>% head(100)
-   
-   
    
    save(use_tables, file="TABLES.Rdata")
    
