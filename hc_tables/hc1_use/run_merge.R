@@ -64,10 +64,17 @@ load_years <- function(stats,years){
      filter(!levels1 %in% c("HHA","HHN"),
             !levels2 %in% c("HHA","HHN"))
    
+   use_tables <- use_tables %>% 
+     mutate(levels1 = replace(levels1,levels1=="Negative or Poor","Negative or poor"),
+            levels2 = replace(levels2,levels2=="Negative or Poor","Negative or poor"))
+            
+   
    use_tables %>% filter(is.na(totPOP)) %>% head(100)
    use_tables %>% filter(is.na(n) & totPOP > 0)  %>% head(100)
    use_tables %>% filter(is.na(totEVT) & pctEXP > 0) %>% head(100)
    use_tables %>% filter(is.na(avgEVT)) %>% head(100)
+   
+   
    
    save(use_tables, file="TABLES.Rdata")
    
