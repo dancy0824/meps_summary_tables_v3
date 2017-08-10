@@ -29,21 +29,21 @@ mepsPage <- function(id,info,form_elements,tab_panel){
 subgrps <- list(
   "(none)"             = "ind",
   "Demographics" = c(
-    "Age Groups"         = "agegrps",
-    "Census Region"      = "region",
-    "Marital Status"     = "married",
-    "Race/Ethnicity"     = "race",
+    "Age groups"         = "agegrps",
+    "Census region"      = "region",
+    "Marital status"     = "married",
+    "Race/ethnicity"     = "race",
     "Sex"                = "sex"
   ),
-  "Socio-Economic Status" = c(
+  "Socio-economic status" = c(
     "Education"         = "education",
-    "Employment Status" = "employed",
-    "Insurance Coverage" = "insurance",
-    "Poverty Status"    = "poverty"
+    "Employment status" = "employed",
+    "Insurance coverage" = "insurance",
+    "Poverty status"    = "poverty"
   ),
-  "Health Variables" = c(
-    "Perceived Health Status" = "health",
-    "Perceived Mental Health" = "mental_health"
+  "Health variables" = c(
+    "Perceived health status" = "health",
+    "Perceived mental health" = "mental_health"
   )
 )  
 

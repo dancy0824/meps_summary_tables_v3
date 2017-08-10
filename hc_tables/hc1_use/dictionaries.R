@@ -22,9 +22,9 @@ use_stats = list(
 )
 
 use_add <- list(
-  "Event Characteristics" = c(
-    "Event Type"  = "event",
-    "Source of Payment"  = "sop"))
+  "Event characteristics" = c(
+    "Event type"  = "event",
+    "Source of payment"  = "sop"))
 
 use_subgrps <- append(subgrps,use_add,after=1)
 
