@@ -5,32 +5,34 @@
 
 source("r/stats/stats.R")
 
-
 load_data <- function(grps,stat,lang="r"){
-  code <- readSource(sprintf("../shared/%s/load/load_fyc.%s",lang,lang))
+  
+  if(lang=="r") LANG = "R" else LANG = lang
+  
+  code <- readSource(sprintf("../shared/%s/load/load_fyc.%s",lang,LANG))
   code <- code %>% add(subgrp_code(grps=grps,lang=lang)) 
   
   if(stat %in% fyc_stats){
-    if(all(c("event","sop") %in% grps)){code <- code %>% add(readSource(sprintf("%s/grps/event_sop.%s",lang,lang)))
-    }else if("event" %in% grps) { code <- code %>% add(readSource(sprintf("%s/grps/event.%s",lang,lang)))
-    }else if("sop" %in% grps) { code <- code %>% add(readSource(sprintf("%s/grps/sop.%s",lang,lang)))}
+    if(all(c("event","sop") %in% grps)){code <- code %>% add(readSource(sprintf("%s/grps/event_sop.%s",lang,LANG)))
+    }else if("event" %in% grps) { code <- code %>% add(readSource(sprintf("%s/grps/event.%s",lang,LANG)))
+    }else if("sop" %in% grps) { code <- code %>% add(readSource(sprintf("%s/grps/sop.%s",lang,LANG)))}
     
     if(lang=="r") code <- code %>% add(readSource("../shared/r/svydesign/design_fyc.R"))
     return(code)
   }
 
   if(stat == "avgEVT"){ # Load pre-code (R includes svydesign)
-    code <- code %>% add(readSource(sprintf("%s/load_events.%s",lang,lang)))
+    code <- code %>% add(readSource(sprintf("%s/load_events.%s",lang,LANG)))
     extension = grps[grps %in% c("sop","event")] %>% sort
     codeName = paste(c("avgEVT",extension),collapse="_")
-    if(lang=="r") code <- code %>% add(readSource(sprintf("%s/stats/%s.%s",lang,codeName,lang)))
+    if(lang=="r") code <- code %>% add(readSource(sprintf("%s/stats/%s.%s",lang,codeName,LANG)))
     return(code)
   }
   
   if(stat %in% evnt_stats){
-    code <- code %>% add(readSource(sprintf("%s/load_events.%s",lang,lang)))
-    code <- code %>% add(readSource(sprintf("%s/merge_events.%s",lang,lang)))
-    if(lang=="r") code <- code %>% add(readSource(sprintf("../shared/%s/svydesign/design_evnt.%s",lang,lang)))
+    code <- code %>% add(readSource(sprintf("%s/load_events.%s",lang,LANG)))
+    code <- code %>% add(readSource(sprintf("%s/merge_events.%s",lang,LANG)))
+    if(lang=="r") code <- code %>% add(readSource("../shared/r/svydesign/design_evnt.R"))
     return(code)
   }
   
