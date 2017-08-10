@@ -3,9 +3,9 @@
 ###                      FUNCTIONS                          ###
 ###############################################################
 
-source("r/stats.R")
+source("R/stats.R")
 
-load_data <- function(rows,cols,year,lang="r"){
+load_data <- function(rows,cols,year,lang="R"){
   year <- as.numeric(year)
   yr <- substring(year,3,4)
   yb <- substring(year-1,3,4)
@@ -36,9 +36,9 @@ get_r_code <- function(rows,cols,stat="",year=2014){
 
   dsgn = switch(prefix,"adult"="design_saq","diab"="design_diab","design_fyc")
 
-  code <- readSource('../shared/r/load/load_pkg.R')
-  code <- code %>% add(load_data(rows,cols,year,lang="r"))
-  code <- code %>% add(readSource(sprintf("../shared/r/svydesign/%s.R",dsgn)))
+  code <- readSource('../shared/R/load/load_pkg.R')
+  code <- code %>% add(load_data(rows,cols,year,lang="R"))
+  code <- code %>% add(readSource(sprintf("../shared/R/svydesign/%s.R",dsgn)))
   
   # Select svy or svyby depending on subgroups
   if(length(gp)==0) meps_code = meps_svy[[svy]] else meps_code = meps_svyby[[svy]]

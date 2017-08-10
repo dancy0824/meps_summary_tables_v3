@@ -59,7 +59,8 @@ stat_list = c(fyc_stats,evnt_stats,"n","n_exp")
   
   year_list = year_start:year_end
   
-  
+# year_list = 2014
+ 
 for(year in year_list){  
   dir.create(sprintf('%s/%s',tables,year), showWarnings = FALSE)
   yr <- substring(year,3,4)
@@ -119,7 +120,7 @@ for(year in year_list){
       for(SOP in sop_list){ 
         if(done(outfile,dir=tables,grp1=grp1,levels2=SOP)) next
         
-        nEVTdsgn <- update(nEVTdsgn,sop=SOP)
+        if(stat=="avgEVT") nEVTdsgn <- update(nEVTdsgn,sop=SOP)
         EVNTdsgn <- update(EVNTdsgn,sop=SOP)
         FYCdsgn <- update(FYCdsgn,sop=SOP)
  

@@ -4,8 +4,8 @@ app <- 'hc1_use'
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-source("../shared/r/run_preamble.R",chdir=T)
 source("../shared/app_preamble.R",chdir=F)
+source("../shared/r/run_preamble.R",chdir=T)
 source("dictionaries.R",chdir=T)
 
 years = 2014:1996

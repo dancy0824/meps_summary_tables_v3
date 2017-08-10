@@ -51,6 +51,7 @@ subgrp_vec <- unlist(subgrps)
 
 subgrp_code <- function(grps,lang="r"){
   lang <- tolower(lang)
+  if(lang=="r") LANG = "R" else LANG = lang
   
   subgrps <- c("agevar",subgrp_vec[subgrp_vec != 'ind'])
   subgrps <- grps[grps %in% subgrps] %>% unique
@@ -60,7 +61,7 @@ subgrp_code <- function(grps,lang="r"){
     subgrps <- c("agevar",subgrps)
   
   sapply(subgrps, function(x)
-    readSource(sprintf("../shared/%s/subgrps/%s.%s",lang,x,lang))) %>%
+    readSource(sprintf("../shared/%s/subgrps/%s.%s",lang,x,LANG))) %>%
     paste(collapse="\n")
 } 
 
