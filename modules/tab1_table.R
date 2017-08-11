@@ -126,9 +126,9 @@ tableModule <- function(input, output, session, tbl, inputs, adj, labels,pivot=F
       foots <- footnotes() %>% rm_html %>% rm_brks %>% rm_xspc
       foots <- foots[foots!=""]
       if(controlTotals()) foots = c(foots,controlTotals_message)
-
+      
       for(fn in c(" ",foots," ")) add.table(fn,file,col.names=F)
-      #add.table(paste("Source:",source_text()),file,col.names=F)
+      add.table(rm_html(labels()$source),file,col.names=F)
     })   
 
 }
