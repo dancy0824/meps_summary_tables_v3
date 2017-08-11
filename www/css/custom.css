@@ -94,7 +94,9 @@ select{
   color: black;
 }
 
-
+figure{ /* wrapper for table, caption, footnotes */
+  margin: 0;
+}
 
 table caption{
   visibility:hidden;
