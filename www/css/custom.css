@@ -84,6 +84,18 @@ select{
 
 /*****  Table  *****/
 
+.footnote, 
+.footnote:hover, 
+.footnote:visited, 
+.footnote:focus,
+.footnote:active{
+  text-decoratiOn: none;
+  box-shadow: none;
+  color: black;
+}
+
+
+
 table caption{
   visibility:hidden;
 }

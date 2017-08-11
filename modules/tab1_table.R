@@ -26,6 +26,10 @@ tableUI<- function(id,DT=F){
   }else{ tbl <- uiOutput(ns('meps_table'),role="region","aria-live"="polite")}
   
   tabPanel(title="Table",icon=icon("table"),
+           
+           
+        tags$figure( # wrap table and footnotes in figure tag
+           
            downloadButton508( ns("csv"), 
                               class = 'download-button',
                               label = 'Download table', 
@@ -36,6 +40,7 @@ tableUI<- function(id,DT=F){
            #dataTableOutput(ns('meps_table')),
            tbl,
            uiOutput(ns("table_footnotes"),role="region","aria-live"="polite")
+        )
   )
   
 }
@@ -61,9 +66,11 @@ tableModule <- function(input, output, session, tbl, inputs, adj, labels,pivot=F
   formatted_tbl <- reactive({
     denom = adj()$D; digits = adj()$d;
     
-    tbl() %>%  
+    tbl() %>% 
       mutate_at(vars(coef,se),funs(formatNum(./denom,d=digits))) %>%
-      mutate(coef = ifelse(star,paste0(coef,"*"),coef),
+      mutate(coef = ifelse(coef=="--","<a href='#suppress' class='footnote'>--</a>",coef),
+              se  = ifelse(se=="--","<a href='#suppress' class='footnote'>--</a>",se)) %>%
+      mutate(coef = ifelse(star,paste0(coef,"<a href='#RSE' class='footnote'>*</a>"),coef),
              coef_se = sprintf("%s  <span class='gray'>(%s)</span>",coef,se))
   }) 
   
@@ -86,7 +93,15 @@ tableModule <- function(input, output, session, tbl, inputs, adj, labels,pivot=F
   })
   
   
-  output$table_footnotes <- renderText(paste0(footnotes(),collapse=""))
+  output$table_footnotes <- renderText({
+    f_star = footnotes()$star
+    f_suppress = footnotes()$suppress
+    
+    if(f_star != "") f_star = sprintf("<aside id='RSE'>%s</aside>",f_star)
+    if(f_suppress != "") f_suppress = sprintf("<aside id='suppress'>%s</aside>",f_suppress)
+     
+    paste0(c(f_suppress,f_star),collapse="")
+  })
   
   
 # Download table
