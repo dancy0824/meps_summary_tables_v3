@@ -25,15 +25,15 @@ tableUI<- function(id,DT=F){
   if(DT){tbl <- DT::dataTableOutput(ns('meps_DT'))
   }else{ tbl <- uiOutput(ns('meps_table'),role="region","aria-live"="polite")}
   
-  tabPanel(title="Table",icon=icon("table"),
+  tabPanel(title=tags$span(class='tab-title table-tab',"Table"), 
            
            
         tags$figure( # wrap table and footnotes in figure tag
            
            downloadButton508( ns("csv"), 
                               class = 'download-button',
-                              label = 'Download table', 
-                              icon = icon('download')),
+                              label = 'Download table'), 
+                              #icon = icon('download')),
            
            uiOutput(ns("table_caption"),inline=T,role="region","aria-live"="polite"),
            #uiOutput(ns('meps_table'),role="region","aria-live"="polite"),

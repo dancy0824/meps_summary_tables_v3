@@ -190,38 +190,87 @@ input[type="search"]{
 }
 
 
+.tab-title{
+  background-size: 1em;
+  background-repeat: no-repeat;
+  padding-left: 1.4em;
+  background-position: left center;
+}
+
+
+.table-tab{
+  /* maybe put active ones here so they load in first thing (otherwise lags)
+  background-image: url(../img/table-white.png); 
+  background-image: url(../img/table-white.svg); */
+  background-image: url(../img/table-blue.png); 
+  background-image: url(../img/table-blue.svg); 
+}
+
+.active .table-tab{
+  background-image: url(../img/table-white.png); 
+  background-image: url(../img/table-white.svg); 
+}
+
+.plot-tab{
+  background-image: url(../img/bar-chart-blue.png); 
+  background-image: url(../img/bar-chart-blue.svg);
+  background-size: 1.2em;
+}
+
+.active .plot-tab{
+  background-image: url(../img/bar-chart-white.png); 
+  background-image: url(../img/bar-chart-white.svg); 
+}
+
+.code-tab{
+  background-image: url(../img/code-blue.png); 
+  background-image: url(../img/code-blue.svg);
+  background-size: 1.2em;
+}
+
+.active .code-tab{
+  background-image: url(../img/code-white.png); 
+  background-image: url(../img/code-white.svg); 
+}
+
+
+
+
 /*****  Download Button  *****/
 
-.download-button{
+.usa-button.download-button{
+  background-image: url(../img/download-gray.png); 
+  background-image: url(../img/download-gray.svg);
+  background-size: 1.4em;
+  background-repeat: no-repeat;
+  background-position: left center;
+  padding-left: 1.4em;
+  padding: 0.2em 1em;
+   
   display: inline;
-  padding: 0.2rem 1rem;
-  font-size: 24px;
   color: #5b616b;
+  
   background-color: white;
   text-decoration: none;
   margin-right: 0;
+  box-shadow:none;
+}
+
+.usa-button.download-button:hover{
+  background-image: url(../img/download.png); 
+  background-image: url(../img/download.svg);
 }
 
 /*.download-button, */
-.download-button:visited,
-.download-button:active,
-.download-button:hover,
-.download-button:focus{ 
+.usa-button.download-button:visited,
+.usa-button.download-button:active,
+.usa-button.download-button:hover,
+.usa-button.download-button:focus,
+.usa-button.download-button:visited:hover,
+.usa-button.download-button:visited:active{ 
    background-color: white;
    text-decoration: none;
-   color: black;
+   box-shadow:none;
 }
-
-.download-button:hover, 
-.downlad-button:focus,
-.download-button:visited:hover{
-  background-color: white;
-}
-
-.download-button:visited:active,
-.download-button:active{
-  background-color: white;
-}
-
 
 

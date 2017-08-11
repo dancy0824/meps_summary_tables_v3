@@ -5,7 +5,7 @@
 codeUI <- function(id){
   ns <- NS(id)
   
-  tabPanel(title="Code",icon=icon("code"),
+  tabPanel(title=tags$span(class='tab-title code-tab',"Code"),
            
            div(class='code-select',
              selectInput508(ns("code_language"),
@@ -15,8 +15,8 @@ codeUI <- function(id){
              
              downloadButton508( ns("dl_code"), 
                                 class = 'download-button',
-                                label = 'Download Code', 
-                                icon=icon('download'))
+                                label = 'Download Code')
+                                #icon=icon('download'))
             ),
            
            tags$p(HTML(

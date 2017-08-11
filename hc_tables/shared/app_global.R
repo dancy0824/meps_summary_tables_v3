@@ -359,8 +359,8 @@ actionButton508 <- function (inputId, label, usaStyle = NULL, class="", icon = N
     list(shiny:::validateIcon(icon), label), ...)
 }
 
-downloadButton508 <- function (outputId, label = "Download", icon, class="",hideLabel=T){
-  if(missing(icon)) icon <- icon("download")
+downloadButton508 <- function (outputId, label = "Download", class="",hideLabel=T){
+  #if(missing(icon)) icon <- icon("download")
   
   title <- ifelse(hideLabel,label,'')
   labelClass <- ifelse(hideLabel,'usa-sr-only','')
@@ -369,7 +369,7 @@ downloadButton508 <- function (outputId, label = "Download", icon, class="",hide
                  class = paste("em-tooltip shiny-download-link usa-button",class),
                  href = "",
                  target = "_blank",
-                 tags$span(icon,`aria-hidden`='true'),
+                 #tags$span(icon,`aria-hidden`='true'),
                  tags$span(class=labelClass,label))
 }
 

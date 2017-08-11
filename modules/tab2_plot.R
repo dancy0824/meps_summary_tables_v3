@@ -21,12 +21,12 @@ build_legend <- function(names,colors,type="bar"){
 plotUI<- function(id){
   ns <- NS(id)
   
-  tabPanel(title="Plot",icon=icon("bar-chart"), 
+  tabPanel(title=tags$span(class='tab-title plot-tab',"Plot"), 
            
            downloadButton508( ns("png"), 
                               class = 'download-button',
-                              label = 'Download Plot', 
-                              icon=icon('download')),
+                              label = 'Download Plot'),
+                              #icon=icon('download')),
            
            uiOutput(ns("plot_caption"),inline=T,role="region","aria-live"="polite"),
            uiOutput(ns("sub_caption"),role="region","aria-live"="polite"),
