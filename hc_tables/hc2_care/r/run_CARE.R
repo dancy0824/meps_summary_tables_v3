@@ -2,6 +2,9 @@
 ###   Accessibility and quality of care   ###
 #############################################
 
+print("initiating run_CARE.R")
+Sys.sleep(1)
+
 standardize <- function(results,grp1,stat){
   results %>% 
     rename_(levels1=grp1) %>%
@@ -31,6 +34,8 @@ standardize_n <- function(results,grp1,grp2){
 
 app <- "hc2_care"
 
+setwd("r")
+
 # Shared
 source("../../shared/app_global.R")
 source("../../shared/r/run_preamble.R",chdir=T)
@@ -44,22 +49,30 @@ caregrps = care_subgrps %>% unlist %>% setNames(NULL)
 ##################################################
 ###                   RUN                      ###
 ##################################################
-  
+# From initial run, .bat file:
+#
+# args = commandArgs(trailingOnly = TRUE)
+# if(length(args) > 0){
+#   year_start = as.numeric(args[1])
+#   year_end = as.numeric(args[2])
+# }else{
+#   year_start = min(meps_names$Year)
+#   year_end = max(meps_names$Year)
+# }
+# year_list = year_start:year_end
+
 # Load packages
   runSource('load/load_pkg.R',dir=shared)
   
-args = commandArgs(trailingOnly = TRUE)
-if(length(args) > 0){
-  year_start = as.numeric(args[1])
-  year_end = as.numeric(args[2])
-}else{
-  year_start = 2002
-  year_end = max(meps_names$Year)
-}
-year_list = year_start:year_end
+years = meps_names$Year[meps_names$FYC!=""]
+year_list = years[years >= 2002] # for care tables, start at 2002
+
+#year_list = years[!years %in% list.files("tables")]
 
 
 for(year in year_list){   print(year)
+  done_file = sprintf("tables/%s/_DONE.Rdata",year)
+  if(file.exists(done_file)) next
   
   dir.create(sprintf('%s/%s',tables,year), showWarnings = FALSE)
   yr <- substring(year,3,4); 
@@ -88,7 +101,7 @@ for(year in year_list){   print(year)
     if(!svy %in% names(meps_svyby)) svy = strsplit(stat,"_")[[1]][1]
   
     for(grp1 in subgrp_list){
-      #if(done(outfile,dir=tables,grp1=grp1,grp2=stat)) next
+      if(done(outfile,dir=tables,grp1=grp1,grp2=stat)) next
       
       out <- meps_svyby[[svy]] %>% rsub(by=grp1,formula=stat,FUN="svymean") %>% run
       results <- out %>% standardize(grp1=grp1,stat=stat)
@@ -102,5 +115,11 @@ for(year in year_list){   print(year)
       update.csv(both,file=outfile,dir=tables)
     }
   }
+  
+  all_done = TRUE; save(all_done,file=done_file);
 
 } # end of yearlist loop
+
+
+print("...care estimates completed")
+Sys.sleep(1)

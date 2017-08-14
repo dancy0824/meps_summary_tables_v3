@@ -1,13 +1,17 @@
 
 ### NOTE! If you update the meps_file_names.csv, run UPDATE.R first to create puf_names.csv ###
 
-library(dplyr)
+print("transferring new PUF files from meps.ahrq.gov to C:/MEPS")
+Sys.sleep(1)
+
+suppressMessages(library(dplyr))
 
 rm_empty <- function(vec) vec[vec!=""]
 
 downloadSSP <- function(filename){
   file.ssp = paste0(filename,".ssp")
   file.alt = file.ssp %>% sub("h","hc",.)
+  if(filename == "h06r") file.alt = "hc006r.ssp"
   all_files = tolower(list.files())
   if(any(c(file.ssp,file.alt) %in% all_files)) return(sprintf("File %s already loaded",filename))
   
@@ -18,6 +22,8 @@ downloadSSP <- function(filename){
 }
 
 ################################################
+
+setwd("shared")
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Load MEPS names from csv
@@ -43,3 +49,6 @@ for(letter in letters[2:8]){
   event_files <- gsub("\\*",letter,meps_names_evnt)
   lapply(event_files,downloadSSP)
 }
+
+print("...PUF transfer completed")
+Sys.sleep(1)

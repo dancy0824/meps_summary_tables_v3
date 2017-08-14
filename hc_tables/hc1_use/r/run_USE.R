@@ -2,6 +2,9 @@
 ###     UTILIZATION AND EXPENDITURES      ###
 #############################################
 
+print("initiating run_USE.R")
+Sys.sleep(1)
+
 gather_sop <- function(df){
   df %>% 
     gather(group,coef) %>%
@@ -25,9 +28,11 @@ standardize <- function(results,grp1,grp2,stat){
 ###                  LISTS                     ###
 ##################################################
 
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-
 app <- "hc1_use"
+
+setwd("r")
+# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
 
 # Shared
 source("../../shared/app_global.R")
@@ -44,24 +49,28 @@ stat_list = c(fyc_stats,evnt_stats,"n","n_exp")
 ###                   RUN                      ###
 ##################################################
 
+# From initial run, .bat file:
+#
+# args = commandArgs(trailingOnly = TRUE)
+# if(length(args) > 0){
+#   year_start = as.numeric(args[1])
+#   year_end = as.numeric(args[2])
+# }else{
+#   year_start = min(meps_names$Year)
+#   year_end = max(meps_names$Year)
+# }
+# year_list = year_start:year_end
+
 # Load packages
   runSource('load/load_pkg.R',dir=shared)
 
-  args = commandArgs(trailingOnly = TRUE)
+  year_list = meps_names$Year[meps_names$FYC!=""]
+  #year_list = years[!years %in% list.files("tables")]
+
+for(year in year_list){   print(year)
+  done_file = sprintf("tables/%s/_DONE.Rdata",year)
+  if(file.exists(done_file)) next
   
-  if(length(args) > 0){
-    year_start = as.numeric(args[1])
-    year_end = as.numeric(args[2])
-  }else{
-    year_start = min(meps_names$Year)
-    year_end = max(meps_names$Year)
-  }
-  
-  year_list = year_start:year_end
-  
-# year_list = 2014
- 
-for(year in year_list){  
   dir.create(sprintf('%s/%s',tables,year), showWarnings = FALSE)
   yr <- substring(year,3,4)
   sg <- paste0(subgrp_list,",",collapse="")
@@ -236,8 +245,11 @@ for(year in year_list){
     }  
     
   }# end of stat_list loop
+
+  all_done = TRUE; save(all_done,file=done_file);
   
 }# end of year_list loop
   
-  
-  
+
+print("...use estimates completed")
+Sys.sleep(1)

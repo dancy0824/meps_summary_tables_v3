@@ -1,14 +1,14 @@
 
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-library(shiny)
-library(DT)
-library(stringr)
-library(plotly)
-library(RColorBrewer)
-library(dplyr)
-library(tidyr)
-library(scales)
+suppressMessages(library(shiny))
+suppressMessages(library(DT))
+suppressMessages(library(stringr))
+suppressMessages(library(plotly))
+suppressMessages(library(RColorBrewer))
+suppressMessages(library(dplyr))
+suppressMessages(library(tidyr))
+suppressMessages(library(scales))
 
 meps_names <- read.csv("../shared/puf_expanded.csv", stringsAsFactors=F)
 
@@ -27,6 +27,6 @@ source("app_info.R",local=T)
 source("app_code.R",local=T)
 source("dictionaries.R",local=T) # run dictionaries last to overwrite default functions
 
-load("TABLES.Rdata")
+try(load("TABLES.Rdata"),silent=T)
 
 addResourcePath('www','../../www')

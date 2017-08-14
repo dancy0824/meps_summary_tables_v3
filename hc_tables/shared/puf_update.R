@@ -1,15 +1,20 @@
 ################################################################
 ## Update list of MEPS files and create expanded version
 
+print("initiating update.R...")
+Sys.sleep(1)
+
+suppressMessages(library(dplyr))
+
 meps_file = "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_file_names.csv"
 
 puf_names_current = read.csv(meps_file,stringsAsFactors = F)
 
 puf_names <- puf_names_current %>% 
-  mutate(Year = as.numeric(Year)) %>% 
+  mutate(Year = suppressWarnings(as.numeric(Year))) %>% 
   filter(!is.na(Year)) 
 
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd("shared")
 
 write.csv(puf_names,file="puf_names.csv",row.names=F) # for file_transfer.R
@@ -38,3 +43,6 @@ for(evnt in names(event_letters)){
 }
 
 write.csv(puf_expanded,file="puf_expanded.csv",row.names=F)
+
+print("...Completed")
+Sys.sleep(1)
