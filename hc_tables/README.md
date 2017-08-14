@@ -4,9 +4,9 @@ This folder contains individual apps (folders starting with 'hc') as well as com
 
 The following apps are in progress:
 * **Use, Expenditures, and Population**: [hc1_use](hc1_use)
-* **Accessibility and Quality of care**: [hc2_care](hc2_care) (in progress)
-* **Prescription Medicines**: [hc3_pmed](hc3_pmed) (preliminary stages)
-* **Medical Conditions**: [hc4_cond](hc4_cond) (in progress)
+* **Accessibility and Quality of care**: [hc2_care](hc2_care) 
+* **Prescription Medicines**: (preliminary stages)
+* **Medical Conditions**: (preliminary stages)
 
 Each app folder contains (or will eventually contain) the following components:
 * **r**,**sas**,**stata** folders: R/SAS/Stata code and output for generating master summary table
@@ -18,7 +18,6 @@ Each app folder contains (or will eventually contain) the following components:
 * **TABLES.Rdata**: Rdata file containing master summary table for app
 
 The [shared](shared) folder contains the following components used by all the apps:
-* **PUFS**: SAS transport files (.ssp) of original PUFS, read in by R/SAS/Stata codes to create estimates
 * **r/sas/stata**: R/SAS/Stata code for loading FYC files, loading and combining Event files, defining demographic subgroups (e.g. age, race, sex,...), and defining survey design (if applicable). Also contains shared functions.
 * **app_global.R**: formatting functions and Shiny 508 functions, built specifically web accessibility and compatibility with the [18F U.S. Web Design Standards](https://standards.usa.gov/)
 * **app_notes.R**: Abbreviations and dictionaries used in the 'Notes' section of the app (e.g. description of insurance categories)
