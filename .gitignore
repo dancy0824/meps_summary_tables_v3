@@ -1,13 +1,20 @@
 archive/*
 ic_tables/*
+packrat/*
+
+
+hc_tables/hc3_pmed/*
+hc_tables/hc4_cond/*
+
+
 
 hc_tables/*/*/tables*
+hc_tables/*/*.Rdata
 
 hc_tables/shared/PUFS/*
 
-hc_tables/hc3_pmed/*
 
-hc_tables/*/*.Rdata
+
 
 *.Rhistory
 *.history
@@ -19,8 +26,6 @@ hc_tables/*/*.Rdata
 
 
 hc_tables/code/SSS/*
-
-packrat/*
 
 QC*
 
