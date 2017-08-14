@@ -4,14 +4,21 @@
 
 build_legend <- function(names,colors,type="bar"){
   listy = list(); 
-  for(i in 1:length(names)){
+  n = length(names)
+  for(i in 1:n){
     listy[[i]] =
       tags$li(
         tags$div(class = paste0("legend-",type),
                  style = paste0('background-color: ',colors[i])),
         names[i])
   }
-  tagList(listy)
+  
+  # convert to 2 columns on small screen
+  split = ceiling(n/2)
+  first_col = tags$div(class = "col-xs-6 col-sm-12",tagList(listy[1:split]))
+  second_col = tags$div(class = "col-xs-6 col-sm-12",tagList(listy[(split+1):n]))
+  
+  tagList(first_col,second_col)
 }
 
 #######################################################
