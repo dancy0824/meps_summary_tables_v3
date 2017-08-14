@@ -3,8 +3,6 @@
 
 library(dplyr)
 
-setwd("C:/Users/emily.mitchell/Desktop/Programming/GitHub/meps_summary_tables/hc_tables/shared/PUFS")
-
 rm_empty <- function(vec) vec[vec!=""]
 
 downloadSSP <- function(filename){
@@ -20,9 +18,10 @@ downloadSSP <- function(filename){
 }
 
 ################################################
+# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Load MEPS names from csv
-meps_names <- read.csv("../puf_names.csv",stringsAsFactors = F)
+meps_names <- read.csv("puf_names.csv",stringsAsFactors = F)
 
 meps_names_fyc <- meps_names %>% select(FYC) %>% rm_empty
 meps_names_RX   <- meps_names %>% select(RX.Events) %>% rm_empty
@@ -30,6 +29,9 @@ meps_names_evnt <- meps_names %>% select(Events) %>% rm_empty
 meps_names_cond <- meps_names %>% select(Conditions) %>% rm_empty
 meps_names_CLNK <- meps_names %>% select(CLNK) %>% rm_empty
 meps_names_RXLK <- meps_names %>% select(RXLK) %>% rm_empty
+
+
+setwd("C:/MEPS/") # target directory
 
 lapply(meps_names_fyc,downloadSSP)
 lapply(meps_names_RX,downloadSSP)
