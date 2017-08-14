@@ -1,13 +1,15 @@
 This folder contains individual apps (folders starting with 'hc') as well as components shared by all apps ([shared](shared))
 
-After the yearly release of the Full-Year-Consolidated File (FYC), the app tables can be updated by running (double-clicking) [UPDATE.bat](UPDATE.bat) (on Windows).
+## Updating tables
 
-[UPDATE.bat](UPDATE.bat) is a batch file that runs:
+After the yearly release of the Full-Year-Consolidated File (FYC), the app tables can be updated by running (double-clicking) [UPDATE.bat](UPDATE.bat) (on Windows). This is a batch file that runs:
 1. [shared/puf_update.R](shared/puf_update.R) to read in most recent updates to Public Use Files (PUF) releases
 2. [shared/puf_transfer.R](shared/puf_transfer.R) transfers new PUFs from MEPS website to local folder C:/MEPS (may need to create this folder if it doesn't exist)
-3. **/r/run_USE.R (** = app folder) to run estimates on new data
-4. **/run_merge.R (** = app folder) to append new estimates onto existing data
+3. XX/r/run_USE.R (XX = app folder) to run estimates on new data
+4. XX/run_merge.R (XX = app folder) to append new estimates onto existing data
 
+
+## Apps
 
 The following apps are in progress:
 * **Use, Expenditures, and Population**: [hc1_use](hc1_use)
