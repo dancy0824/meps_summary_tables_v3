@@ -1,12 +1,13 @@
 library(tidyr)
 library(dplyr)
 
-dir = "C:/Users/emily.mitchell/Desktop/Programming/GitHub/meps_summary_tables/hc_tables"
+setwd("../..")
+
+dir = getwd()
 shared = paste0(dir,"/shared/r")
-#PUFdir = sprintf("%s/shared/PUFS",dir) 
-PUFdir = "C:/MEPS"
 path   = sprintf("%s/%s/r",dir,app)
 tables = sprintf("%s/tables",path) 
+PUFdir = "C:/MEPS"
 
 meps_names <-
   read.csv(sprintf("%s/shared/puf_expanded.csv",dir),
