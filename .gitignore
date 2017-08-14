@@ -3,9 +3,15 @@ ic_tables/*
 packrat/*
 
 
+hc_tables/hc1_use/QC*
+hc_tables/hc2_care/QC*
+
+hc_tables/hc1_use/stata/*
+hc_tables/hc2_care/stata/*
+hc_tables/hc1_use/sas/SSS/*
+
 hc_tables/hc3_pmed/*
 hc_tables/hc4_cond/*
-
 
 
 hc_tables/*/*/tables*
@@ -14,21 +20,12 @@ hc_tables/*/*.Rdata
 hc_tables/shared/PUFS/*
 
 
-
+.Rproj.user
+.Rprofile
 
 *.Rhistory
 *.history
 *.ssp
 *.Rdata
-
-.Rproj.user
-.Rprofile
-
-
-hc_tables/code/SSS/*
-
-QC*
-
-
 *.Rproj
 *.log
