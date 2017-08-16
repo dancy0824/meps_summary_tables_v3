@@ -9,7 +9,7 @@ mepsPage <- function(id,info,form_elements,tab_panel){
     
     div(class = 'info-box ',
         div(class='full-screen',
-            h1(info$title), p(info$description), p(info$instructions))),
+            h2(info$title), p(info$description), p(info$instructions))),
     
     fluidRow(class = "full-screen",
              column(width=12,class="col-md-3",
