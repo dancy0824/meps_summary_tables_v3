@@ -43,12 +43,11 @@ select{
 }
 
 .em-banner-header{
-  color:blue;
-  color: blue;
   padding-top: 0.55rem;
   padding-bottom: 0.55rem;
   font-size: 1.2rem;
   font-weight: 400;
+  margin-left: 0.5rem;
 }
 
 .em-banner-header p {
