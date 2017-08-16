@@ -60,6 +60,11 @@ stat_list = c(fyc_stats,evnt_stats) # fyc_stats includes n, n_exp
 ###                   RUN                      ###
 ##################################################
 
+# Load packages
+  runSource('load/load_pkg.R',dir=shared)
+
+year_list = meps_names$Year[meps_names$FYC!=""]
+
 # From initial run, .bat file:
 #
 # args = commandArgs(trailingOnly = TRUE)
@@ -72,12 +77,6 @@ stat_list = c(fyc_stats,evnt_stats) # fyc_stats includes n, n_exp
 # }
 # year_list = year_start:year_end
 
-# Load packages
-  runSource('load/load_pkg.R',dir=shared)
-
-  year_list = meps_names$Year[meps_names$FYC!=""]
-
-  
 for(year in year_list){   print(year)
   
   done_file = sprintf("tables/%s/_DONE.Rdata",year)
