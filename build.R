@@ -29,7 +29,7 @@ library(shiny)
 build_preview <- function(info,folder,path,col_width="one-half"){
   col508(width = col_width,
          tags$a(href = paste0(path,folder,"/"),class = "preview-box",
-                h1(info$title),
+                h2(info$title),
                 p(info$description))
   )
 }

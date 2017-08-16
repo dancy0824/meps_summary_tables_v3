@@ -6,8 +6,15 @@
 
 body{font-family: Source Sans Pro,Helvetica Neue,Helvetica,Roboto,Arial,sans-serif;}
 
-h1{font-size: 3rem;}
-h2{font-size: 2rem;}
+
+h1{
+  -webkit-margin-before: 0;
+  -webkit-margin-after: 0;
+  font-size: 1em;
+  font-family: Source Sans Pro,Helvetica Neue,Helvetica,Roboto,Arial,sans-serif;
+  line-height: 1;
+}
+
 
 select{
   max-width: none;
