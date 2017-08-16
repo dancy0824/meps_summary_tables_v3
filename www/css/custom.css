@@ -6,6 +6,10 @@
 
 body{font-family: Source Sans Pro,Helvetica Neue,Helvetica,Roboto,Arial,sans-serif;}
 
+a:focus{
+  box-shadow: 0 0 3px #3e94cf, 0 0 7px #3e94cf; 
+  outline: 5px auto -webkit-focus-ring-color;
+}
 
 h1{
   -webkit-margin-before: 0;
@@ -13,6 +17,7 @@ h1{
   font-size: 1em;
   font-family: Source Sans Pro,Helvetica Neue,Helvetica,Roboto,Arial,sans-serif;
   line-height: 1;
+  margin-top: 0;
 }
 
 
@@ -37,9 +42,28 @@ select{
   text-align: center;
 }
 
-.usa-banner-inner a:focus{
-  outline: 5px auto -webkit-focus-ring-color;
+.em-banner-header{
+  color:blue;
+  color: blue;
+  padding-top: 0.55rem;
+  padding-bottom: 0.55rem;
+  font-size: 1.2rem;
+  font-weight: 400;
 }
+
+.em-banner-header p {
+    margin-top: 0;
+    margin-bottom: 0;
+    display: inline;
+    overflow: hidden;
+    vertical-align: middle;
+}
+
+.em-banner-header img {
+    width: 2rem;
+}
+
+
 
 .gray{
   color: #5b616b;
@@ -51,6 +75,8 @@ select{
 
 
 /*****  Header  *****/
+
+
 
 .usa-banner-inner, 
 .usa-header-extended .usa-navbar,
