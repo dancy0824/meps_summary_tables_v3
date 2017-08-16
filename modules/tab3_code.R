@@ -22,9 +22,13 @@ codeUI <- function(id){
            tags$p(HTML(
              "To run the code, first download and unzip the required public use data files from the
              <a href = 'https://meps.ahrq.gov/mepsweb/data_stats/download_data_files.jsp' target='_blank_'>
-              MEPS data files page</a>, and save them to your computer.  
+              MEPS data files page </a>, and save them to your computer.  
              More information on downloading and analyzing MEPS data in R, SAS, and Stata can be found 
-             at the <a href = 'https://github.com/HHS-AHRQ/MEPS#accessing-meps-hc-data' target='_blank_'>AHRQ GitHub site</a>."
+             at the <a class = 'external-link' 
+             href = 'https://github.com/HHS-AHRQ/MEPS#accessing-meps-hc-data' target='_blank_'>
+             AHRQ GitHub site
+             <img src='www/img/externallink.gif' alt='External Link' height='14 width='14'>
+             </a>."
            )),
            
            tags$p("The following code can be used to generate the selected estimates, where

@@ -1,5 +1,10 @@
 $("document").ready(function() {
   
+  $('.external-link').on('click',function(){
+    return confirm('You are leaving a U.S. Department of Health and Human Services (HHS) Web site and entering a nongovernment Web site. \n\nHHS cannot attest to the accuracy of information provided by linked sites. \n\nLinking to an external Web site does not constitute an endorsement by HHS, or any of its employees, of the sponsors of the site or the products presented on the site. \n\nYou will be subject to the destination site\'s privacy policy when you leave the HHS site.\n\nPress \'OK\' to accept or \'Cancel\' to stay on this page.');
+  });
+  
+  
   $('.dropdown-menu').on('click', function(e) {
     if($(this).hasClass('dropdown-menu-form')) {
       e.stopPropagation();
