@@ -82,7 +82,8 @@ notesModule <- function(input, output, session, tbl, inputs, adj){
   
   output$citation <- renderText({
     today <- Sys.Date() %>% format("%B %d, %Y")
-    sprintf("%s. %s. %s. Generated interactively: %s.",AHRQ,caption(),MEPS,today)
+    sprintf("%s. %s. %s. Generated interactively: %s.",AHRQ,caption(),MEPS,today) %>% 
+      gsub("<SE>","(standard errors)",.)
   })
   
   ################
