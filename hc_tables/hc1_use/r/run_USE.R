@@ -5,19 +5,29 @@
 print("initiating run_USE.R")
 Sys.sleep(1)
 
-gather_sop <- function(df){
+get_names <- function(vec){
+  out <- vec %>% grep(" = ",.,value=T) %>% sub(' = .*$','',.)
+  
+  # Need to make sure we have the right key variables, esp. for avgEVT
+  event_check <- substring(out,1,2) %in% substring(event_list,1,2)
+  sop_check <- substring(out,nchar(out)-2,nchar(out)) %in% sop_list
+  
+  out[event_check&sop_check]
+}
+
+gather_sop <- function(df,grps){
   df %>% 
-    gather(group,coef) %>%
+    gather_("group","coef",setdiff(names(.),c(grps,"ind"))) %>%
     separate(group,c("stat","sop"),sep="\\.",fill="left") %>%
     mutate(stat = replace(stat,is.na(stat),"stat")) %>%
     spread(stat,coef) %>%
-    select(sop,stat,se)
+    select(one_of(grps),sop,stat,se)
 }
 
 standardize <- function(results,grp1,grp2,stat){
   out <- results %>% select(-contains("FALSE")) 
   key = c(stat,paste0(stat,"_se"))
-  names(out)[!names(out) %in% c(grp1,grp2)] = key
+  names(out)[!names(out) %in% c("ind","sop","event",grp1,grp2)] = key
   out %>%
     mutate(grp1=grp1,grp2=grp2) %>%
     mutate_(levels1=grp1,levels2=grp2) %>%
@@ -40,10 +50,11 @@ source("../../shared/r/run_preamble.R",chdir=T)
 
 # Local
 source("../dictionaries.R",chdir=T)
+source("../app_code.R",chdir=T)
 source("stats/stats.R")
 
 usegrps = c("sop", "event", "event_sop")
-stat_list = c(fyc_stats,evnt_stats,"n","n_exp")
+stat_list = c(fyc_stats,evnt_stats) # fyc_stats includes n, n_exp
 
 ##################################################
 ###                   RUN                      ###
@@ -65,9 +76,10 @@ stat_list = c(fyc_stats,evnt_stats,"n","n_exp")
   runSource('load/load_pkg.R',dir=shared)
 
   year_list = meps_names$Year[meps_names$FYC!=""]
-  #year_list = years[!years %in% list.files("tables")]
 
+  
 for(year in year_list){   print(year)
+  
   done_file = sprintf("tables/%s/_DONE.Rdata",year)
   if(file.exists(done_file)) next
   
@@ -85,12 +97,14 @@ for(year in year_list){   print(year)
 # Load EVENTS and merge with FYC 
   runSource('load_events.R',yy=yr,PUFdir=PUFdir,subgrps=sg,get_file_names(year))
   runSource('merge_events.R',yy=yr,subgrps=sg)
-  
+
 # Define survey design  
   runSource("svydesign/design_fyc.R",dir=shared,"yy"=yr)
   runSource("svydesign/design_evnt.R",dir=shared,"yy"=yr)
+  runSource("stats/avgEVT.R","yy"=yr)
   
 # Run for each statistic  
+
   for(stat in stat_list){
     
     outfile <- sprintf("%s/%s.csv",year,stat)
@@ -98,153 +112,44 @@ for(year in year_list){   print(year)
   # Demographic subgroups, crossed 
   #  Dear future Emily: don't try to change i and j back to all_subgrps.
   #  You will end up with many redundancies. Bad juju.
-    
-    if(stat=="avgEVT") runSource("stats/avgEVT.R",yy=yr)
+
+    grp_list = c(subgrp_list,"sop","event")
+    if(stat %in% c("totEVT","meanEVT")) grp_list = c(grp_list,"event_v2X")
+    sl = length(grp_list)
     
     for(i in 1:sl){   
       for(j in i:sl){ 
         
-        grp1 = subgrp_list[i]; strp1 <- gsub("_v2X","",grp1); 
-        grp2 = subgrp_list[j]; strp2 <- gsub("_v2X","",grp2);
+        grp1 = grp_list[i]; strp1 <- gsub("_v2X","",grp1); 
+        grp2 = grp_list[j]; strp2 <- gsub("_v2X","",grp2);
         if(strp1==strp2 & grp1!="ind") next   # skip if grp1 = grp2 (but run for ind, ind)
         if(done(outfile,dir=tables,grp1=grp1,grp2=grp2)) next
  
-        by <- sprintf("~%s+%s",grp1,grp2)
-        count <- sprintf("PERWT%sF",yr)
-        use <- sprintf("(XP%sX >= 0)",yr)
-        
-        out <- meps_svyby[[stat]] %>% rsub(by=by,count=count,use=use,yy=yr,event="TOT",sop="EXP",sp="XP") %>% run
-        results <- out %>% standardize(grp1,grp2,stat)
-        update.csv(results,file=outfile,dir=tables)
+        grps = c(grp1,grp2)
 
-      }
-    }
+        out_code <- capture.output(get_r_code(rows=grp1,cols=grp2,stat=stat,year=year,display=F) %>% run)
     
-    
-  # Demographic subgroups x source of payment 
-    
-    if(stat=="avgEVT") runSource("stats/avgEVT_sop.R",yy=yr)
-    
-    for(grp1 in subgrp_list){   
-      for(SOP in sop_list){ 
-        if(done(outfile,dir=tables,grp1=grp1,levels2=SOP)) next
-        
-        if(stat=="avgEVT") nEVTdsgn <- update(nEVTdsgn,sop=SOP)
-        EVNTdsgn <- update(EVNTdsgn,sop=SOP)
-        FYCdsgn <- update(FYCdsgn,sop=SOP)
- 
-        by    <- sprintf("~%s+sop",grp1)
-        count <- sprintf("TOT%s%s",SOP,yr)
-        sp    <- sp_list[[SOP]]
-        use   <- sprintf("(%s%sX > 0)",sp,yr)
-        
-        out <- meps_svyby[[stat]] %>% rsub(by=by,count=count,use=use,yy=yr,event="TOT",sop=SOP,sp=sp) %>% run
-        results <- out %>% standardize(grp1,'sop',stat)
-        update.csv(results,file=outfile,dir=tables)
- 
-      }
-    }
+        for(nm in get_names(out_code)){
 
-  # Demographic subgroups x event type
-
-    for(grp1 in subgrp_list){  
-      
-      ## avgEVT: (check first since avgEVT in evnt_stats) ##
-      if(stat == "avgEVT"){
-        by=sprintf("~%s",grp1)
-        runSource("stats/avgEVT_event.R",yy=yr,by=by)
-        
-        for(EV in event_list[-1]){
-          if(done(outfile,dir=tables,grp1=grp1,levels2=EV)) next
+          ev = substr(nm,1,2);
+          if(ev == "RX"){evt = ev; sp = substr(nm,3,5);
+          }else{evt = substr(nm,1,3); sp = substr(nm,4,6);}
           
-          out <- meps_svyby[["avgEVT_event"]] %>% rsub(event=EV) %>% run 
-          results <- out %>% mutate(event=EV) %>% standardize(grp1,'event',stat)
-          update.csv(results,file=outfile,dir=tables)
-        }
-      
-      ## EVENT STATS: totEVT, meanEVT ##
-      }else if(stat %in% evnt_stats){
-        if(done(outfile,dir=tables,grp1=grp1,grp2='event_v2X')) next
-        use <- sprintf("(XP%sX >= 0)",yr)
-        
-        out <- meps_svyby[[stat]] %>% rsub(use=use,by=sprintf("~%s+event",grp1),sp="XP",yy=yr) %>% run 
-        results <- out %>% standardize(grp1,'event',stat)
-        update.csv(results,file=outfile,dir=tables)
-        
-        out <- meps_svyby[[stat]] %>% rsub(use=use,by=sprintf("~%s+event_v2X",grp1),sp="XP",yy=yr) %>% run 
-        results <- out %>% standardize(grp1,'event_v2X',stat)
-        update.csv(results,file=outfile,dir=tables)
-        
-      ## FYC STATS: totPOP, totEXP,... ##  
-      }else if(stat %in% c(fyc_stats,"n","n_exp")){
-        for(EVNT in event_list){ 
-          if(done(outfile,dir=tables,grp1=grp1,levels2=EVNT)) next
-          FYCdsgn <- update(FYCdsgn,event=EVNT)
+          out <- get(nm) 
           
-          by <- sprintf("~%s+event",grp1)
-          count <- paste0(use_list[[EVNT]],yr)
-          
-          out <- meps_svyby[[stat]] %>% rsub(by=by,count=count,event=EVNT,sop="EXP",yy=yr) %>% run 
-          results <- out %>% standardize(grp1,'event',stat)
-          update.csv(results,file=outfile,dir=tables)
-          
-        }
-      }
-    }  
-    
-  # Source of payment x event type
+          if(stat == "avgEVT" & 'sop' %in% grps) out <- out %>% gather_sop(grps) else out <- out %>% mutate(sop=sp)
+          if(!stat %in% c("totEVT","meanEVT")) out <- out %>% mutate(event = evt)
+          out <- out %>% mutate(ind="Total")
 
-    if(stat == "avgEVT"){
-      
-      runSource("stats/avgEVT_event_sop.R",yy=yr,sop="EXP+SLF+MCR+MCD+PTR+OTZ")
-      
-      for(EV in event_list[-1]){
-        if(done(outfile,dir=tables,grp1="sop",levels2=EV)) next
-        out <- meps_svyby[["avgEVT_event"]] %>% rsub(event=EV) %>% run 
-        results <- out %>% select(-ind) %>% gather_sop %>% mutate(event=EV) %>% standardize('sop','event',stat)
-        update.csv(results,file=outfile,dir=tables)
-      }
-    }
-    
-  
-    for(SOP in sop_list){
-
-      ## EVENT STATS: totEVT, meanEVT ##
-      if(stat %in% c("totEVT","meanEVT")){
-        if(done(outfile,dir=tables,levels1=SOP,grp2='event_v2X')) next
-        
-        sp <- sp_list[[SOP]]
-        use <- sprintf("(%s%sX > 0)",sp,yr)
-        
-        EVNTdsgn <- update(EVNTdsgn,sop=SOP)
-        
-        out <- meps_svyby[[stat]] %>% rsub(use=use,by="~sop+event",sp=sp,yy=yr) %>% run 
-        results <- out %>% standardize('sop','event',stat)
-        update.csv(results,file=outfile,dir=tables)
-        
-        out <- meps_svyby[[stat]] %>% rsub(use=use,by="~sop+event_v2X",sp=sp,yy=yr) %>% run 
-        results <- out %>% standardize('sop','event_v2X',stat)
-        update.csv(results,file=outfile,dir=tables)
-        
-        
-      ## FYC STATS: totPOP, totEXP,... ## 
-      }else if(stat %in% c(fyc_stats,"n","n_exp")){
-
-        for(EVNT in event_list){ 
-          if(done(outfile,dir=tables,levels1=SOP,levels2=EVNT)) next
-          
-          FYCdsgn <- update(FYCdsgn,event=EVNT,sop=SOP)
-          count <- paste0(EVNT,SOP,yr)
-
-          out <- meps_svyby[[stat]] %>% rsub(by="~sop+event",count=count,event=EVNT,sop=SOP,yy=yr) %>% run 
-          results <- out %>% standardize('sop','event',stat)
+          results <- out %>% standardize(grp1,grp2,stat)
+          print(results)
           update.csv(results,file=outfile,dir=tables)
         }
         
       }
-    }  
+    }
     
-  }# end of stat_list loop
+  }
 
   all_done = TRUE; save(all_done,file=done_file);
   

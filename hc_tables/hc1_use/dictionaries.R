@@ -37,7 +37,7 @@ grp_labels <- use_subgrps %>% invertList %>% as.list
 grp_labels$Year = "Year"
 
 
-fyc_stats <- c(use_stats$Population,use_stats$Expenditures)
+fyc_stats <- c(use_stats$Population,use_stats$Expenditures,"n","n_exp")
 evnt_stats <- use_stats$Utilization
 
 use_list = list(

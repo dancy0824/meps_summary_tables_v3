@@ -7,7 +7,7 @@ meps_svyby <- list(
   'meanEXP'  = 'svyby(~.event..sop..yy., FUN=svymean, by=.by., design=subset(FYCdsgn,.event..sop..yy. > 0))',
   'medEXP'   = 'svyby(~.event..sop..yy., FUN=svyquantile, by=.by., design=subset(FYCdsgn,.event..sop..yy. > 0), quantiles=c(0.5), ci=T, method="constant")',
   
-  'avgEVT' = 'svyby(~.sop., FUN=svymean, by=.by.,design=nEVTdsgn)',
+  'avgEVT'       = 'svyby(~.sop_formula., FUN=svymean, by=.by.,design=nEVTdsgn)',
   'avgEVT_event' = 'avgEVT(.event.)',
     
   'n'     = 'svyby(~.count., FUN=unwtd.count, by=.by., design=subset(FYCdsgn, .count. > 0))',
@@ -26,7 +26,7 @@ meps_svy <- list(
   'meanEXP'  = 'svymean(~.event..sop..yy., design=subset(FYCdsgn,.event..sop..yy. > 0))',
   'medEXP'   = 'svyquantile(~.event..sop..yy., design=subset(FYCdsgn,.event..sop..yy. > 0), quantiles=c(0.5), ci=T, method="constant")',
 
-  'avgEVT' = 'svymean(~.sop.,design=nEVTdsgn)',
+  'avgEVT'       = 'svymean(~.sop_formula.,design=nEVTdsgn)',
   'avgEVT_event' = 'avgEVT(.event.)',
   
   'totEVT' = 'svytotal(~.use., design=subset(EVNTdsgn, .sp..yy.X >= 0))',

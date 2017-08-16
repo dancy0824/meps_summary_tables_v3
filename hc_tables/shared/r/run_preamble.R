@@ -28,6 +28,8 @@ age_levels = c("Under 18","Under 5","5-17","18-64","18-44","45-64","65+")
 ##                      FUNCTIONS                      ##
 #########################################################
 
+rm_empty <- function(vec) vec[vec!=""]
+
 run <- function(codeString,verbose=T){
   if(verbose) writeLines(codeString)
   eval(parse(text=codeString),envir=.GlobalEnv)
