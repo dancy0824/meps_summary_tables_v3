@@ -15,6 +15,7 @@ mepstrends/hc_tables/hc4_cond/*
 
 
 build/*/tables/*
+build/*/*.Rdata
 
 .Rproj.user
 .Rprofile
@@ -22,6 +23,5 @@ build/*/tables/*
 *.Rhistory
 *.history
 *.ssp
-*.Rdata
 *.Rproj
 *.log
