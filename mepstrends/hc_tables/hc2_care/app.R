@@ -55,16 +55,14 @@ server <- function(input, output,session) {
     callModule(dataModule,"care", 
                df = care_tables,
                stat = stat,
+               adj = adj,
                exclude_choices = exclude_choices,
                exclude_initial = exclude_initial)
   
-  # Labels, caption, footnotes, notes
-  meps_labels <- callModule(notesModule,"care", adj=adj, meps_data=meps_data)  
+  meps_inputs <- reactive(meps_data()) 
   
-  # Intentional bottleneck here to slow update
-  meps_inputs <- reactive(list(adj=adj(),tbl=meps_data()$tbl,inputs=meps_data()$inputs,labels=meps_labels())) %>% debounce(370)
-
   # tabPanels
+  callModule(notesModule,"care", meps_inputs=meps_inputs)
   callModule(tableModule,"care", meps_inputs=meps_inputs)
   callModule(plotModule, "care", meps_inputs=meps_inputs)
   callModule(codeModule, "care", meps_inputs=meps_inputs)

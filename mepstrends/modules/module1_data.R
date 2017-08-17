@@ -94,8 +94,12 @@ switchUI <- function(id,class=""){
 ###                     SERVER                      ###
 #######################################################
 
-dataModule <- function(input, output, session, df, stat, exclude_initial,...){
- 
+dataModule <- function(input, output, session, df, stat, adj, exclude_initial,...){
+
+  ##################
+  ##    INPUTS    ##
+  ##################
+  
   is_trend <- reactive(input$tabs == "trend")
   
   years <- reactive({
@@ -119,9 +123,12 @@ dataModule <- function(input, output, session, df, stat, exclude_initial,...){
     return(input$rows)
   }) 
   
+  ##################
+  ##     DATA     ##
+  ##################  
   
   
-# Standard Errors and Control Totals
+  # Standard Errors and Control Totals
   controlTotals <- reactive({
     tot_vars = c("Year","ind","agegrps","race","sex","poverty","region")
     (stat()=="totPOP") &
@@ -202,23 +209,77 @@ dataModule <- function(input, output, session, df, stat, exclude_initial,...){
 
   })
   
-  ### Return ###
   
+  ####################
+  ##     LABELS     ##
+  ####################  
+  stat_label <- reactive({
+    paste0(stat_labels[[stat()]], adj()$label)
+  })
+
+  dat_labels <- reactive({
+    list(rows = grp_labels[[rowsX()]], Total=stat_label())
+  })
+
+  year_caption <- reactive({
+    if(input$tabs=="cross") return(input$year)
+    c(min(years()),max(years())) %>% unique %>% paste0(collapse="-")
+  })
+
+  se_caption <- reactive({
+    if(!showSEs()) return("")
+    return(" <SE>")
+  })
+
+  caption <- reactive({
+    get_caption(stat_label(),rows(),cols(),se_caption(),year_caption())
+  })
+
+  source_text <- reactive( # also used in download table
+    paste("<b>Source:</b>",sprintf("%s, %s, %s, %s.",CFACT,AHRQ,MEPS,year_caption()))
+  )
+
+  footnotes <- reactive({
+    tab <- decorated_tbl()
+    footnotes = list()
+    footnotes$suppress <- ifelse(any(tab$suppress,na.rm=T),suppressed_message,"")
+    footnotes$star     <- ifelse(any(tab$star,na.rm=T),rse_message,"")
+    return(footnotes)
+  })
+
+  ####################
+  ##     OUTPUT     ##
+  ####################  
+
   inputs <- reactive({
-    list(years=years(),cols=cols(),rows=rows(),rowsX=rowsX(),
-         is_trend=is_trend(),showSEs=showSEs(),stat=stat(),controlTotals=controlTotals())
+    list(years=years(),
+         cols=cols(),
+         rows=rows(),
+         rowsX=rowsX(),
+         is_trend=is_trend(),
+         showSEs=showSEs(),
+         stat=stat(),
+         controlTotals=controlTotals())
   }) 
+  
+  labels <- reactive({
+    list(labels = dat_labels(),
+         source = source_text(),
+         caption = caption(),
+         footnotes = footnotes(),
+         controlTotals=controlTotals())
+  })
   
   decorated_tbl <- reactive({
     select_levels() %>% decorate_tbl(var_name=stat())
   })
   
-  # outlist <- reactive(
-  #   list(inputs = inputs(),tbl = decorated_tbl())
-  # ) %>% debounce(300)
+  outlist <- reactive(
+    list(adj=adj(),inputs=inputs(),tbl=decorated_tbl(),labels=labels())
+  ) %>% debounce(350)
 
-  return(reactive(list(inputs=inputs(), tbl=decorated_tbl())))
- # return(outlist)
+ # return(reactive(list(inputs=inputs(), tbl=decorated_tbl())))
+  return(outlist)
 }
 
 

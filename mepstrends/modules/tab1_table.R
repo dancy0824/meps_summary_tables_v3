@@ -51,7 +51,7 @@ tableUI<- function(id,DT=F){
 ###                     SERVER                      ###
 #######################################################
 
-tableModule <- function(input, output, session, meps_inputs,pivot=F){
+tableModule <- function(input, output, session, meps_inputs, pivot=F){
   
   adj <- reactive(meps_inputs()$adj)
   tbl <- reactive(meps_inputs()$tbl)

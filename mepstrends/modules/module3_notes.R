@@ -24,14 +24,14 @@ hc_info <- function(id){
   )
 }
 
-
 #######################################################
 ###                     SERVER                      ###
 #######################################################
 
-notesModule <- function(input, output, session, adj, meps_data){ 
-  tbl <- reactive(meps_data()$tbl)
-  inputs <- reactive(meps_data()$inputs)
+notesModule <- function(input, output, session, meps_inputs){ 
+  tbl <- reactive(meps_inputs()$tbl)
+  inputs <- reactive(meps_inputs()$inputs)
+  labels <- reactive(meps_inputs()$labels)
 
   years <- reactive(inputs()$years)
   cols  <- reactive(inputs()$cols)
@@ -39,38 +39,8 @@ notesModule <- function(input, output, session, adj, meps_data){
   rowsX <- reactive(inputs()$rowsX) #ind -> year
   stat  <- reactive(inputs()$stat)
   controlTotals <- reactive(inputs()$controlTotals)
-  
-  #################
-  
-  stat_label <- reactive({
-    paste0(stat_labels[[stat()]], adj()$label)
-  })
-  
-  labels <- reactive({
-    list(rows = grp_labels[[rowsX()]], Total=stat_label())
-  })
-  
-  year_caption <- reactive({                                             
-    if(input$tabs=="cross") return(input$year)
-    c(min(years()),max(years())) %>% unique %>% paste0(collapse="-")
-  })
-  
-  se_caption <- reactive({
-    if(!inputs()$showSEs) return("")
-    return(" <SE>")
-  })
-  
-  caption <- reactive({
-    get_caption(stat_label(),rows(),cols(),se_caption(),year_caption())
-  })
 
-  #################
-  
-  source_text <- reactive( # also used in download table
-    paste("<b>Source:</b>",sprintf("%s, %s, %s, %s.",CFACT,AHRQ,MEPS,year_caption()))
-  ) 
-  
-  output$source <- renderText(source_text())
+  output$source <- renderText(labels()$source_text)
   
   output$notes <- renderUI({
     stat_notes <- notes[[stat()]] 
@@ -84,27 +54,8 @@ notesModule <- function(input, output, session, adj, meps_data){
   
   output$citation <- renderText({
     today <- Sys.Date() %>% format("%B %d, %Y")
-    sprintf("%s. %s. %s. Generated interactively: %s.",AHRQ,caption(),MEPS,today) %>% 
+    sprintf("%s. %s. %s. Generated interactively: %s.",AHRQ,labels()$caption,MEPS,today) %>% 
       gsub("<SE>","(standard errors)",.)
   })
-  
-  ################
-  
-  footnotes <- reactive({  
-    tab <- tbl()
-    footnotes = list()
-    footnotes$suppress <- ifelse(any(tab$suppress,na.rm=T),suppressed_message,"")
-    footnotes$star     <- ifelse(any(tab$star,na.rm=T),rse_message,"")
-    return(footnotes)
-  })
-  
-  
-  #################
-  
-  return(reactive(list(labels = labels(), 
-                       source = source_text(),
-                       caption = caption(), 
-                       footnotes = footnotes(),
-                       controlTotals = controlTotals())))
-  
+
 }

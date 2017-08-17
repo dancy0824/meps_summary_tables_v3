@@ -46,7 +46,7 @@ add_points <- function(gg,legend_label,colors,showLegend=T){
     expand_limits(y=0)
 }
 
-point_graph <- function(dat,showSEs,legend_label,colors,showLegend=T){    print('point-graph')
+point_graph <- function(dat,showSEs,legend_label,colors,showLegend=T){    
   yr <- dat$x[1]
   n <- length(dat$x)
   jitter = 1:n*(1/(2*n))
@@ -64,7 +64,7 @@ point_graph <- function(dat,showSEs,legend_label,colors,showLegend=T){    print(
 }
 
     
-line_graph <- function(dat,showSEs,legend_label,colors,showLegend=T){  print('line-graph')
+line_graph <- function(dat,showSEs,legend_label,colors,showLegend=T){  
   brks = waiver()
   yrs <- min(dat$x):max(dat$x)
   if(length(yrs) <= 3) brks = yrs
@@ -82,7 +82,7 @@ line_graph <- function(dat,showSEs,legend_label,colors,showLegend=T){  print('li
 }
 
 
-bar_graph <- function(dat,showSEs,legend_label,colors,showLegend=T,hide_y_axis=F,br="\n"){ print('bar-graph')
+bar_graph <- function(dat,showSEs,legend_label,colors,showLegend=T,hide_y_axis=F,br="\n"){ 
   
   dat <-dat %>%
     mutate(
@@ -103,7 +103,11 @@ bar_graph <- function(dat,showSEs,legend_label,colors,showLegend=T,hide_y_axis=F
     guides(color=guide_legend(order=2),fill=guide_legend(reverse=T,order=1))  
 }
 
-
+gv <- function(graph_type,...,hide_y_axis=F,br="<br>"){
+  if(graph_type=="line") return(line_graph(...))
+  if(graph_type=="bar") return(bar_graph(...,hide_y_axis=hide_y_axis,br=br))
+  if(graph_type=="point") return(point_graph(...))
+}
 
 #######################################################
 ###                      UI                         ###
@@ -261,39 +265,9 @@ plotModule <- function(input, output, session, meps_inputs){
     return(NA)
   })
 
-  # gv <- function(br){
-  # 
-  #   print('gv')
-  # 
-  #   if(graph_type()=="line"){
-  #     gp <- line_graph()
-  #   }else if(graph_type()=="bar"){
-  #     gp <- bar_graph(br=br)
-  #   }else if(graph_type()=="point"){
-  #     gp <- point_graph()
-  #   }
-  # 
-  #   gp + ylab("") #+ xlab(grpLabel()) + 
-  #    # scale_y_continuous(labels = format_type()) 
-  # }
-  
-  gv <- function(graph_type,...,hide_y_axis=F,br="<br>"){
-
-    print('gv')
-
-    if(graph_type=="line") return(line_graph(...))
-    if(graph_type=="bar") return(bar_graph(...,hide_y_axis=hide_y_axis,br=br))
-    if(graph_type=="point") return(point_graph(...))
-        
-    #gp + ylab("") #+ xlab(grpLabel()) + 
-    # scale_y_continuous(labels = format_type()) 
-  }
-
 ############# Dispay (PLOTLY) ############# 
   
   output$plot <- renderPlotly({
-    
-    print('PLOT')
     
     gp <- gv(graph_type=graph_type(),
              dat=plot_data(),
@@ -341,8 +315,7 @@ plotModule <- function(input, output, session, meps_inputs){
 
   # outputOptions(output, "plot", suspendWhenHidden = FALSE)
   # outputOptions(output, "legend", suspendWhenHidden = FALSE)
-  
-  
+
   ############# Download (GGPLOT) ############# 
 
   outgg <- function(){

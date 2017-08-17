@@ -64,21 +64,19 @@ server <- function(input,output,session) {
 
 ### Modules ###
 
-# Edit inputs and filter data
+# Edit inputs and filter data -- debounce inside dataModule
     meps_data <- 
       callModule(dataModule,"use", 
                  df = use_tables,
                  stat = stat,
+                 adj = adj,
                  exclude_choices = exclude_choices,
-                 exclude_initial = exclude_initial)
+                 exclude_initial = exclude_initial) # Output: adj, inputs, labels, tbl
 
-# Labels, caption, footnotes, notes
-    meps_labels <- callModule(notesModule,"use", adj=adj, meps_data=meps_data)  
-
-    # Intentional bottleneck here to slow update
-    meps_inputs <- reactive(list(adj=adj(),tbl=meps_data()$tbl,inputs=meps_data()$inputs,labels=meps_labels())) %>% debounce(370)
+    meps_inputs <- reactive(meps_data()) 
     
 # tabPanels
+    callModule(notesModule,"use", meps_inputs=meps_inputs)
     callModule(tableModule,"use", meps_inputs=meps_inputs)
     callModule(plotModule, "use", meps_inputs=meps_inputs)
     callModule(codeModule, "use", meps_inputs=meps_inputs)
