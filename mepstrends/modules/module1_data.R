@@ -206,7 +206,7 @@ dataModule <- function(input, output, session, df, stat, exclude_initial,...){
   
   inputs <- reactive({
     list(years=years(),cols=cols(),rows=rows(),rowsX=rowsX(),
-         showSEs=showSEs(),stat=stat(),controlTotals=controlTotals())
+         is_trend=is_trend(),showSEs=showSEs(),stat=stat(),controlTotals=controlTotals())
   }) 
   
   decorated_tbl <- reactive({

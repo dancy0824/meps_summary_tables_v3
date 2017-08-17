@@ -51,11 +51,12 @@ tableUI<- function(id,DT=F){
 ###                     SERVER                      ###
 #######################################################
 
-tableModule <- function(input, output, session, meps_inputs, labels,pivot=F){
+tableModule <- function(input, output, session, meps_inputs,pivot=F){
   
   adj <- reactive(meps_inputs()$adj)
   tbl <- reactive(meps_inputs()$tbl)
   inputs <- reactive(meps_inputs()$inputs)
+  labels <- reactive(meps_inputs()$labels)
   
   table_caption <- reactive(labels()$caption %>% gsub("<SE>","(standard errors)",.))
   dl_caption <- reactive(labels()$caption %>% gsub(" <SE>","",.))
@@ -81,7 +82,9 @@ tableModule <- function(input, output, session, meps_inputs, labels,pivot=F){
 
 # Display table     
 
-  display_tbl <- reactive({  
+  display_tbl <- reactive({ 
+    
+    #print(head(formatted_tbl()))
     
    validate(need(nrow(formatted_tbl()) > 0,"Loading..."))
     
