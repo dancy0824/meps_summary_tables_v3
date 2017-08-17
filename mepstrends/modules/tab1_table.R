@@ -83,14 +83,11 @@ tableModule <- function(input, output, session, meps_inputs, labels,pivot=F){
 
   display_tbl <- reactive({  
     
-   validate(
-     need(nrow(formatted_tbl()) > 0,"Loading...")
-   )
+   validate(need(nrow(formatted_tbl()) > 0,"Loading..."))
     
    formatted_tbl() %>% 
       spread_tbl(stat=ifelse(inputs()$showSEs,"coef_se","coef"), labels=labels()$labels, pivot=pivot) 
   }) 
-  
   
   output$meps_table <- renderUI({
     HTML508table(body = display_tbl(), caption = table_caption())
@@ -100,8 +97,7 @@ tableModule <- function(input, output, session, meps_inputs, labels,pivot=F){
     DT::datatable(display_tbl(),rownames=F,select="none",
                   options = list(paging = FALSE),escape=F)
   })
-  
-  
+
   output$table_footnotes <- renderText({
     f_star = footnotes()$star
     f_suppress = footnotes()$suppress
@@ -112,6 +108,9 @@ tableModule <- function(input, output, session, meps_inputs, labels,pivot=F){
     paste0(c(f_suppress,f_star),collapse="")
   })
   
+  outputOptions(output, "table_footnotes", suspendWhenHidden = FALSE)
+  outputOptions(output, "meps_table", suspendWhenHidden = FALSE)
+  outputOptions(output, "meps_DT", suspendWhenHidden = FALSE)
   
 # Download table
 

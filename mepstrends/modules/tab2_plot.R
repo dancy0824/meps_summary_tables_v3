@@ -103,6 +103,10 @@ plotModule <- function(input, output, session, meps_inputs, labels){
   output$plot_caption <- renderUI(tags$caption(caption()))
   output$sub_caption <- renderUI(tags$div(class="sub-caption",sub_caption()))
 
+  # outputOptions(output, "plot_footnote", suspendWhenHidden = FALSE)
+  # outputOptions(output, "plot_caption", suspendWhenHidden = FALSE)
+  # outputOptions(output, "sub_caption", suspendWhenHidden = FALSE)
+  
   ############# Data ############# 
   
   pre_data <- reactive({
@@ -289,6 +293,7 @@ plotModule <- function(input, output, session, meps_inputs, labels){
       layout(font=list(family="Arial"),margin=list(r=30,t=20))
   })
   
+  
   output$legend <- renderUI({
     if(cols()=="ind" & graph_type()=="line") return('')
     
@@ -308,6 +313,10 @@ plotModule <- function(input, output, session, meps_inputs, labels){
       tags$ul(class = "test-legend",li_main,li_CI)
     )
   })
+
+  # outputOptions(output, "plot", suspendWhenHidden = FALSE)
+  # outputOptions(output, "legend", suspendWhenHidden = FALSE)
+  
   
   ############# Download (GGPLOT) ############# 
 
