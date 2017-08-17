@@ -215,10 +215,10 @@ dataModule <- function(input, output, session, df, stat, exclude_initial,...){
   
   # outlist <- reactive(
   #   list(inputs = inputs(),tbl = decorated_tbl())
-  # ) %>% debounce(150)
+  # ) %>% debounce(300)
 
   return(reactive(list(inputs=inputs(), tbl=decorated_tbl())))
-  return(outlist)
+ # return(outlist)
 }
 
 

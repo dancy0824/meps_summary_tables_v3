@@ -45,8 +45,10 @@ codeUI <- function(id){
 ###                     SERVER                      ###
 #######################################################
 
-codeModule <- function(input, output, session, inputs){
-   
+codeModule <- function(input, output, session, meps_inputs){
+
+  inputs <- reactive(meps_inputs()$inputs)
+  
   rows <- reactive(inputs()$rows)
   cols <- reactive(inputs()$cols)
   year <- reactive(max(inputs()$years))

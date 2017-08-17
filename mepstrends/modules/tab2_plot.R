@@ -66,7 +66,11 @@ plotUI<- function(id){
 ###                     SERVER                      ###
 #######################################################
 
-plotModule <- function(input, output, session, tbl, inputs, adj, labels){
+plotModule <- function(input, output, session, meps_inputs, labels){
+  
+  adj <- reactive(meps_inputs()$adj)
+  tbl <- reactive(meps_inputs()$tbl)
+  inputs <- reactive(meps_inputs()$inputs)
   
   cols <- reactive(inputs()$cols)
   rows <- reactive(inputs()$rows)
@@ -139,6 +143,11 @@ plotModule <- function(input, output, session, tbl, inputs, adj, labels){
   output$sr_table <- renderUI(HTML508table(body = hidden_tbl()))
   
   plot_data <- reactive({
+    
+    validate(
+      need(nrow(pre_data()) > 0,"Loading...")
+    )
+    
     dat <- pre_data() %>%
       mutate(grp = meps_wrap(grp),
             grp = factor(grp, levels = rev(unique(grp))))

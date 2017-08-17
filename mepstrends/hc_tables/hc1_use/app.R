@@ -71,18 +71,17 @@ server <- function(input,output,session) {
                  stat = stat,
                  exclude_choices = exclude_choices,
                  exclude_initial = exclude_initial)
+
+    # Intentional bottleneck here to slow update
+    meps_inputs <- reactive(list(adj=adj(),tbl=meps_data()$tbl,inputs=meps_data()$inputs)) %>% debounce(1500)
     
-    meps_tbl <- reactive(meps_data()$tbl)
-    meps_inputs <- reactive(meps_data()$inputs) # years, rows, cols, stat
-
-
 # Labels, caption, footnotes, notes
-    meps_labels <- callModule(notesModule,"use", tbl=meps_tbl, inputs=meps_inputs, adj=adj)
+    meps_labels <- callModule(notesModule,"use", meps_inputs=meps_inputs)  
 
 # tabPanels
-    callModule(tableModule,"use", tbl=meps_tbl, inputs=meps_inputs, labels=meps_labels, adj=adj)
-    callModule(plotModule, "use", tbl=meps_tbl, inputs=meps_inputs, labels=meps_labels, adj=adj)
-    callModule(codeModule, "use", inputs=meps_inputs)
+    callModule(tableModule,"use", meps_inputs=meps_inputs, labels=meps_labels) 
+    callModule(plotModule, "use", meps_inputs=meps_inputs, labels=meps_labels)
+    callModule(codeModule, "use", meps_inputs=meps_inputs)
 }
 
   

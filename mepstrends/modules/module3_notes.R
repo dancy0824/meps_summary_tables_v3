@@ -29,7 +29,10 @@ hc_info <- function(id){
 ###                     SERVER                      ###
 #######################################################
 
-notesModule <- function(input, output, session, tbl, inputs, adj){ 
+notesModule <- function(input, output, session, meps_inputs){ 
+  adj <- reactive(meps_inputs()$adj)
+  tbl <- reactive(meps_inputs()$tbl)
+  inputs <- reactive(meps_inputs()$inputs)
   
   years <- reactive(inputs()$years)
   cols  <- reactive(inputs()$cols)
