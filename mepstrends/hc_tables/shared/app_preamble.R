@@ -14,11 +14,11 @@ meps_names <- read.csv("../shared/puf_expanded.csv", stringsAsFactors=F)
 
 source("../../modules/module1_data.R",local=TRUE)
 source("../../modules/module2_levels.R",local=TRUE)
-source("../../modules/module3_notes.R",local=TRUE)
 
-source("../../modules/tab1_table.R",local=TRUE)
-source("../../modules/tab2_plot.R",local=TRUE)
-source("../../modules/tab3_code.R",local=TRUE)
+source("../../modules/out1_table.R",local=TRUE)
+source("../../modules/out2_plot.R",local=TRUE)
+source("../../modules/out3_code.R",local=TRUE)
+source("../../modules/out4_notes.R",local=TRUE)
 
 source("../shared/app_notes.R",local=TRUE)
 source("../shared/app_global.R",local=TRUE)
