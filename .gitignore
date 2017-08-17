@@ -1,24 +1,20 @@
-archive/*
-ic_tables/*
-packrat/*
 
 
-hc_tables/hc1_use/QC*
-hc_tables/hc2_care/QC*
+build/version_control/*
 
-hc_tables/hc1_use/stata/*
-hc_tables/hc2_care/stata/*
-hc_tables/hc1_use/sas/SSS/*
+build/*/QC/*
 
-hc_tables/hc3_pmed/*
-hc_tables/hc4_cond/*
+build/hc3_pmed/*
+build/hc4_cond/*
+
+build/stata_example_code/*
+
+mepstrends/ic_tables/*
+mepstrends/hc_tables/hc3_pmed/*
+mepstrends/hc_tables/hc4_cond/*
 
 
-hc_tables/*/*/tables*
-hc_tables/*/*.Rdata
-
-hc_tables/shared/PUFS/*
-
+build/*/tables/*
 
 .Rproj.user
 .Rprofile
