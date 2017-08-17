@@ -59,7 +59,7 @@ server <- function(input, output,session) {
                exclude_initial = exclude_initial)
   
   # Intentional bottleneck here to slow update
-  meps_inputs <- reactive(list(adj=adj(),tbl=meps_data()$tbl,inputs=meps_data()$inputs)) %>% debounce(1500)
+  meps_inputs <- reactive(list(adj=adj(),tbl=meps_data()$tbl,inputs=meps_data()$inputs)) %>% debounce(370)
   
   # Labels, caption, footnotes, notes
   meps_labels <- callModule(notesModule,"care", meps_inputs=meps_inputs)
