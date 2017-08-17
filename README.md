@@ -1,6 +1,6 @@
 ## Quick Start
 
-To run the available app locally, run this code in Rstudio:
+To run the available apps locally, run this code in Rstudio:
 
 ```r
 # Install packages (only need to run this once)
@@ -15,7 +15,7 @@ shiny:::runGitHub("meps_summary_tables_v3","e-mitchell",subdir="mepstrends/hc_ta
 
 > **Note**: Relative links will not work when running locally
 
-## Components
+## Repository Components
 
 [mepstrends](mepstrends) is the main folder containing app code needed to run each app on Shiny server.
 
