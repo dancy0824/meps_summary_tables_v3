@@ -127,7 +127,6 @@ dataModule <- function(input, output, session, df, stat, adj, exclude_initial,..
   ##     DATA     ##
   ##################  
   
-  
   # Standard Errors and Control Totals
   controlTotals <- reactive({
     tot_vars = c("Year","ind","agegrps","race","sex","poverty","region")
@@ -169,13 +168,11 @@ dataModule <- function(input, output, session, df, stat, adj, exclude_initial,..
     updateSelectInput(session,inputId="rows",selected=in1)
   })
 
-  
   select_years <- reactive({                              
     df %>% filter(Year %in% years())
   })
   
   subgrp_tbl <- reactive({                                 
-    
     rows <- rows()
     cols <- cols()
     
@@ -201,12 +198,10 @@ dataModule <- function(input, output, session, df, stat, adj, exclude_initial,..
   })
   
   select_levels <- reactive({                               
-    
     subgrp_tbl() %>%
       mutate_(cols = input$cols, rows=rows()) %>% # for trend, rows() = 'ind'
       filter(cols %in% col_levels(), rows %in% row_levels()) %>%
       mutate_(rows = rowsX())  ## maybe change this so row_levels = years if row is year?
-
   })
   
   
@@ -281,11 +276,6 @@ dataModule <- function(input, output, session, df, stat, adj, exclude_initial,..
  # return(reactive(list(inputs=inputs(), tbl=decorated_tbl())))
   return(outlist)
 }
-
-
-
-
-
 
 
 
