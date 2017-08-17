@@ -8,6 +8,6 @@ This folder contains R code that is shared by all household-component (HC) apps.
 
 [app_preamble.R](app_preamble.R): Loads libraries and codes needed for each app
 
-[puf_transfer.R](puf_transfer.R): Downloads MEPS Public Use Files (PUFs) from the web and stores them as SAS transfer files (.ssp) (not shown on GitHub)
+[puf_names.csv](puf_names.csv): MEPS public use files dataset names from [meps_file_names.csv](https://github.com/HHS-AHRQ/MEPS/blob/master/Quick_Reference_Guides/meps_file_names.csv) in the [HHS-AHRQ/MEPS](https://github.com/HHS-AHRQ/MEPS) repository.
 
-[puf_update.R](puf_update.R): Reads [meps_file_names.csv](https://github.com/HHS-AHRQ/MEPS/blob/master/Quick_Reference_Guides/meps_file_names.csv) from the [HHS-AHRQ/MEPS](https://github.com/HHS-AHRQ/MEPS) repository for any new PUF releases, then updates [puf_expanded.csv](puf_expanded.csv) and [puf_names.csv](puf_names.csv).
+[puf_expanded.csv](puf_expanded.csv): An extended version of [puf_names.csv](puf_names.csv), easier to manipulate programmatically
