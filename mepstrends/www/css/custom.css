@@ -152,11 +152,18 @@ caption, .caption{
   display: inline;
 }
 
+.dataTables_info{
+  display:none;
+}
+
+.dataTables_wrapper{
+  overflow-x: auto;
+}
 
 .dataTables_wrapper .dataTables_filter {
-    float: left !important; 
-    text-align: left !important; 
-    width: 100%;
+  float: left !important; 
+  text-align: left !important; 
+  width: 100%;
 }
 
 input[type="search"]{
