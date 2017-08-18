@@ -22,7 +22,8 @@ spread_tbl <- function(data,stat,labels=NULL,pivot=FALSE){
 tableUI<- function(id,DT=F){
   ns <- NS(id)
   
-  if(DT){tbl <- DT::dataTableOutput(ns('meps_DT'))
+  if(DT){#tbl <- DT::dataTableOutput(ns('meps_DT'))
+     tbl <- uiOutput(ns('meps_DT'),role="region","aria-live"="polite")
   }else{ tbl <- uiOutput(ns('meps_table'),role="region","aria-live"="polite")}
   
   tabPanel(title=tags$span(class='tab-title table-tab',"Table"), 
@@ -51,7 +52,7 @@ tableUI<- function(id,DT=F){
 ###                     SERVER                      ###
 #######################################################
 
-tableModule <- function(input, output, session, meps_inputs, SESSION,pivot=F){
+tableModule <- function(input, output, session, meps_inputs,pivot=F){
   
   adj <- reactive(meps_inputs()$adj)
   tbl <- reactive(meps_inputs()$tbl)
@@ -96,20 +97,28 @@ tableModule <- function(input, output, session, meps_inputs, SESSION,pivot=F){
 
   
   
-  chkbox = paste(checkboxInput508("hi",label="CLICK ME"))
+  chkbox = paste(checkboxInput508("hi",label=""))
   
   dt_tbl <- reactive({
     tab <- display_tbl()
-# 
-#     tab[,1] = as.character(tab[,1])
-#     tab[1,1] = chkbox
+
+    chkcol <- sapply(tab[,1],function(x) paste(checkboxInput508(x,x)))
+
+    tab[,1] <- chkcol
+
+    print(head(tab))
+    
     tab
   })
   
-  output$meps_DT <- DT::renderDataTable(
-    dt_tbl(),escape=F,options=list(paging = FALSE),rownames=F
-    #isolate(display_tbl()),select="none",escape=F,options=list(paging = FALSE),server=T
-  )
+  output$meps_DT <- renderUI({
+    HTML508table(body = dt_tbl(), caption = table_caption())
+  })
+  
+  # output$meps_DT <- DT::renderDataTable(
+  #   dt_tbl(),escape=F,options=list(paging = FALSE),rownames=F
+  #   #isolate(display_tbl()),select="none",escape=F,options=list(paging = FALSE),server=T
+  # )
 
   # proxy = dataTableProxy(session$ns("meps_DT"),session=SESSION)
   # 

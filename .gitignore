@@ -5,13 +5,11 @@ build/version_control/*
 build/*/QC/*
 
 build/hc3_pmed/*
-build/hc4_cond/*
 
 build/stata_example_code/*
 
 mepstrends/ic_tables/*
 mepstrends/hc_tables/hc3_pmed/*
-mepstrends/hc_tables/hc4_cond/*
 
 
 build/*/tables/*
