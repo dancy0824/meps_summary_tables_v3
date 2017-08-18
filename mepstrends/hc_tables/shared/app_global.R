@@ -376,9 +376,9 @@ downloadButton508 <- function (outputId, label = "Download", class="",hideLabel=
 }
 
 
-checkboxInput508 <- function(inputId, label, value = FALSE, inline=FALSE){
+checkboxInput508 <- function(inputId, label, value = FALSE, inline=FALSE, class=""){
   value <- restoreInput(id = inputId, default = value)
-  inputTag <- tags$input(id = inputId, type = "checkbox", name=inputId, value=inputId)
+  inputTag <- tags$input(id = inputId, type = "checkbox", name=inputId, value=inputId,class=class)
   if (!is.null(value) && value) inputTag$attribs$checked <- "checked"
   labelTag <- tags$label('for'=inputId,label)
   if(inline){
