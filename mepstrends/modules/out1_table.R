@@ -73,18 +73,17 @@ tableModule <- function(input, output, session, meps_inputs, pivot=F){
     
     tbl() %>% 
       mutate_at(vars(coef,se),funs(formatNum(./denom,d=digits))) %>%
-      mutate(coef = ifelse(coef=="--","<a href='#suppress' class='footnote'>--</a>",coef),
+      mutate(coef = str_pad(coef,width=max(nchar(coef),na.rm=T),side='left')) %>% # padding for DT sort
+      mutate(coef = ifelse(grepl("--",coef),"               <a href='#suppress' class='footnote'>--</a>",coef),
               se  = ifelse(se=="--","<a href='#suppress' class='footnote'>--</a>",se)) %>%
       mutate(coef = ifelse(star,paste0(coef,"<a href='#RSE' class='footnote'>*</a>"),coef),
-             coef_se = sprintf("%s  <span class='gray'>(%s)</span>",coef,se))
+             coef_se = sprintf("%s  <span class='se gray'>(%s)</span>",coef,se))
   }) 
   
 
 # Display table     
 
   display_tbl <- reactive({ 
-    
-    #print(head(formatted_tbl()))
     
    validate(need(nrow(formatted_tbl()) > 0,"Loading..."))
     
@@ -96,9 +95,30 @@ tableModule <- function(input, output, session, meps_inputs, pivot=F){
     HTML508table(body = display_tbl(), caption = table_caption())
   })
 
+  
+  # ord <- reactive(input$meps_DT_state)
+  # 
+  # dt_order <- reactive({
+  # 
+  #   state <- ord()
+  #   
+  #   #print(state)
+  #   
+  #   if(!is.null(state)){
+  #     order_col = state$order
+  #     
+  #     if(length(order_col) > 0){
+  #       order1 <- order_col[[1]]
+  #       order_num <- order1[[1]]
+  #       return(order_num)
+  #     }
+  #   }
+  #   return(5)
+  # })
+
   output$meps_DT <- DT::renderDataTable({
-    DT::datatable(display_tbl(),rownames=F,select="none",
-                  options = list(paging = FALSE),escape=F)
+      DT::datatable(display_tbl(),rownames=F,select="none",
+                options = list(paging = FALSE,stateSave=TRUE),escape=F)
   })
 
   output$table_footnotes <- renderText({
