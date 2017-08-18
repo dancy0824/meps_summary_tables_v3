@@ -51,7 +51,7 @@ tableUI<- function(id,DT=F){
 ###                     SERVER                      ###
 #######################################################
 
-tableModule <- function(input, output, session, meps_inputs, pivot=F){
+tableModule <- function(input, output, session, meps_inputs, SESSION,pivot=F){
   
   adj <- reactive(meps_inputs()$adj)
   tbl <- reactive(meps_inputs()$tbl)
@@ -81,13 +81,12 @@ tableModule <- function(input, output, session, meps_inputs, pivot=F){
   }) 
   
 
-# Display table     
+# Display table    
 
   display_tbl <- reactive({ 
-    
    validate(need(nrow(formatted_tbl()) > 0,"Loading..."))
-    
-   formatted_tbl() %>% 
+
+   formatted_tbl()  %>% 
       spread_tbl(stat=ifelse(inputs()$showSEs,"coef_se","coef"), labels=labels()$labels, pivot=pivot) 
   }) 
   
@@ -96,30 +95,30 @@ tableModule <- function(input, output, session, meps_inputs, pivot=F){
   })
 
   
-  # ord <- reactive(input$meps_DT_state)
-  # 
-  # dt_order <- reactive({
-  # 
-  #   state <- ord()
-  #   
-  #   #print(state)
-  #   
-  #   if(!is.null(state)){
-  #     order_col = state$order
-  #     
-  #     if(length(order_col) > 0){
-  #       order1 <- order_col[[1]]
-  #       order_num <- order1[[1]]
-  #       return(order_num)
-  #     }
-  #   }
-  #   return(5)
-  # })
-
-  output$meps_DT <- DT::renderDataTable({
-      DT::datatable(display_tbl(),rownames=F,select="none",
-                options = list(paging = FALSE,stateSave=TRUE),escape=F)
+  
+  chkbox = paste(checkboxInput508("hi",label="CLICK ME"))
+  
+  dt_tbl <- reactive({
+    tab <- display_tbl()
+# 
+#     tab[,1] = as.character(tab[,1])
+#     tab[1,1] = chkbox
+    tab
   })
+  
+  output$meps_DT <- DT::renderDataTable(
+    dt_tbl(),escape=F,options=list(paging = FALSE),rownames=F
+    #isolate(display_tbl()),select="none",escape=F,options=list(paging = FALSE),server=T
+  )
+
+  # proxy = dataTableProxy(session$ns("meps_DT"),session=SESSION)
+  # 
+  # observe({
+  #   replaceData(proxy,display_tbl(),resetPaging=F)
+  #   # reloadData(proxy)
+  # })
+  
+  ######################################
 
   output$table_footnotes <- renderText({
     f_star = footnotes()$star
@@ -145,13 +144,13 @@ tableModule <- function(input, output, session, meps_inputs, pivot=F){
     content = function(file){
       
       write.table(dl_caption(),file,sep=",",row.names=F,col.names=F)
-      add.table(coef_tab(),file)
+      add.table(coef_tab() %>% rm_html,file)
       
       if(!controlTotals()){
         cap <- dl_caption() %>% str_replace(.,word(.,1),word(.,1)%>%tolower)
         se_caption <- paste("Standard errors for",cap)
         add.table(se_caption,file,col.names="")
-        add.table(se_tab(),file)
+        add.table(se_tab() %>% rm_html,file)
       }
       
       foots <- footnotes() %>% rm_html %>% rm_brks %>% rm_xspc
