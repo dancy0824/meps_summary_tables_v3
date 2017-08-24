@@ -156,6 +156,10 @@ rename_cols = function(df,lst){
 }     
 
 add.table <- function(x,file,...){
+  # These next three lines keep rm_html from convert 1x2 data frame into 2x1
+  x <- rbind(1,x)
+  x <- rm_html(x) %>% as.data.frame
+  x <- x[-1,]
   suppressWarnings(write.table(x,file,sep=",",row.names=F,append=T,...))
 }
 

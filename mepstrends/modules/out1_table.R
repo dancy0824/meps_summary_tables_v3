@@ -148,19 +148,19 @@ tableModule <- function(input, output, session, meps_inputs,pivot=F){
 
   coef_tab <- reactive(formatted_tbl() %>% spread_tbl(stat="coef",labels=labels()$labels,pivot=pivot))
   se_tab   <- reactive(formatted_tbl() %>% spread_tbl(stat="se",  labels=labels()$labels,pivot=pivot))
-  
+
   output$csv <- downloadHandler(
     filename = function(){ paste('meps-hc-accessed-',Sys.Date(),'.csv',sep='') },
     content = function(file){
       
       write.table(dl_caption(),file,sep=",",row.names=F,col.names=F)
-      add.table(coef_tab() %>% rm_html,file)
+      add.table(coef_tab(),file)
       
       if(!controlTotals()){
         cap <- dl_caption() %>% str_replace(.,word(.,1),word(.,1)%>%tolower)
         se_caption <- paste("Standard errors for",cap)
         add.table(se_caption,file,col.names="")
-        add.table(se_tab() %>% rm_html,file)
+        add.table(se_tab(),file)
       }
       
       foots <- footnotes() %>% rm_html %>% rm_brks %>% rm_xspc
