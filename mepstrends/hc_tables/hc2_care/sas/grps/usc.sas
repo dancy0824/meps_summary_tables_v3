@@ -8,10 +8,10 @@ run;
 
 proc format;
 	value usc
-     0 = "No usual source of health care"
-     1 = "Office-based"
-     2 = "Hospital"
-     3 = "Emergency room"
+	 0 = "No usual source of health care"
+	 1 = "Office-based"
+	 2 = "Hospital"
+	 3 = "Emergency room"
 	-1 = "Inapplicable"
 	-8 = "Don't know";
 run;

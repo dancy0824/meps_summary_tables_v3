@@ -1,9 +1,9 @@
 data MEPS; set MEPS;
-  delay_PM  = (PMUNAB42=1|PMDLAY42=1);
-  afford_PM = (PMDLRS42=1|PMUNRS42=1);
-  insure_PM = (PMDLRS42 in (2,3)|PMUNRS42 in (2,3));
-  other_PM  = (PMDLRS42 > 3|PMUNRS42 > 3);
-  domain = (ACCELI42 = 1 & delay_PM=1);
+	delay_PM  = (PMUNAB42=1|PMDLAY42=1);
+	afford_PM = (PMDLRS42=1|PMUNRS42=1);
+	insure_PM = (PMDLRS42 in (2,3)|PMUNRS42 in (2,3));
+	other_PM  = (PMDLRS42 > 3|PMUNRS42 > 3);
+	domain = (ACCELI42 = 1 & delay_PM=1);
 run;
 
 proc format;

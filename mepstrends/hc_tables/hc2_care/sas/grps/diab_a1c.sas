@@ -6,11 +6,10 @@ run;
 
 proc format;
 	value diab_a1c
-     1 = "Had measurement"
-     0 = "Did not have measurement"
-    -8 = "Don't know"
-    -9 = "Non-response"
-    -1 = "Inapplicable";
+	 1 = "Had measurement"
+	 0 = "Did not have measurement"
+	-9 - -7 = "Don't know/Non-response"
+	-1 = "Inapplicable";
 run;
 
 proc surveyfreq data = MEPS missing; 

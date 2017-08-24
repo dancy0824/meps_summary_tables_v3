@@ -15,6 +15,17 @@ freq <- '
     "-9" = "Don\'t know/Non-response",
     "-1" = "Inapplicable"'
 
+freq_fmt <- '
+proc format;
+  value freq
+   4 = "Always"
+   3 = "Usually"
+   1 - 2 = "Sometimes/Never"
+  -9 - -7 = "Don\'t know/Non-response"
+  -1 = "Inapplicable";
+run;
+'
+
 
 load_data <- function(rows,cols,year,lang="r"){
   
@@ -74,5 +85,5 @@ get_sas_code <- function(rows,cols,stat="",year=2014){
   if(length(rs) > 0) grp <- paste0(rs,"*") else grp = ""
   
   code %>%
-    rsub(type='sas',PUFdir="C:\\\\MEPS", get_file_names(year),yy=yr,fmt=fmt,grp=grp)
+    rsub(type='sas',PUFdir="C:\\\\MEPS", get_file_names(year),yy=yr,fmt=fmt,grp=grp,freq_fmt=freq_fmt)
 }
