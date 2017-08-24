@@ -8,8 +8,9 @@ Sys.sleep(1)
 app <- "hc2_care"
 
 #source("../shared/app_preamble.R",chdir=F)
+#source("../../mepstrends/hc_tables/hc2_care/dictionaries.R")
 source("../run_preamble.R",chdir=T)
-source("../../mepstrends/hc_tables/hc2_care/dictionaries.R")
+
 
 care_grps <- care_subgrps %>% unlist
 
@@ -68,9 +69,18 @@ if(length(years) == 0){
     mutate(n=counts) %>%
     select(-counts)
   
-  new_tables <- new_tables %>% reorder_levels(age_levels)
+  freq_levels <- c(
+    "9-10 rating","7-8 rating","0-6 rating",
+    "Don't know/Non-response",
+    "Not ascertained",
+    "Inapplicable",
+    "Missing")
   
-  care_tables <- bind_rows(new_tables,care_tables) %>% arrange(-Year)
+  new_tables <- new_tables %>% 
+    reorder_levels(age_levels) %>% 
+    reorder_levels(freq_levels)
+  
+  care_tables <- bind_rows(new_tables,care_tables) # Don't order by year -- will mess up levels for diab_foot
   
   save(care_tables, file="../../mepstrends/hc_tables/hc2_care/TABLES.Rdata")
   

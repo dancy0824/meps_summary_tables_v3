@@ -130,7 +130,7 @@ reorder_levels <- function(df,new_levels){
   df %>%
     mutate(levels1 = factor(levels1,levels=new_l1),
            levels2 = factor(levels2,levels=new_l2)) %>%
-    arrange(-Year,levels1,levels2) %>%
+    arrange(levels1,levels2) %>%
     mutate(levels1 = as.character(levels1),
            levels2 = as.character(levels2))
 }
