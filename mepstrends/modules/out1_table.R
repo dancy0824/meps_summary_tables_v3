@@ -106,7 +106,7 @@ tableModule <- function(input, output, session, meps_inputs,pivot=F){
 
     tab[,1] <- chkcol
 
-    print(head(tab))
+   # print(head(tab))
     
     tab
   })

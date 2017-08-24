@@ -4,6 +4,7 @@ FYC <- FYC %>%
   mutate(diab_a1c = recode_factor(diab_a1c,
     "1" = "Had measurement",
     "0" = "Did not have measurement",
-    "-8" = "Don\'t know",
-    "-9" = "Non-response",
+    "-7" = "Don\'t know/Non-response",
+    "-8" = "Don\'t know/Non-response",
+    "-9" = "Don\'t know/Non-response",
     "-1" = "Inapplicable"))

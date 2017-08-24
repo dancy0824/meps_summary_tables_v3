@@ -5,6 +5,17 @@
 
 source("r/stats.R")
 
+freq <- '
+    "4" = "Always",
+    "3" = "Usually",
+    "2" = "Sometimes/Never",
+    "1" = "Sometimes/Never",
+    "-7" = "Don\'t know/Non-response",
+    "-8" = "Don\'t know/Non-response",
+    "-9" = "Don\'t know/Non-response",
+    "-1" = "Inapplicable"'
+
+
 load_data <- function(rows,cols,year,lang="r"){
   
   if(lang=="r") LANG = "R" else LANG = lang
@@ -47,8 +58,11 @@ get_r_code <- function(rows,cols,stat="",year=2014){
   if(length(gp)==0) meps_code = meps_svy[[svy]] else meps_code = meps_svyby[[svy]]
   
   code %>% add(meps_code) %>% 
-    rsub(PUFdir="C:/MEPS", get_file_names(year),yy=yr,FUN='svymean', by=by, formula=cols)
+    rsub(PUFdir="C:/MEPS", get_file_names(year),yy=yr,FUN='svymean', by=by, formula=cols,freq=freq)
 }
+
+
+get_r_code('ind','adult_illness') %>% writeLines
 
 get_sas_code <- function(rows,cols,stat="",year=2014){
   yr <- substring(year,3,4)

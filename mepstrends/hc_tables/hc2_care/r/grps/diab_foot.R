@@ -4,8 +4,7 @@ if(year > 2007){
       past_year = (DSFT.yy.53==1 | DSFT.ya.53==1),
       more_year = (DSFT.yb.53==1 | DSFB.yb.53==1),
       never_chk = (DSFTNV53 == 1),
-      dontknow  = (DSFT.yy.53 == -8),
-      non_resp  = (DSFT.yy.53 %in% c(-7,-9)),
+      non_resp  = (DSFT.yy.53 %in% c(-7,-8,-9)),
       inapp     = (DSFT.yy.53 == -1),
       not_past_year = FALSE
     )
@@ -14,8 +13,7 @@ if(year > 2007){
     mutate(
       past_year = (DSCKFT53 >= 1),
       not_past_year = (DSCKFT53 == 0),
-      dontknow  = (DSCKFT53 == -8),
-      non_resp  = (DSCKFT53 %in% c(-7,-9)),
+      non_resp  = (DSCKFT53 %in% c(-7,-8,-9)),
       inapp     = (DSCKFT53 == -1),
       more_year = FALSE,
       never_chk = FALSE
@@ -29,7 +27,6 @@ FYC <- FYC %>%
       .$more_year ~ "More than 1 year ago",
       .$never_chk ~ "Never had feet checked",
       .$not_past_year ~ "No exam in past year",
-      .$dontknow ~ "Don\'t know",
-      .$non_resp ~ "Non-response",
+      .$non_resp ~ "Don\'t know/Non-response",
       .$inapp ~ "Inapplicable",
       TRUE ~ "Missing")))

@@ -42,16 +42,16 @@ caregrps = care_subgrps %>% unlist %>% setNames(NULL)
 ###                   RUN                      ###
 ##################################################
 # From initial run, .bat file:
-#
-# args = commandArgs(trailingOnly = TRUE)
-# if(length(args) > 0){
-#   year_start = as.numeric(args[1])
-#   year_end = as.numeric(args[2])
-# }else{
-#   year_start = min(meps_names$Year)
-#   year_end = max(meps_names$Year)
-# }
-# year_list = year_start:year_end
+
+  args = commandArgs(trailingOnly = TRUE)
+  if(length(args) > 0){
+    year_start = as.numeric(args[1])
+    year_end = as.numeric(args[2])
+  }else{
+    year_start = min(meps_names$Year)
+    year_end = max(meps_names$Year)
+  }
+  year_list = year_start:year_end
 
 # Load packages
   runSource('load/load_pkg.R',dir=shared)
@@ -72,7 +72,7 @@ for(year in year_list){   print(year)
   
 # Add subgroups  
   for(grp in subgrp_load) runSource(sprintf("subgrps/%s.R",grp),dir=shared,yy=yr)
-  for(grp in caregrps) runSource(sprintf("grps/%s.R",grp),dir=path,yy=yr,ya=ya,yb=yb)
+  for(grp in caregrps) runSource(sprintf("grps/%s.R",grp),dir=path,yy=yr,ya=ya,yb=yb,freq=freq)
   
 # Define design
   runSource("svydesign/design_fyc.R", dir=shared,yy=yr)

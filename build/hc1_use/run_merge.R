@@ -8,8 +8,10 @@ app <- 'hc1_use'
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 #source("../shared/app_preamble.R",chdir=F)
+#source("../../mepstrends/hc_tables/hc1_use/dictionaries.R")
+
 source("../run_preamble.R",chdir=T)
-source("../../mepstrends/hc_tables/hc1_use/dictionaries.R")
+
 
 load_stat <- function(year,stat){
   cat(year,'..')
