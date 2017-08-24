@@ -59,6 +59,14 @@ Difficulty categories are not mutually exclusive. For instance, a person can hav
 medical and dental care.
 "
 
+notes$rsn_MD <- notes$rsn_DN <- notes$rsn_PM <- "
+Reasons for difficulty are not mutually exclusive. For instance, a person can have difficulty due to
+insurance-related issues as well as affordability.
+"
+
+notes$diab_eye <- "
+A small percentage of persons (< 0.1 percent) had a missing or invalid response for eye exam.
+"
 
 ################################
 ##        Demographics        ##
