@@ -8,9 +8,8 @@ proc format;
 	9-10 = "9-10 rating"
 	7-8 = "7-8 rating"
 	0-6 = "0-6 rating"
-	 -8 = "Don't know"
-	 -9 = "Non-response"
-	 -1 = "Inapplicable";
+	-9 - -7 = "Don't know/Non-response"
+	-1 = "Inapplicable";
 run;
 
 

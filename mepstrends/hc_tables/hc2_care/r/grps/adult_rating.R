@@ -5,5 +5,5 @@ FYC <- FYC %>%
       .$ADHECR42 >= 7 ~ "7-8 rating",
       .$ADHECR42 >= 0 ~ "0-6 rating",
       .$ADHECR42 == -1 ~ "Inapplicable",
-      .$ADHECR42 <= -8 ~ "Don\'t know/Non-response",
+      .$ADHECR42 <= -7 ~ "Don\'t know/Non-response",
       TRUE ~ "Missing")))
