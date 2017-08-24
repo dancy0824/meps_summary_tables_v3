@@ -5,6 +5,7 @@ run;
 
 &freq_fmt.;
 
+ods output CrossTabs = out;
 proc surveyfreq data = MEPS missing; 
 	FORMAT adult_explain freq. &fmt.;
 	STRATA VARSTR;
@@ -13,4 +14,7 @@ proc surveyfreq data = MEPS missing;
 	TABLES domain*&grp.adult_explain / row;
 run;
 
-
+proc print data = out;
+	where domain = 1 and adult_explain ne . &where.;
+	var adult_explain &gp. WgtFreq Frequency RowPercent RowStdErr;
+run;

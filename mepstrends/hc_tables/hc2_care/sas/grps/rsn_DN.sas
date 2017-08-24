@@ -12,6 +12,7 @@ proc format;
 	value other 1 = "Other";
 run;
 
+ods output CrossTabs = out;
 proc surveyfreq data = MEPS missing; 
 	FORMAT afford_DN afford. insure_DN insure. other_DN other. &fmt.;
 	STRATA VARSTR;
@@ -20,3 +21,7 @@ proc surveyfreq data = MEPS missing;
 	TABLES domain*&grp.(afford_DN insure_DN other_DN) / row;
 run;
 
+proc print data = out;
+	where domain = 1 and (afford_DN > 0 or insure_DN > 0 or other_DN > 0) &where.;
+	var afford_DN insure_DN other_DN &gp. WgtFreq Frequency RowPercent RowStdErr;
+run;

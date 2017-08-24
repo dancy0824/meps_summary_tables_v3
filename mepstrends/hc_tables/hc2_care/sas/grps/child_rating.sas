@@ -12,7 +12,7 @@ proc format;
 	-1 = "Inapplicable";
 run;
 
-
+ods output CrossTabs = out;
 proc surveyfreq data = MEPS missing; 
 	FORMAT child_rating child_rating. &fmt.;
 	STRATA VARSTR;
@@ -21,3 +21,7 @@ proc surveyfreq data = MEPS missing;
 	TABLES domain*&grp.child_rating / row;
 run;
 
+proc print data = out;
+	where domain = 1 and child_rating ne . &where.;
+	var child_rating &gp. WgtFreq Frequency RowPercent RowStdErr;
+run;

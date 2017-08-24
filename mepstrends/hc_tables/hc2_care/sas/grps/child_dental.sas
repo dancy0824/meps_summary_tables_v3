@@ -1,6 +1,6 @@
 data MEPS; set MEPS;
-    child_2to17 = (1 < AGELAST & AGELAST < 18);
-    child_dental = ((DVTOT&yy. > 0) & (child_2to17=1));
+	child_dental = (DVTOT&yy. > 0);
+	domain = (1 < AGELAST & AGELAST < 18);
 run;
 
 proc format;
@@ -9,11 +9,16 @@ proc format;
 	0 = "No dental visits in past year";
 run;
 
+ods output CrossTabs = out;
 proc surveyfreq data = MEPS missing; 
 	FORMAT child_dental child_dental. &fmt.;
 	STRATA VARSTR;
 	CLUSTER VARPSU;
 	WEIGHT PERWT&yy.F; 
-	TABLES child_2to17*&grp.child_dental / row;
+	TABLES domain*&grp.child_dental / row;
 run;
 
+proc print data = out;
+	where domain = 1 and child_dental ne . &where.;
+	var child_dental &gp. WgtFreq Frequency RowPercent RowStdErr;
+run;

@@ -12,6 +12,7 @@ proc format;
 	0 = "No difficulty";
 run;
 
+ods output CrossTabs = out;
 proc surveyfreq data = MEPS missing; 
 	FORMAT delay: delay. &fmt.;
 	STRATA VARSTR;
@@ -20,3 +21,7 @@ proc surveyfreq data = MEPS missing;
 	TABLES domain*&grp.(delay_ANY delay_MD delay_DN delay_PM) / row;
 run;
 
+proc print data = out;
+	where domain = 1 and (delay_ANY > 0 or delay_MD > 0 or delay_DN > 0 or delay_PM > 0) &where.;
+	var delay_ANY delay_MD delay_DN delay_PM &gp. WgtFreq Frequency RowPercent RowStdErr;
+run;

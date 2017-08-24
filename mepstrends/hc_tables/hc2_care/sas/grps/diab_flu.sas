@@ -19,9 +19,9 @@ data MEPS; set MEPS;
 	else if non_resp = 1  then diab_flu = -7;
 	else diab_flu = -9;
  
+	domain = 1;
 run;
-
-   
+ 
 proc format;
 	value diab_flu
 	 1 = "In the past year"
@@ -33,12 +33,16 @@ proc format;
 	-9 = "Missing";
 run;
 
+ods output CrossTabs = out;
 proc surveyfreq data = MEPS missing; 
 	FORMAT diab_flu diab_flu. &fmt.;
 	STRATA VARSTR;
 	CLUSTER VARPSU;
 	WEIGHT DIABW&yy.F; 
-	TABLES &grp.diab_flu / row;
+	TABLES domain*&grp.diab_flu / row;
 run;
 
-
+proc print data = out;
+	where domain = 1 and diab_flu ne . &where.;
+	var diab_flu &gp. WgtFreq Frequency RowPercent RowStdErr;
+run;

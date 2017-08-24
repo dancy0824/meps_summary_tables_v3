@@ -5,12 +5,18 @@ run;
 
 &freq_fmt.;
 
+ods output CrossTabs = out;
 proc surveyfreq data = MEPS missing; 
 	FORMAT child_respect freq. &fmt.;
 	STRATA VARSTR;
 	CLUSTER VARPSU;
 	WEIGHT PERWT&yy.F; 
 	TABLES domain*&grp.child_respect / row;
+run;
+
+proc print data = out;
+	where domain = 1 and child_respect ne . &where.;
+	var child_respect &gp. WgtFreq Frequency RowPercent RowStdErr;
 run;
 
 

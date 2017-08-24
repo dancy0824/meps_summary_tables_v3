@@ -16,6 +16,7 @@ proc format;
 	-8 = "Don't know";
 run;
 
+ods output CrossTabs = out;
 proc surveyfreq data = MEPS missing; 
 	FORMAT usc usc. &fmt.;
 	STRATA VARSTR;
@@ -24,3 +25,7 @@ proc surveyfreq data = MEPS missing;
 	TABLES domain*&grp.usc / row;
 run;
 
+proc print data = out;
+	where domain = 1 and usc ne . &where.;
+	var usc &gp. WgtFreq Frequency RowPercent RowStdErr;
+run;

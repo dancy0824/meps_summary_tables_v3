@@ -80,9 +80,16 @@ get_sas_code <- function(rows,cols,stat="",year=2014){
   code <- load_data(rows,cols,year,lang="sas")
   
   rs <- rows[rows != 'ind']
-  if(length(rs) > 0) fmt <- paste(rs,paste0(rs,"."),collapse=" ") else fmt = ""
-  if(length(rs) > 0) grp <- paste0(rs,"*") else grp = ""
+  if(length(rs) > 0){
+    fmt <- paste(rs,paste0(rs,"."),collapse=" ")
+    grp <- paste0(rs,"*")
+    gp <- rs
+    where <- sprintf("and %s ne .",gp)
+  }else{
+    fmt <- grp <- gp <- where <- ""
+  } 
   
   code %>%
-    rsub(type='sas',PUFdir="C:\\\\MEPS", get_file_names(year),yy=yr,fmt=fmt,grp=grp,freq_fmt=freq_fmt)
+    rsub(type='sas',PUFdir="C:\\\\MEPS", get_file_names(year),
+         yy=yr,fmt=fmt,where=where,grp=grp,gp=gp,freq_fmt=freq_fmt)
 }

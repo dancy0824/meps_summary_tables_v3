@@ -1,3 +1,5 @@
+ods graphics off;
+
 ** Read in dataset and initialize year **;
 
 FILENAME &FYC. "&PUFdir.\&FYC..ssp";

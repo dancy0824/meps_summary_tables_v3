@@ -18,6 +18,8 @@ data MEPS; set MEPS;
 	else if never_chk = 1 then diab_eye = 3;
 	else if non_resp = 1  then diab_eye = -7;
 	else diab_eye = -9;
+
+	domain = 1;
 run;
 
 proc format;
@@ -31,11 +33,16 @@ proc format;
 	-9 = "Missing";
 run;
 
+ods output CrossTabs = out;
 proc surveyfreq data = MEPS missing; 
 	FORMAT diab_eye diab_eye. &fmt.;
 	STRATA VARSTR;
 	CLUSTER VARPSU;
 	WEIGHT DIABW&yy.F; 
-	TABLES &grp.diab_eye / row;
+	TABLES domain*&grp.diab_eye / row;
 run;
 
+proc print data = out;
+	where domain = 1 and diab_eye ne . &where.;
+	var diab_eye &gp. WgtFreq Frequency RowPercent RowStdErr;
+run;

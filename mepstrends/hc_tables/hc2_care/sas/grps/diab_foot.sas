@@ -21,6 +21,8 @@ data MEPS; set MEPS;
 	else if inapp = 1     then diab_foot = -1;
 	else if non_resp = 1  then diab_foot = -7;
 	else diab_foot = -9;
+
+	domain = 1;
 run;
 
 proc format;
@@ -34,11 +36,16 @@ proc format;
 	-9 = "Missing";
 run;
 
+ods output CrossTabs = out;
 proc surveyfreq data = MEPS missing; 
 	FORMAT diab_foot diab_foot. &fmt.;
 	STRATA VARSTR;
 	CLUSTER VARPSU;
 	WEIGHT DIABW&yy.F; 
-	TABLES &grp.diab_foot / row;
+	TABLES domain*&grp.diab_foot / row;
 run;
 
+proc print data = out;
+	where domain = 1 and diab_foot ne . &where.;
+	var diab_foot &gp. WgtFreq Frequency RowPercent RowStdErr;
+run;

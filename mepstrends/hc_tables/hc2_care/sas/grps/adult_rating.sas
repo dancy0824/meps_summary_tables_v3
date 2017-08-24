@@ -12,11 +12,17 @@ proc format;
 	-1 = "Inapplicable";
 run;
 
+ods output CrossTabs = out;
 proc surveyfreq data = MEPS missing; 
 	FORMAT adult_rating adult_rating. &fmt.;
 	STRATA VARSTR;
 	CLUSTER VARPSU;
 	WEIGHT SAQWT&yy.F; 
 	TABLES domain*&grp.adult_rating / row;
+run;
+
+proc print data = out;
+	where domain = 1 and adult_rating ne . &where.;
+	var adult_rating &gp. WgtFreq Frequency RowPercent RowStdErr;
 run;
 

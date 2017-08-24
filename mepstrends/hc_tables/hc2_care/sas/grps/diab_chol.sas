@@ -18,6 +18,8 @@ data MEPS; set MEPS;
 	else if never_chk = 1 then diab_chol = 3;
 	else if non_resp = 1  then diab_chol = -7;
 	else diab_chol = -9;
+
+	domain = 1;
 run;
 
 proc format;
@@ -31,11 +33,16 @@ proc format;
 	-9 = "Missing";
 run;
 
+ods output CrossTabs = out;
 proc surveyfreq data = MEPS missing; 
 	FORMAT diab_chol diab_chol. &fmt.;
 	STRATA VARSTR;
 	CLUSTER VARPSU;
 	WEIGHT DIABW&yy.F; 
-	TABLES &grp.diab_chol / row;
+	TABLES domain*&grp.diab_chol / row;
 run;
 
+proc print data = out;
+	where domain = 1 and diab_chol ne . &where.;
+	var diab_chol &gp. WgtFreq Frequency RowPercent RowStdErr;
+run;
