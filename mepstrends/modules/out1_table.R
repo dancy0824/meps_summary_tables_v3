@@ -6,6 +6,7 @@ spread_tbl <- function(data,stat,labels=NULL,pivot=FALSE){
   spread_by = ifelse(pivot,"rows","cols")
   
   data %>%
+    arrange(-Year) %>%
     mutate(cols = factor(cols, levels = unique(cols)),
            rows = factor(rows, levels = unique(rows))) %>%
     select_("rows","cols",stat) %>% distinct %>%
