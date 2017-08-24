@@ -39,7 +39,8 @@ load_data <- function(rows,cols,year,lang="r"){
   prefix = strsplit(cols,"_")[[1]][1]
   
   load_sg = rows
-  if(prefix %in% c("adult","child")) load_sg <- c("agevar",load_sg)
+  load_agevar = (prefix %in% c("adult","child") & !(load_sg %in% age_subgrps))
+  if(load_agevar) load_sg <- c("agevar",load_sg)
   
   code <- readSource(sprintf("../shared/%s/load/load_fyc.%s",lang,LANG))
   code <- code %>% add(subgrp_code(grps=load_sg,lang=lang)) 
@@ -72,8 +73,6 @@ get_r_code <- function(rows,cols,stat="",year=2014){
     rsub(PUFdir="C:/MEPS", get_file_names(year),yy=yr,FUN='svymean', by=by, formula=cols,freq=freq)
 }
 
-
-get_r_code('ind','adult_illness') %>% writeLines
 
 get_sas_code <- function(rows,cols,stat="",year=2014){
   yr <- substring(year,3,4)

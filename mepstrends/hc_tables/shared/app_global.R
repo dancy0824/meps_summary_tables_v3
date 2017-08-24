@@ -51,6 +51,8 @@ subgrps <- list(
 
 subgrp_vec <- unlist(subgrps) 
 
+age_subgrps <- c("agegrps","employed","education","insurance")
+
 subgrp_code <- function(grps,lang="r"){
   lang <- tolower(lang)
   if(lang=="r") LANG = "R" else LANG = lang
@@ -59,7 +61,7 @@ subgrp_code <- function(grps,lang="r"){
   subgrps <- grps[grps %in% subgrps] %>% unique
   
   # add agevar if needed
-  if(any(c("agegrps","employed","education","insurance") %in% subgrps))
+  if(any(age_subgrps %in% subgrps))
     subgrps <- c("agevar",subgrps)
   
   sapply(subgrps, function(x)
