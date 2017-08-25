@@ -97,7 +97,7 @@ tableModule <- function(input, output, session, meps_inputs,pivot=F){
   })
 
   
-  
+  # Testing checkboxes inside data table
   chkbox = paste(checkboxInput508("hi",label=""))
   
   dt_tbl <- reactive({
