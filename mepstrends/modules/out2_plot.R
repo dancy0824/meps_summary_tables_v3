@@ -138,12 +138,12 @@ plotUI<- function(id){
 
            ),
            
-           ## temporary -- for debugging
+           ## temporary -- for debugging download plot
 
            # div(class = "square",
            #     div(class = "content",
            #         plotOutput(ns("ggplot")))),
-           # 
+
            
            uiOutput(ns("plot_footnote"),role="region","aria-live"="polite"),
            uiOutput(ns("sr_table"),class="usa-sr-only",role="region","aria-live"="polite")
@@ -322,11 +322,11 @@ plotModule <- function(input, output, session, meps_inputs){
     gp <- gv(graph_type=graph_type(),
              dat=plot_data(),
              showSEs=inputs()$showSEs,
-             legend_label=legend_label(),
+             legend_label=str_wrap(legend_label(),35),
              colors=colors(),
              showLegend=showLegend(),
-             hide_y_axis=(rows()=='ind'),br="\n") #
-
+             hide_y_axis=(rows()=='ind'),br="\n") 
+    
     gp <- gp + ylab("") + xlab(grpLabel()) +
       scale_y_continuous(labels = format_type()) +
       labs(title = str_wrap(caption(),60),
