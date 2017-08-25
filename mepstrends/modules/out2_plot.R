@@ -185,7 +185,7 @@ plotModule <- function(input, output, session, meps_inputs){
   })
   
   caption <- reactive(labels()$caption %>% gsub(" <SE>","",.))
-  meps_source <- reactive(labels()$source %>% gsub("<.*?>","",.))
+  meps_source <- reactive(labels()$source %>% rm_html) #gsub("<.*?>","",.))
   
   output$plot_footnote <- renderText(labels()$footnotes$suppress %>% gsub(" -- Estimates","<em>Note:</em> Some estimates",.))
   output$plot_caption <- renderUI(tags$caption(caption()))
@@ -332,7 +332,7 @@ plotModule <- function(input, output, session, meps_inputs){
       labs(title = str_wrap(caption(),60),
            subtitle = str_wrap(sub_caption(),60),
            caption = str_wrap(meps_source(),100)) +
-      theme(plot.caption = element_text(size = 10),
+      theme(plot.caption = element_text(size = 8),
             plot.margin = margin(t=10,r=20,l=10,b=10),
             legend.text = element_text(size=11))
 
