@@ -285,10 +285,8 @@ input[type="search"]{
   background-image: url(../img/download-gray.svg);
   background-size: 1.4em;
   background-repeat: no-repeat;
-  background-position: left center;
-  padding-left: 1.4em;
-  padding: 0.2em 1em;
-   
+  background-position: center center;
+ 
   display: inline;
   color: #5b616b;
   
@@ -315,4 +313,8 @@ input[type="search"]{
    box-shadow:none;
 }
 
+.usa-button.download-button:focus{
+  box-shadow: 0 0 3px #3e94cf, 0 0 7px #3e94cf; 
+  outline: 5px auto -webkit-focus-ring-color;
+}
 
