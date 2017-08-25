@@ -40,7 +40,7 @@ notesModule <- function(input, output, session, meps_inputs){
   stat  <- reactive(inputs()$stat)
   controlTotals <- reactive(inputs()$controlTotals)
 
-  output$source <- renderText(labels()$source_text)
+  output$source <- renderText(labels()$source)
   
   output$notes <- renderUI({
     stat_notes <- notes[[stat()]] 
