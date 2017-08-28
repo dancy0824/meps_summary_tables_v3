@@ -119,6 +119,11 @@ select{
 
 /*****  Table  *****/
 
+
+th [type=checkbox] + label{ /* over-ride margin for checkbox when inside table row */
+  margin:0;
+}
+
 .footnote, 
 .footnote:hover, 
 .footnote:visited, 
