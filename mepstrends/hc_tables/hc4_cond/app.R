@@ -24,7 +24,7 @@ form_elements <- tagList(
 
 tab_panel <- tabsetPanel(type="pills",
   tableUI('cond',DT=T),
-  #plotUI('cond'),
+  plotUI('cond'),
   codeUI('cond')
 )
 

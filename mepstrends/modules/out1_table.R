@@ -23,13 +23,13 @@ spread_tbl <- function(data,stat,labels=NULL,pivot=FALSE){
 tableUI<- function(id,DT=F){
   ns <- NS(id)
   
-  if(DT){#tbl <- DT::dataTableOutput(ns('meps_DT'))
-     tbl <- uiOutput(ns('meps_DT'),role="region","aria-live"="polite")
+  if(DT){
+    tbl <- div(DT::dataTableOutput(ns('meps_DT')),role="region","aria-live"="polite")
+    #tbl <- uiOutput(ns('meps_DT'),role="region","aria-live"="polite")
   }else{ tbl <- uiOutput(ns('meps_table'),role="region","aria-live"="polite")}
   
   tabPanel(title=tags$span(class='tab-title table-tab',"Table"), 
-           
-           
+       
         tags$figure( # wrap table and footnotes in figure tag
            
            downloadButton508( ns("csv"), 
@@ -38,8 +38,6 @@ tableUI<- function(id,DT=F){
                               #icon = icon('download')),
            
            uiOutput(ns("table_caption"),inline=T,role="region","aria-live"="polite"),
-           #uiOutput(ns('meps_table'),role="region","aria-live"="polite"),
-           #dataTableOutput(ns('meps_table')),
            tbl,
            uiOutput(ns("table_footnotes"),role="region","aria-live"="polite")
         )
@@ -96,38 +94,55 @@ tableModule <- function(input, output, session, meps_inputs,pivot=F){
     HTML508table(body = display_tbl(), caption = table_caption())
   })
 
+ 
+# DataTable for Conditions, PMEDs
   
-  # Testing checkboxes inside data table
-  chkbox = paste(checkboxInput508("hi",label=""))
+  ## NOTE: can add checkboxes to names for 508 compliance
+
+  ## Save order and selected rows
+  v <- reactiveValues(order="2014",dir="desc",rows=NULL)
   
-  dt_tbl <- reactive({
-    tab <- display_tbl()
-
-    chkcol <- sapply(tab[,1],function(x) paste(checkboxInput508(x,x)))
-
-    tab[,1] <- chkcol
-
-   # print(head(tab))
-    
-    tab
+  observe({
+    order = input$meps_DT_state$order
+    if(!is.null(order)){
+      if(length(order)!=0){
+         col_num <- order[[1]][[1]]
+         col_name <- colnames(dt_tbl())[col_num+1]
+         v$order = col_name
+         v$dir = order[[1]][[2]]
+      }
+    }
   })
   
-  output$meps_DT <- renderUI({
-    HTML508table(body = dt_tbl(), caption = table_caption())
+  observe({
+    rows_selected = input$meps_DT_rows_selected
+    row_names <- dt_tbl()[rows_selected,1]
+    v$rows = row_names
   })
   
-  # output$meps_DT <- DT::renderDataTable(
-  #   dt_tbl(),escape=F,options=list(paging = FALSE),rownames=F
-  #   #isolate(display_tbl()),select="none",escape=F,options=list(paging = FALSE),server=T
-  # )
+  dt_tbl <- eventReactive(display_tbl(),{
+    tab <- display_tbl() #[1:10,]
+    col_names <- v$order
+    if(col_names %in% colnames(display_tbl())){
+      tab <- tab[order(tab[[col_names]],decreasing=(v$dir=="desc")),]
+    }else{
+      tab <- tab[order(tab[,2],decreasing=T),]
+    }
 
-  # proxy = dataTableProxy(session$ns("meps_DT"),session=SESSION)
-  # 
-  # observe({
-  #   replaceData(proxy,display_tbl(),resetPaging=F)
-  #   # reloadData(proxy)
-  # })
+    tab %>% mutate(selected = (cols %in% v$rows))
+  })
+
+  output$meps_DT <- DT::renderDataTable({ 
+    tab <- dt_tbl()
+    selected <- which(tab$selected)
+    tab <- tab %>% select(-selected)
+   
+    datatable(tab,options(paging=F,stateSave=T),
+              rownames=F,escape=F,
+              selection = list(mode='multiple',selected=selected,target='row'))
+  })
   
+
   ######################################
 
   output$table_footnotes <- renderText({

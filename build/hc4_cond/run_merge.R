@@ -4,16 +4,14 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 app <- "hc4_cond"
 
-source("../shared/app_global.R",chdir=T)
-source("../shared/r/run_preamble.R",chdir=T)
-source("dictionaries.R")
+source("../run_preamble.R",chdir=T)
 
 library(dplyr)
 
 ########################################################
 
 load_stats <- function(stat,year){
-  file = sprintf("r/tables/%s/%s.csv",year,stat)
+  file = sprintf("tables/%s/%s.csv",year,stat)
   df <- read.csv(file,stringsAsFactors = F) 
   df %>% rm_v2 #%>% reorder_cols
 }
@@ -32,12 +30,22 @@ for(year in years){                 cat(year,"..")
 
 cond_tables <- bind_rows(out) %>% dedup
 
+
+### Add checkboxes to conditions labels -- using 'cond' namespace
+### Need these for 508 compliance keyboard navigation with DT
+
+# label = cond_tables$levels2
+# id = paste0("cond-cols-levels-",label)
+# 
+# cond_tables$levels2 <- sprintf(
+#     '<input id="%s" type="checkbox" name="%s" value="%s" class="shiny-input-container"/><label for="%s">%s</label>',
+#     id,id,id,id,label
+# )
+
+
 ### Fake sample size for now
 
 cond_tables$n = 10000
 cond_tables$n_exp = 10000
 
-
-save(cond_tables, file="TABLES.Rdata")
-
-
+save(cond_tables, file="../../mepstrends/hc_tables/hc4_cond/TABLES.Rdata")
