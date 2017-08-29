@@ -38,6 +38,8 @@ tableUI<- function(id,DT=F){
                               #icon = icon('download')),
            
            uiOutput(ns("table_caption"),inline=T,role="region","aria-live"="polite"),
+           
+           actionButton508(ns("clear"),"Clear Rows"),
            tbl,
            uiOutput(ns("table_footnotes"),role="region","aria-live"="polite")
         )
@@ -105,28 +107,26 @@ tableModule <- function(input, output, session, meps_inputs,pivot=F,DT=F){
     v <- reactiveValues(order="2014",dir="desc",rows=NULL)
 
     observe({
-      if(DT){
-        order = input$meps_DT_state$order
-        if(!is.null(order)){
-          if(length(order)!=0){
-             col_num <- order[[1]][[1]]
-             col_name <- colnames(dt_tbl())[col_num+1]
-             v$order = col_name
-             v$dir = order[[1]][[2]]
-          }
+      order = input$meps_DT_state$order
+      if(!is.null(order)){
+        if(length(order)!=0){
+           col_num <- order[[1]][[1]]
+           col_name <- colnames(dt_tbl())[col_num+1]
+           v$order = col_name
+           v$dir = order[[1]][[2]]
         }
       }
     })
   
     observe({
-      if(DT){
-        rows_selected = input$meps_DT_rows_selected
-        row_names <- dt_tbl()[rows_selected,1]
-        v$rows = row_names
-      }
+      rows_selected = input$meps_DT_rows_selected
+      row_names <- dt_tbl()[rows_selected,1]
+      
+      if(length(row_names)==0) row_names <- dt_tbl()[1:5,1]
+      
+      v$rows = row_names
     })
-
- 
+    
     dt_tbl <- eventReactive(display_tbl(),{
       tab <- display_tbl() #[1:10,]
       col_names <- v$order
@@ -138,6 +138,7 @@ tableModule <- function(input, output, session, meps_inputs,pivot=F,DT=F){
   
       tab %>% mutate(selected = (cols %in% v$rows))
     })
+    
   
     output$meps_DT <- DT::renderDataTable({
       tab <- dt_tbl()
@@ -148,6 +149,12 @@ tableModule <- function(input, output, session, meps_inputs,pivot=F,DT=F){
                 rownames=F,escape=F,
                 selection = list(mode='multiple',selected=selected,target='row'))
     })
+    
+    proxy = dataTableProxy(session$ns('meps_DT'))
+    observeEvent(input$clear, {
+      selectRows(proxy, NULL)
+    })
+    
     outputOptions(output, "meps_DT", suspendWhenHidden = FALSE)
   }
 
@@ -194,6 +201,8 @@ tableModule <- function(input, output, session, meps_inputs,pivot=F,DT=F){
       add.table(rm_html(labels()$source),file,col.names=F)
     })   
 
+  if(DT) return(reactive(v$rows) %>% debounce(200))  # return selected rows for plot intake
+ # if(DT) return(reactive(dt_tbl))
 }
 
 

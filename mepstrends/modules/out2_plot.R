@@ -115,49 +115,42 @@ gv <- function(graph_type,...,hide_y_axis=F,br="<br>"){
 
 plotUI<- function(id){
   ns <- NS(id)
-  
-  #tabPanel(title=tags$span(class='tab-title plot-tab',"Plot"), 
-           
+
   tagList(
-  
-           downloadButton508( ns("png"), 
-                              class = 'download-button',
-                              label = 'Download Plot'),
-                              #icon=icon('download')),
-           
-           uiOutput(ns("plot_caption"),inline=T,role="region","aria-live"="polite"),
-           uiOutput(ns("sub_caption"),role="region","aria-live"="polite"),
-
-           fluidRow(
-             column(width = 9,
-                    div(class="square",div(class="content",
-                      plotlyOutput(ns("plot"),height="100%",width="100%")))
-             ),
-             
-             column(width = 3,
-                    div(uiOutput(ns("legend")))
-             )
-
-           ),
-           
-           ## temporary -- for debugging download plot
-
-           # div(class = "square",
-           #     div(class = "content",
-           #         plotOutput(ns("ggplot")))),
-
-           
-           uiOutput(ns("plot_footnote"),role="region","aria-live"="polite"),
-           uiOutput(ns("sr_table"),class="usa-sr-only",role="region","aria-live"="polite")
+    downloadButton508(ns("png"), class='download-button',label='Download Plot'),
+    
+    uiOutput(ns("plot_caption"),inline=T,role="region","aria-live"="polite"),
+    uiOutput(ns("sub_caption"),role="region","aria-live"="polite"),
+    
+    fluidRow(
+     column(width = 9,
+            div(class="square",div(class="content",
+              plotlyOutput(ns("plot"),height="100%",width="100%")))
+     ),
+     
+     column(width = 3,
+            div(uiOutput(ns("legend")))
+     )
+    ),
+    
+    ## temporary -- for debugging download plot
+    
+    # div(class = "square",
+    #     div(class = "content",
+    #         plotOutput(ns("ggplot")))),
+    
+    
+    uiOutput(ns("plot_footnote"),role="region","aria-live"="polite"),
+    uiOutput(ns("sr_table"),class="usa-sr-only",role="region","aria-live"="polite")
   )
- # )
+
 }
 
 #######################################################
 ###                     SERVER                      ###
 #######################################################
 
-plotModule <- function(input, output, session, meps_inputs){
+plotModule <- function(input, output, session, meps_inputs,DT=F,plot_rows=NULL){
   
   adj <- reactive(meps_inputs()$adj)
   tbl <- reactive(meps_inputs()$tbl)
@@ -200,11 +193,21 @@ plotModule <- function(input, output, session, meps_inputs){
   
   ############# Data ############# 
   
+  dt <- reactive({
+    tab <- tbl()
+    
+    # print(head(tab))
+    # print(plot_rows())
+    
+    if(DT) tab <- tab %>% filter(cols %in% plot_rows())
+    tab
+  })
+  
   pre_data <- reactive({
     D  <- adj()$D
     d <- adj()$d
     
-    df <- tbl() %>% mutate(x = rows, grp = cols)
+    df <- dt() %>% mutate(x = rows, grp = cols)
     
     if(is_trend()) df$x = df$Year
     
@@ -222,21 +225,21 @@ plotModule <- function(input, output, session, meps_inputs){
   }) 
   
   ## Output CI table for screen readers
-  hidden_tbl <- reactive({
-    
-    dat <- pre_data() %>% 
-      select(grp,x,pretty_y,pretty_LL,pretty_UL) %>%
-      rename_cols(list(
-        grp=legend_label(),
-        x=grpLabel(),
-        pretty_y = "Point Estimate",
-        pretty_LL="Lower 95% Confidence Limit",
-        pretty_UL="Upper 95% Confidence Limit")) 
-    
-    dat[,colnames(dat)!="(none)"]
-  })
+  # hidden_tbl <- reactive({
+  #   
+  #   dat <- pre_data() %>% 
+  #     select(grp,x,pretty_y,pretty_LL,pretty_UL) %>%
+  #     rename_cols(list(
+  #       grp=legend_label(),
+  #       x=grpLabel(),
+  #       pretty_y = "Point Estimate",
+  #       pretty_LL="Lower 95% Confidence Limit",
+  #       pretty_UL="Upper 95% Confidence Limit")) 
+  #   
+  #   dat[,colnames(dat)!="(none)"]
+  # })
   
-  output$sr_table <- renderUI(HTML508table(body = hidden_tbl()))
+  #output$sr_table <- renderUI(HTML508table(body = hidden_tbl()))
   
   plot_data <- reactive({
     validate(need(nrow(pre_data()) > 0,"Loading..."))
