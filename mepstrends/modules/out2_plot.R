@@ -116,8 +116,10 @@ gv <- function(graph_type,...,hide_y_axis=F,br="<br>"){
 plotUI<- function(id){
   ns <- NS(id)
   
-  tabPanel(title=tags$span(class='tab-title plot-tab',"Plot"), 
+  #tabPanel(title=tags$span(class='tab-title plot-tab',"Plot"), 
            
+  tagList(
+  
            downloadButton508( ns("png"), 
                               class = 'download-button',
                               label = 'Download Plot'),
@@ -148,6 +150,7 @@ plotUI<- function(id){
            uiOutput(ns("plot_footnote"),role="region","aria-live"="polite"),
            uiOutput(ns("sr_table"),class="usa-sr-only",role="region","aria-live"="polite")
   )
+ # )
 }
 
 #######################################################

@@ -23,9 +23,9 @@ form_elements <- tagList(
 )
 
 tab_panel <- tabsetPanel(type="pills",
-  tableUI('cond',DT=T),
-  plotUI('cond'),
-  codeUI('cond')
+  tabPanel(title=tags$span(class='tab-title table-tab',"Table"),tableUI('cond',DT=T)),
+  tabPanel(title=tags$span(class='tab-title plot-tab',"Plot"),plotUI('cond')),
+  tabPanel(title=tags$span(class='tab-title code-tab',"Code"),codeUI('cond'))
 )
 
 ui <- mepsPage("cond",info=info,form_elements=form_elements,tab_panel=tab_panel)
@@ -70,7 +70,7 @@ server <- function(input,output,session) {
   
   # tabPanels
   callModule(notesModule,"cond", meps_inputs=meps_inputs)
-  callModule(tableModule,"cond", meps_inputs=meps_inputs,pivot=T)
+  callModule(tableModule,"cond", meps_inputs=meps_inputs,pivot=T,DT=T)
   callModule(plotModule, "cond", meps_inputs=meps_inputs)
   callModule(codeModule, "cond", meps_inputs=meps_inputs)
 }

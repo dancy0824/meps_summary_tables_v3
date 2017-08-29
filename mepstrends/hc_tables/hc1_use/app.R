@@ -25,12 +25,12 @@ form_elements <- tagList(
     )
 )
 
-
 tab_panel <- tabsetPanel(type="pills",
-  tableUI('use'),
-  plotUI('use'),
-  codeUI('use')
+  tabPanel(title=tags$span(class='tab-title table-tab',"Table"),tableUI('use')),
+  tabPanel(title=tags$span(class='tab-title plot-tab',"Plot"),plotUI('use')),
+  tabPanel(title=tags$span(class='tab-title code-tab',"Code"),codeUI('use'))
 )
+
 
 ui <- mepsPage("use",info=info,form_elements=form_elements,tab_panel=tab_panel)
 

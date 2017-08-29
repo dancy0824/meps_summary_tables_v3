@@ -5,8 +5,10 @@
 codeUI <- function(id){
   ns <- NS(id)
   
-  tabPanel(title=tags$span(class='tab-title code-tab',"Code"),
-           
+  #tabPanel(title=tags$span(class='tab-title code-tab',"Code"),
+      
+  tagList(
+       
            div(class='code-select',
              selectInput508(ns("code_language"),
                             label = "Select Programming Language:",
