@@ -115,6 +115,7 @@ select{
   max-width: 250px;
   width: 80%;
   display: inline-block;
+  margin-right: 8px;
 }
 
 /*****  Table  *****/
