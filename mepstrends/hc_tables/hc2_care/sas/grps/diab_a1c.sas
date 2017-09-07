@@ -3,7 +3,11 @@ data MEPS; set MEPS;
 	else diab_a1c = DSA1C53;
 	if diab_a1c = 96 then diab_a1c = 0;
 
-	domain = 1;
+	if diabw&yy.f>0 then domain=1;
+        else do;
+          domain=2;
+          diabw&yy.f=1;
+        end;
 run;
 
 proc format;
