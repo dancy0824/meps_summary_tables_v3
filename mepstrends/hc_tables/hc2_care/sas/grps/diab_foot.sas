@@ -22,7 +22,11 @@ data MEPS; set MEPS;
 	else if non_resp = 1  then diab_foot = -7;
 	else diab_foot = -9;
 
-	domain = 1;
+	if diabw&yy.f>0 then domain=1;
+        else do;
+          domain=2;
+          diabw&yy.f=1;
+        end;
 run;
 
 proc format;
