@@ -18,8 +18,12 @@ data MEPS; set MEPS;
 	else if never_chk = 1 then diab_eye = 3;
 	else if non_resp = 1  then diab_eye = -7;
 	else diab_eye = -9;
-
-	domain = 1;
+    
+	if diabw15f>0 then domain=1;
+    else do;
+      domain=2;
+      diabw15f=1;
+    end;
 run;
 
 proc format;
