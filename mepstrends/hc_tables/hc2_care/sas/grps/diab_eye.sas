@@ -20,10 +20,10 @@ data MEPS; set MEPS;
 	else diab_eye = -9;
     
 	if diabw15f>0 then domain=1;
-    else do;
-      domain=2;
-      diabw15f=1;
-    end;
+        else do;
+          domain=2;
+          diabw15f=1;
+        end;
 run;
 
 proc format;
