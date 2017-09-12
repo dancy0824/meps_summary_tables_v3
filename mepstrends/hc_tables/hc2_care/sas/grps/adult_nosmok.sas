@@ -3,6 +3,7 @@ data MEPS; set MEPS;
 	else adult_nosmok = ADNSMK42;
 
 	domain = (ADSMOK42=1 & CHECK53=1);
+	if domain=0 and SAQWT&yy.F=0 then SAQWT&yy.F=1;
 run;
 
 proc format;
